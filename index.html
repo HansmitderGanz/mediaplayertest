@@ -4,38 +4,92 @@
     <title>Player-Auswahlseite</title>
     <style>
         body {
-            display: flex; 
+            display: flex;
             flex-direction: column;
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            font-family: Arial, sans-serif; /* Ändern Sie dies in die gewünschte Schriftart */
-            background-color: #f0f0f0; /* Ändern Sie dies in die gewünschte Background-Farbe */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
         }
         h1 {
             font-weight: bold;
         }
+        .btn-container {
+            display: flex;
+            justify-content: space-evenly;
+            width: 100%;
+        }
         a {
-            display: inline-block; // Notwendig, um Hintergrundfarbe zu zeigen
+            flex: 1;
+            display: inline-block;
             margin: 10px;
             padding: 10px;
             border-radius: 5px;
             text-decoration: none;
             color: black;
-            font-weight: bold; 
+            font-weight: bold;
+            text-align: center;
         }
+        .description { 
+            flex: 1; 
+            margin: 10px;
+            padding: 10px;
+            background-color: #e6e6e6; /* Hintergrundfarbe */
+            border-radius: 5px; /* Kanten abrunden */
+            text-align: center; 
+            height: 200px; /* Definierte Höhe */
+            overflow: auto; /* Scrollbalken, wenn der Inhalt zu lang ist */
+        }
+
+}
+        .description ul {
+            list-style-position: inside;
+        }
+        .description li {
+            font-weight: bold;
+}
+        .description ul {
+            list-style-position: inside;
+        }
+        .description li {
+            font-weight: bold;
+	margin-bottom: 10px; // Abstand am unteren Rand für jeden Aufzählungspunkt
+        }
+
         #sichterButton {
-            background-color: #9966cc; /* Blaulila */
+            background-color: #9966cc; /* blaulila */
         }
-        #abnahmeButton {
-            background-color: #d2b48c; /* Wüstengelb */
+        #standartButton {
+            background-color: #d2b48c; /* wüstengelb */
         }
     </style>
 </head>
 <body>
     <h1>Willkommen beim 99pro media Player</h1>
-    <h2>Bitte wählen Sie einen Player:</h2>
-    <a id="abnahmeButton" href="99pro_media_Player.html">99pro media Player (klassisch)</a>
-    <a id="sichterButton" href="99pro_media_Player_Sichten.html">99pro media Sichter</a>
+    <h2>Bitte wählen Sie einen Player</h2>
+    <div class="btn-container">
+        <a id="standartButton" href="99pro_media_Player.html">99pro media Player (Standart)</a>
+		<a id="sichterButton" href="99pro_media_Player_Sichten.html">99pro media Sichter</a>
+    </div>
+    <div class="btn-container">
+        <div class="description">
+            <ul>
+                <li>Einfaches Sichten von Proxies</li>
+                <li>Import von Trint Transkripten (.txt)</li>
+		<li>Markiere Anmerkungen direkt im Player</li>
+		<li>Durchführung von Endabnahmen</li>
+                <!-- Fügen Sie weitere Aufzählungspunkte hinzu -->
+            </ul>
+        </div>
+        <div class="description">
+            <ul>
+                <li> Für Sichtungen mit Fokus Sprechertext</li>
+                <li>Einfacher Import von Sichtungstranskripten (.txt)</li>
+		<li>Live Sprachausgabe von Sprechertexten</li>
+		<li>Bearbeitung und Export von Sprechertexten</li>
+                <!-- Fügen Sie weitere Aufzählungspunkte hinzu -->
+            </ul>
+        </div>
 </body>
 </html>
