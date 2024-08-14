@@ -16,21 +16,26 @@
             font-weight: bold;
         }
         a {
+            display: inline-block; // Notwendig, um Hintergrundfarbe zu zeigen
             margin: 10px;
             padding: 10px;
-            background-color: #ddd;
             border-radius: 5px;
             text-decoration: none;
             color: black;
             font-weight: bold; 
-            display: inline-block;
+        }
+        #sichterButton {
+            background-color: #9966cc; /* Blaulila */
+        }
+        #abnahmeButton {
+            background-color: #d2b48c; /* Wüstengelb */
         }
     </style>
 </head>
 <body>
     <h1>Willkommen beim 99pro media Player</h1>
     <h2>Bitte wählen Sie einen Player:</h2>
-    <a href="99pro_media_Player.html">99pro media Player (Standard)</a>
-    <a href="99pro_media_Player_Sichten.html">99pro media Player Sichter</a>
+    <a id="abnahmeButton" href="99pro_media_Player.html">99pro media Player (klassisch)</a>
+    <a id="sichterButton" href="99pro_media_Player_Sichten.html">99pro media Sichter</a>
 </body>
 </html>
