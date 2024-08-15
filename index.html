@@ -10,11 +10,19 @@
             align-items: center;
             min-height: 100vh;
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            /* Hier setzen wir das Hintergrundbild */
+            background-image: url('hintergrund2.png'); /* 'hintergrund.jpg' ist der Pfad zu Ihrer Bilddatei */
+            background-repeat: no-repeat; /* Das Bild soll nicht wiederholt werden */
+            background-size: cover; /* Das Bild deckt den gesamten Bildschirm ab */
+            background-position: center; /* Das Bild wird zentriert */
         }
-        h1 {
-            font-weight: bold;
-        }
+    h1 {
+      font-weight: bold;
+      color: white; /* Textfarbe geändert zu weiß */
+    }
+    h2 {
+      color: white; /* Textfarbe geändert zu weiß */
+    }
         .btn-container {
             display: flex;
             justify-content: space-evenly;
@@ -60,34 +68,34 @@
         #sichterButton {
             background-color: #9966cc; /* blaulila */
         }
-        #standartButton {
+        #standardButton {
             background-color: #d2b48c; /* wüstengelb */
         }
     </style>
 </head>
 <body>
-    <h1>Willkommen beim 99pro media Player</h1>
+    <h1></h1>
     <h2>Bitte wählen Sie einen Player</h2>
     <div class="btn-container">
-        <a id="standartButton" href="99pro_media_Player.html">99pro media Player (Standart)</a>
+        <a id="standardButton" href="99pro_media_Player.html">99pro media Player (Standard)</a>
 		<a id="sichterButton" href="99pro_media_Player_Sichten.html">99pro media Sichter</a>
     </div>
     <div class="btn-container">
         <div class="description">
             <ul>
-                <li>Einfaches Sichten von Proxies</li>
-                <li>Import von Trint Transkripten (.txt)</li>
-		<li>Markiere Anmerkungen direkt im Player</li>
-		<li>Durchführung von Endabnahmen</li>
+                <li>👀 Einfaches Sichten von Proxies</li>
+                <li>🖊️ Import von Trint Transkripten (.txt)</li>
+		<li>🏷️ Markiere Anmerkungen direkt im Player</li>
+		<li> ✅ Durchführung von Endabnahmen</li>
                 <!-- Fügen Sie weitere Aufzählungspunkte hinzu -->
             </ul>
         </div>
         <div class="description">
             <ul>
-                <li> Für Sichtungen mit Fokus Sprechertext</li>
-                <li>Einfacher Import von Sichtungstranskripten (.txt)</li>
-		<li>Live Sprachausgabe von Sprechertexten</li>
-		<li>Bearbeitung und Export von Sprechertexten</li>
+                <li>🎙️ Für Sichtungen mit Fokus Sprechertext</li>
+                <li> 📜Einfacher Import von Sichtungstranskripten (.txt)</li>
+		<li> 🔊Live Sprachausgabe von Sprechertexten</li>
+		<li>🛠️ Bearbeitung und Export von Sprechertexten</li>
                 <!-- Fügen Sie weitere Aufzählungspunkte hinzu -->
             </ul>
         </div>
