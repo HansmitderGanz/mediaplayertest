@@ -1,103 +1,162 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Player-Auswahlseite</title>
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
-            /* Hier setzen wir das Hintergrundbild */
-            background-image: url('hintergrund2.png'); /* 'hintergrund.jpg' ist der Pfad zu Ihrer Bilddatei */
-            background-repeat: no-repeat; /* Das Bild soll nicht wiederholt werden */
-            background-size: cover; /* Das Bild deckt den gesamten Bildschirm ab */
-            background-position: center; /* Das Bild wird zentriert */
-        }
-    h1 {
-      font-weight: bold;
-      color: white; /* Textfarbe geändert zu weiß */
-    }
-    h2 {
-      color: white; /* Textfarbe geändert zu weiß */
-    }
-        .btn-container {
-            display: flex;
-            justify-content: space-evenly;
-            width: 100%;
-        }
-        a {
-            flex: 1;
-            display: inline-block;
-            margin: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            text-decoration: none;
-            color: black;
-            font-weight: bold;
-            text-align: center;
-        }
-        .description { 
-            flex: 1; 
-            margin: 10px;
-            padding: 10px;
-            background-color: #e6e6e6; /* Hintergrundfarbe */
-            border-radius: 5px; /* Kanten abrunden */
-            text-align: center; 
-            height: 200px; /* Definierte Höhe */
-            overflow: auto; /* Scrollbalken, wenn der Inhalt zu lang ist */
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+background-color:#0f0f0f;   /* Diese Zeile wurde hinzugefügt */
         }
 
-}
-        .description ul {
-            list-style-position: inside;
+        .img-background,
+        #transitionVideoPlayer,
+        #transitionVideoSichter {
+            position: fixed;
+            top: 60%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
         }
-        .description li {
-            font-weight: bold;
-}
-        .description ul {
-            list-style-position: inside;
+
+        .img-background {
+            z-index: 800;
         }
-        .description li {
-            font-weight: bold;
-	margin-bottom: 15px; // Abstand am unteren Rand für jeden Aufzählungspunkt
+
+        #transitionVideoPlayer,
+        #transitionVideoSichter {
+            z-index: 900;
+            display: none;
+        }
+
+        button {
+            position: absolute;
+            top: 25%;
+            z-index: 1000;
+            color: black;
+            background-color: transparent;
+            border: none;
+            font-size: 50px;
+        }
+
+        #playerButton {
+            left: 38%;
+            color: black;
         }
 
         #sichterButton {
-            background-color: #9966cc; /* blaulila */
+            right: 38%;
+            color: black;
         }
-        #standardButton {
-            background-color: #d2b48c; /* wüstengelb */
+
+        a.button {
+            display: none;
+            position: fixed;
+            top: 69%; /* adjust as needed */
+            left: 49.5%;  /* adjust as needed */
+            transform: translate(-50%, -50%);
+            color: black;
+            background-color:  transparent; /* test color: yellow */
+            width: 310px;
+            height: 310px;
+            border-radius: 50%; 
+            z-index: 1000;
         }
     </style>
 </head>
+
 <body>
-    <h1></h1>
-    <h2>Bitte wählen Sie einen Player</h2>
-    <div class="btn-container">
-        <a id="standardButton" href="99pro_media_Player.html">99pro media Player (Standard)</a>
-		<a id="sichterButton" href="99pro_media_Player_Sichten.html">99pro media Sichter</a>
-    </div>
-    <div class="btn-container">
-        <div class="description">
-            <ul>
-                <li>👀 Einfaches Sichten von Proxies</li>
-                <li>🖊️ Import von Trint Transkripten (.txt)</li>
-		<li>🏷️ Markiere Anmerkungen direkt im Player</li>
-		<li> ✅ Durchführung von Endabnahmen</li>
-                <!-- Fügen Sie weitere Aufzählungspunkte hinzu -->
-            </ul>
-        </div>
-        <div class="description">
-            <ul>
-                <li>🎙️ Für Sichtungen mit Fokus Sprechertext</li>
-                <li> 📜Einfacher Import von Sichtungstranskripten (.txt)</li>
-		<li> 🔊Live Sprachausgabe von Sprechertexten</li>
-		<li>🛠️ Bearbeitung und Export von Sprechertexten</li>
-                <!-- Fügen Sie weitere Aufzählungspunkte hinzu -->
-            </ul>
-        </div>
+
+<a href="#" class="button" id="navButton"></a>
+    <button id="playerButton">←</button>
+    <button id="sichterButton">→</button>
+</a>
+    
+
+    <img class="img-background" src="Player Backround Main.png" alt="">
+
+    <video id="transitionVideoPlayer" class="transitionVideo" preload="auto">
+        <source src="Player Main Change Player.mp4" type="video/mp4">
+    </video>
+    <video id="transitionVideoSichter" class="transitionVideo" preload="auto">
+        <source src="Player Main Change Sichter.mp4" type="video/mp4">
+    </video>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    var viewState = 'main';
+
+    var playerButton = document.getElementById('playerButton');
+    var sichterButton = document.getElementById('sichterButton');
+
+    var bgImg = document.querySelector('.img-background');
+
+    var transitionVideoPlayer = document.getElementById('transitionVideoPlayer');
+    var transitionVideoSichter = document.getElementById('transitionVideoSichter');
+
+    $('#playerButton').click(function() {
+        if (viewState === 'main') {
+            changeBackground('player', transitionVideoPlayer);
+            viewState = 'player';
+        } else if (viewState === 'sichter') {
+            changeBackground('main', transitionVideoSichter);
+            viewState = 'main';
+        }
+    });
+
+    $('#sichterButton').click(function() {
+        if (viewState === 'main') {
+            changeBackground('sichter', transitionVideoSichter);
+            viewState = 'sichter';
+        } else if (viewState === 'player') {
+            changeBackground('main', transitionVideoPlayer);
+            viewState = 'main';
+        }
+    });
+
+    function changeBackground(target, transitionVideo) {
+        transitionVideo.style.display = "block";
+        transitionVideo.play();
+        transitionVideo.onended = function() {
+            transitionVideo.style.display = "none";
+            bgImg.src = `Player Backround ${target.charAt(0).toUpperCase() + target.slice(1)}.png`; 
+            
+            if(target === 'main') {
+                playerButton.style.display = 'inline';
+                sichterButton.style.display = 'inline';
+            } else if (target === 'player') {
+                playerButton.style.display = 'none';
+                sichterButton.style.display = 'inline';
+            } else if (target === 'sichter') {
+                playerButton.style.display = 'inline';
+                sichterButton.style.display = 'none';
+            }
+            updateButtonLink();
+        }
+    }
+
+    function updateButtonLink() {
+        var navButton = document.getElementById('navButton');
+        if (viewState === 'player') {
+            navButton.setAttribute('href', '99pro_media_Player.html');
+            navButton.style.display = 'block';
+        } else if(viewState === 'sichter') {
+            navButton.setAttribute('href', '99pro_media_Player_Sichten.html');
+            navButton.style.display = 'block';
+        } else {
+            navButton.style.display = 'none';
+        }
+    }
+
+    // Call this function when the page loads to hide the button
+    updateButtonLink();
+
+</script>
+
 </body>
+
 </html>
