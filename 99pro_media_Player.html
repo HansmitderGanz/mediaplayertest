@@ -4,13 +4,17 @@
 <style>
 body {
     font-family: Arial, sans-serif;
-background-image: url("99pro_media_Player_Backround.png");
+background-image: url("NO_PICTURE_HERE.png");
     background-repeat: no-repeat;
     background-size: cover;
 }
 
 body.dark-mode {
-    background-image: url("Player Darkmode.png");
+    background-image: url("NO_PICTURE_HERE.png");
+}
+
+.transcript-related {
+    display: none;
 }
 
 </style>
@@ -21,9 +25,9 @@ body.dark-mode {
 </body>
 </html>
 
-<button id="toggleShortcuts" style="position: fixed; top: 130px; left: 10px; padding: 10px;  background-color: lightgrey; border-radius: 10px; border: none; cursor: pointer;" onclick="toggleShortcuts()">&#8963;</button>
+<button id="toggleShortcuts" style="position: fixed; top: 130px; left: 10px; padding: 10px;  background-color: lightgrey; border-radius: 10px; border: none; cursor: pointer; font-size: 20px;" onclick="toggleShortcuts()">🙈</button>
 
-<div id="shortcuts" style="position: fixed; top: 150px; left: 10px; padding: 10px;  background-color: lightgrey; border-radius: 10px; display: none;">
+<div id="shortcuts" style="position: fixed; top: 168px; left: 10px; padding: 10px;  background-color: lightgrey; border-radius: 10px; display: none;">
     <h3>Nützliche Shortcuts</h3>
     <table>
         <tr><td><b>Leertaste</b></td><td>: Play/Pause</td></tr>
@@ -52,7 +56,7 @@ body.dark-mode {
     
     <div style="display: flex; justify-content: center; gap: 10px;">
         <input type="file" id="videoFile" accept=".mp4,.mov" onchange="loadVideo(event)" 
-               style="display: inline-block; background-color: red; color: white; padding: 10px; border-radius: 10px; 
+               style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; 
                       cursor: pointer; margin-right: 10px;">
         <select onchange="handleSaveOptions(this)" style="padding: 10px; padding-left: 50px; border-radius: 10px; cursor: pointer;">
     	<option selected disabled>Speichern/Laden</option>
@@ -61,17 +65,17 @@ body.dark-mode {
    	</select>
 	<input type="file" id="loadMarkersFile" style="display: none;" onchange="loadMarkers(event)">
 
-<div style="position: absolute; left: 83.75%; top: 50px; width: 16%;">
+<div style="position: absolute; left: 83.75%; top: 50px; width: 15%;">
     <h2 class="transcript-related">Interaktives Transkript</h2>
-    <input class="transcript-related" type="file" id="transcriptFile" accept=".json,.txt" onchange="loadTranscript(event)"
-        style="display: inline-block; background-color: red; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">
+    <input class="transcript-related" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)"
+        style="background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">
     <input class="transcript-related" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..."
-        style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 100%;">
+        style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 100%;">
     <div class="transcript-related" id="transcript" style="border: solid 1px #ccc; padding: 10px; height: 540px; overflow-y: scroll;"></div>
 </div>
 
 <select onchange="handleExportOptions(this)" 
-                style="display: inline-block; background-color: green; color: white; padding: 10px; border-radius: 10px; cursor: pointer;">
+                style="display: inline-block; background-color: #2E8B57; color: white; padding: 10px; border-radius: 10px; cursor: pointer;">
             <option selected disabled>Anmerkungen Exportieren</option>
             <option value="markers">Für AVID exportieren</option>
             <option value="table"> Als Tabelle exportieren</option>
@@ -91,12 +95,12 @@ body.dark-mode {
 <div style="text-align: center; margin-top: 10px;">
     <button onclick="rewind(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;">&#8647 5sek</button>
 <button onclick="rewind(1/25)" style="padding: 10px; border-radius: 10px; cursor: pointer;">&#8592 Frame</button>
-<button onclick="setMarker()" style="background-color: orange; padding: 10px; border-radius: 10px; cursor: pointer;">Anmerkung setzen</button>
+<button onclick="setMarker()" style="background-color: #F4A460; padding: 10px; border-radius: 10px; cursor: pointer;">Anmerkung setzen</button>
 <button onclick="forward(1/25)" style="padding: 10px; border-radius: 10px; cursor: pointer;">Frame &#8594</button>
 <button onclick="forward(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;">5sek &#8649</button>
 </div>
 
-<ul id="markerList" style="padding: 20px; height: 100%; overflow: auto; background-color: #F8F8FF"></ul>
+<ul id="markerList" style="padding: 20px; height: 100%; overflow: auto; background-color: transparent; max-height: 120px; border: 1px solid lightgray; border-radius: 5px; font-family: Arial; font-weight: bold;"></ul>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -184,10 +188,10 @@ function toggleTranscript() {
 
     // Iteriert durch alle Elemente und toggled die Sichtbarkeit
     for (var i = 0; i < transcriptRelatedElements.length; i++) {
-        if (transcriptRelatedElements[i].style.display === "none") {
-            transcriptRelatedElements[i].style.display = "block";
-        } else {
+        if (transcriptRelatedElements[i].style.display === "block") {
             transcriptRelatedElements[i].style.display = "none";
+        } else {
+            transcriptRelatedElements[i].style.display = "block";
         }
     }
 }
@@ -271,10 +275,10 @@ function toggleShortcuts() {
   var shortcutsDiv = document.getElementById('shortcuts');
   if (shortcutsDiv.style.display === "none") {
       shortcutsDiv.style.display = "block";
-      button.innerHTML = "&#8963;"; // Pfeil-nach-oben Symbol
+      button.innerHTML = "🙉"; // Shortcuts aufgeklappt
   } else {
       shortcutsDiv.style.display = "none";
-      button.innerHTML = "&#8964;"; // Pfeil-nach-unten Symbol
+      button.innerHTML = "🙈"; // Shortcuts zugeklappt
   }
 }
 
@@ -296,6 +300,11 @@ function changeVideoSize(size) {
 function setMarker() {
     var currentTime = videoElement.currentTime;
     var description = prompt("Bitte geben Sie eine Anmerkung für den Marker ein");
+
+if (description === null) {
+        return;
+    }
+
     // Die aktuelle Zeit des Videos wird zur Basiszeit addiert, um den Timecode zu berechnen
     var timecode = convertTimeToTimecode(baseTimecodeInSeconds + currentTime, 25);
     markers.push({timeInSeconds: currentTime, timecode: timecode, description: description});
@@ -493,34 +502,16 @@ window.addEventListener('keydown', function(event) {
 
 </script>
 
-<script>
- 
-fetch('Pfad-zum-Transkript.json')
-  .then(response => response.json())
-  .then(data => {
-    const transcriptDiv = document.getElementById('transcript');
-    data.forEach(item => {
-        const p = document.createElement('p');
-        p.textContent = item.text;
-        p.style.cursor = 'pointer';
-        p.onclick = () => {
-           videoElement.currentTime = item.time;
-        }
-        transcriptDiv.appendChild(p);
-    });
-});
-</script>
-
 <style>
 /* Normaler Modus */
 body {
-    background-color: white;
+    background-color: #FAFAFA;
     color: black;
 }
 
 /* Dark Mode */
 body.dark-mode {
-    background-color: black;
+    background-color: #1a1a1a;
     color: white;
 }
 
@@ -542,6 +533,8 @@ body.dark-mode #shortcuts {
     margin-left: 5%;
     margin-right: 5%;
 }
+
+
 
 #shortcuts {
     /* Andere Stile... */
