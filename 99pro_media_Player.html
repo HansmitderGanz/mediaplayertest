@@ -21,9 +21,9 @@ body.dark-mode {
 </body>
 </html>
 
-<button id="toggleShortcuts" style="position: fixed; top: 130px; left: 10px; padding: 10px;  background-color: lightgrey; border-radius: 15px; border: none; cursor: pointer;" onclick="toggleShortcuts()">&#8963;</button>
+<button id="toggleShortcuts" style="position: fixed; top: 130px; left: 10px; padding: 10px;  background-color: lightgrey; border-radius: 10px; border: none; cursor: pointer;" onclick="toggleShortcuts()">&#8963;</button>
 
-<div id="shortcuts" style="position: fixed; top: 150px; left: 10px; padding: 10px;  background-color: lightgrey; border-radius: 15px; display: none;">
+<div id="shortcuts" style="position: fixed; top: 150px; left: 10px; padding: 10px;  background-color: lightgrey; border-radius: 10px; display: none;">
     <h3>Nützliche Shortcuts</h3>
     <table>
         <tr><td><b>Leertaste</b></td><td>: Play/Pause</td></tr>
@@ -39,10 +39,10 @@ body.dark-mode {
 <div style="position: fixed; top: 10px; left: 10px;">
     <button onclick="toggleDarkMode()" 
                         style="display: block; background-color: gray; 
-                        color: white; padding: 10px; border-radius: 15px; cursor: pointer; margin-bottom: 10px;"> 
+                        color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"> 
                          Dark Mode umschalten 
        </button>
-        <select onchange="changeVideoSize(this.value)" style="padding: 10px; border-radius: 15px; cursor: pointer;">
+        <select onchange="changeVideoSize(this.value)" style="padding: 10px; border-radius: 10px; cursor: pointer;">
             <option value="">Größe ändern</option>
             <option value="480">Klein</option>
             <option value="720">Mittel</option>
@@ -52,9 +52,9 @@ body.dark-mode {
     
     <div style="display: flex; justify-content: center; gap: 10px;">
         <input type="file" id="videoFile" accept=".mp4,.mov" onchange="loadVideo(event)" 
-               style="display: inline-block; background-color: red; color: white; padding: 10px; border-radius: 15px; 
+               style="display: inline-block; background-color: red; color: white; padding: 10px; border-radius: 10px; 
                       cursor: pointer; margin-right: 10px;">
-        <select onchange="handleSaveOptions(this)" style="padding: 10px; padding-left: 50px; border-radius: 15px; cursor: pointer;">
+        <select onchange="handleSaveOptions(this)" style="padding: 10px; padding-left: 50px; border-radius: 10px; cursor: pointer;">
     	<option selected disabled>Speichern/Laden</option>
     	<option value="save">Stand speichern</option>
    	<option value="load">Speicherstand laden</option>
@@ -64,39 +64,39 @@ body.dark-mode {
 <div style="position: absolute; left: 83.75%; top: 50px; width: 16%;">
     <h2 class="transcript-related">Interaktives Transkript</h2>
     <input class="transcript-related" type="file" id="transcriptFile" accept=".json,.txt" onchange="loadTranscript(event)"
-        style="display: inline-block; background-color: red; color: white; padding: 10px; border-radius: 15px; cursor: pointer; margin-bottom: 10px;">
+        style="display: inline-block; background-color: red; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">
     <input class="transcript-related" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..."
-        style="display: inline-block; padding: 10px; border-radius: 15px; cursor: pointer; margin-bottom: 10px; width: 100%;">
-    <div class="transcript-related" id="transcript" style="border: solid 1px #ccc; padding: 10px; height: 720px; overflow-y: scroll;"></div>
+        style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 100%;">
+    <div class="transcript-related" id="transcript" style="border: solid 1px #ccc; padding: 10px; height: 540px; overflow-y: scroll;"></div>
 </div>
 
 <select onchange="handleExportOptions(this)" 
-                style="display: inline-block; background-color: green; color: white; padding: 10px; border-radius: 15px; cursor: pointer;">
+                style="display: inline-block; background-color: green; color: white; padding: 10px; border-radius: 10px; cursor: pointer;">
             <option selected disabled>Anmerkungen Exportieren</option>
             <option value="markers">Für AVID exportieren</option>
             <option value="table"> Als Tabelle exportieren</option>
         </select>
 
 </div>    
-<button style="position: absolute; top: 1.3%; right: 9.5%; padding: 10px; border-radius: 15px; cursor: pointer;" onclick="toggleTranscript()">Transkript ein/aus</button>
+<button style="position: absolute; top: 1.3%; right: 9.5%; padding: 10px; border-radius: 10px; cursor: pointer;" onclick="toggleTranscript()">Transkript ein/aus</button>
 </div>
 </div>
         
 
 
 <div style="text-align: center; margin-top: 10px;">
-    <video id="myVideo" width="1280" height="720" controls style="display:block; margin: 0 auto; border-radius: 15px;"></video>
+    <video id="myVideo" width="1280" height="720" controls style="display:block; margin: 0 auto; border-radius: 10px;"></video>
 </div>
 
 <div style="text-align: center; margin-top: 10px;">
-    <button onclick="rewind(5)" style="padding: 10px; border-radius: 15px; cursor: pointer;">&#8647 5sek</button>
-<button onclick="rewind(1/25)" style="padding: 10px; border-radius: 15px; cursor: pointer;">&#8592 Frame</button>
-<button onclick="setMarker()" style="background-color: orange; padding: 10px; border-radius: 15px; cursor: pointer;">Anmerkung setzen</button>
-<button onclick="forward(1/25)" style="padding: 10px; border-radius: 15px; cursor: pointer;">Frame &#8594</button>
-<button onclick="forward(5)" style="padding: 10px; border-radius: 15px; cursor: pointer;">5sek &#8649</button>
+    <button onclick="rewind(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;">&#8647 5sek</button>
+<button onclick="rewind(1/25)" style="padding: 10px; border-radius: 10px; cursor: pointer;">&#8592 Frame</button>
+<button onclick="setMarker()" style="background-color: orange; padding: 10px; border-radius: 10px; cursor: pointer;">Anmerkung setzen</button>
+<button onclick="forward(1/25)" style="padding: 10px; border-radius: 10px; cursor: pointer;">Frame &#8594</button>
+<button onclick="forward(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;">5sek &#8649</button>
 </div>
 
-<ul id="markerList" style="padding: 20px; height: 300px; overflow: auto;"></ul>
+<ul id="markerList" style="padding: 20px; height: 100%; overflow: auto; background-color: #F8F8FF"></ul>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -313,7 +313,7 @@ function updateMarkerList() {
         });
         listItem.text('Timecode: ' + marker.timecode + ', Anmerkung: ' + marker.description);
         listItem.prepend(jumpButton);
-        var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:10px; padding: 10px; border-radius: 15px; cursor: pointer;"><option selected disabled>Aktionen</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
+        var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:10px; padding: 5px; border-radius: 5px; cursor: pointer;"><option selected disabled>Aktionen</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
         listItem.append(actionSelect);
         markerList.append(listItem);
     });
