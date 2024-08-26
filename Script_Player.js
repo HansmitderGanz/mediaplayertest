@@ -1,4 +1,3 @@
-
 $(document).ready(function() {
     // Fade out the white overlay on page load
     $("#whiteOverlay").fadeOut(2000);
