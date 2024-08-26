@@ -7,12 +7,14 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-background-color:#0f0f0f;   /* Diese Zeile wurde hinzugefügt */
+        background-color:#0f0f0f;   /* Diese Zeile wurde hinzugefügt */
         }
 
         .img-background,
         #transitionVideoPlayer,
-        #transitionVideoSichter {
+        #transitionVideoSichter,
+        #transitionToPlayer,
+        #transitionToSichter {
             position: fixed;
             top: 60%;
             left: 50%;
@@ -21,6 +23,7 @@ background-color:#0f0f0f;   /* Diese Zeile wurde hinzugefügt */
             width: auto;
             height: auto;
             transform: translate(-50%, -50%);
+object-fit: cover;
         }
 
         .img-background {
@@ -28,134 +31,170 @@ background-color:#0f0f0f;   /* Diese Zeile wurde hinzugefügt */
         }
 
         #transitionVideoPlayer,
-        #transitionVideoSichter {
+        #transitionVideoSichter,
+        #transitionToPlayer,
+        #transitionToSichter {
             z-index: 900;
             display: none;
         }
 
-        button {
-            position: absolute;
-            top: 25%;
+
+
+        /* Unsichtbare Bereiche für Navigation */
+        .nav-area {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: 50%;
             z-index: 1000;
-            color: black;
             background-color: transparent;
-            border: none;
-            font-size: 50px;
         }
 
-        #playerButton {
-            left: 38%;
-            color: black;
+        #leftHalf {
+            left: 0;
         }
 
-        #sichterButton {
-            right: 38%;
-            color: black;
+        #rightHalf {
+            right: 0;
         }
 
         a.button {
             display: none;
             position: fixed;
-            top: 69%; /* adjust as needed */
-            left: 49.5%;  /* adjust as needed */
+            top: 69%;
+            left: 49.5%;
             transform: translate(-50%, -50%);
             color: black;
-            background-color:  transparent; /* test color: yellow */
+            background-color: transparent;
             width: 310px;
             height: 310px;
-            border-radius: 50%; 
+            border-radius: 50%;
             z-index: 1000;
         }
+
+.fade-to-white {
+    transition: background-color 2s ease-in-out;
+    background-color:#dbdcdc !important;
+}
     </style>
 </head>
 
 <body>
 
-<a href="#" class="button" id="navButton"></a>
-    <button id="playerButton">←</button>
-    <button id="sichterButton">→</button>
-</a>
-    
+    <div id="leftHalf" class="nav-area"></div>
+    <div id="rightHalf" class="nav-area"></div>
 
-    <img class="img-background" src="Player Backround Main.png" alt="">
+    <a href="#" class="button" id="navButton"></a>
+
+    <img class="img-background" src="Backrounds Index/Player Backround Main.png" alt="">
 
     <video id="transitionVideoPlayer" class="transitionVideo" preload="auto">
-        <source src="Player Main Change Player.mp4" type="video/mp4">
+        <source src="Transitions Index/Player Main Change Player.mp4" type="video/mp4">
     </video>
     <video id="transitionVideoSichter" class="transitionVideo" preload="auto">
-        <source src="Player Main Change Sichter.mp4" type="video/mp4">
+        <source src="Transitions Index/Player Main Change Sichter.mp4" type="video/mp4">
+    </video>
+    <video id="transitionToPlayer" class="transitionVideo" preload="auto">
+        <source src="Transitions Index/Transition To Player.mp4" type="video/mp4">
+    </video>
+    <video id="transitionToSichter" class="transitionVideo" preload="auto">
+        <source src="Transitions Index/Transition To Sichter.mp4" type="video/mp4">
     </video>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    var viewState = 'main';
+    <script>
+        var viewState = 'main';
 
-    var playerButton = document.getElementById('playerButton');
-    var sichterButton = document.getElementById('sichterButton');
-
-    var bgImg = document.querySelector('.img-background');
-
-    var transitionVideoPlayer = document.getElementById('transitionVideoPlayer');
-    var transitionVideoSichter = document.getElementById('transitionVideoSichter');
-
-    $('#playerButton').click(function() {
-        if (viewState === 'main') {
-            changeBackground('player', transitionVideoPlayer);
-            viewState = 'player';
-        } else if (viewState === 'sichter') {
-            changeBackground('main', transitionVideoSichter);
-            viewState = 'main';
-        }
-    });
-
-    $('#sichterButton').click(function() {
-        if (viewState === 'main') {
-            changeBackground('sichter', transitionVideoSichter);
-            viewState = 'sichter';
-        } else if (viewState === 'player') {
-            changeBackground('main', transitionVideoPlayer);
-            viewState = 'main';
-        }
-    });
-
-    function changeBackground(target, transitionVideo) {
-        transitionVideo.style.display = "block";
-        transitionVideo.play();
-        transitionVideo.onended = function() {
-            transitionVideo.style.display = "none";
-            bgImg.src = `Player Backround ${target.charAt(0).toUpperCase() + target.slice(1)}.png`; 
-            
-            if(target === 'main') {
-                playerButton.style.display = 'inline';
-                sichterButton.style.display = 'inline';
-            } else if (target === 'player') {
-                playerButton.style.display = 'none';
-                sichterButton.style.display = 'inline';
-            } else if (target === 'sichter') {
-                playerButton.style.display = 'inline';
-                sichterButton.style.display = 'none';
-            }
-            updateButtonLink();
-        }
-    }
-
-    function updateButtonLink() {
         var navButton = document.getElementById('navButton');
-        if (viewState === 'player') {
-            navButton.setAttribute('href', '99pro_media_Player.html');
-            navButton.style.display = 'block';
-        } else if(viewState === 'sichter') {
-            navButton.setAttribute('href', '99pro_media_Player_Sichten.html');
-            navButton.style.display = 'block';
-        } else {
-            navButton.style.display = 'none';
+
+        var bgImg = document.querySelector('.img-background');
+
+        var transitionVideoPlayer = document.getElementById('transitionVideoPlayer');
+        var transitionVideoSichter = document.getElementById('transitionVideoSichter');
+        var transitionToPlayer = document.getElementById('transitionToPlayer');
+        var transitionToSichter = document.getElementById('transitionToSichter');
+
+        $('#leftHalf').click(function() {
+            if (viewState === 'main') {
+                changeBackground('player', transitionVideoPlayer);
+                viewState = 'player';
+            } else if (viewState === 'sichter') {
+                changeBackground('main', transitionVideoSichter);
+                viewState = 'main';
+            }
+        });
+
+        $('#rightHalf').click(function() {
+            if (viewState === 'main') {
+                changeBackground('sichter', transitionVideoSichter);
+                viewState = 'sichter';
+            } else if (viewState === 'player') {
+                changeBackground('main', transitionVideoPlayer);
+                viewState = 'main';
+            }
+        });
+
+        function changeBackground(target, transitionVideo) {
+            transitionVideo.style.display = "block";
+
+            transitionVideo.play();
+            transitionVideo.onended = function() {
+                transitionVideo.style.display = "none";
+                bgImg.src = `Backrounds Index/Player Backround ${target.charAt(0).toUpperCase() + target.slice(1)}.png`;
+                updateButtonVisibility();
+            };
+
+            transitionVideo.onerror = function() {
+                console.error("Error loading or playing the video:", transitionVideo.src);
+            };
         }
+
+        function updateButtonVisibility() {
+            if (viewState === 'main') {
+                navButton.style.display = 'none';
+            } else if (viewState === 'player') {
+                navButton.style.display = 'block';
+                navButton.setAttribute('href', '99pro_media_Player.html');
+            } else if (viewState === 'sichter') {
+                navButton.style.display = 'block';
+                navButton.setAttribute('href', '99pro_media_Player_Sichten.html');
+            }
+        }
+
+        $('#navButton').click(function(e) {
+    e.preventDefault();
+
+    if (viewState === 'player') {
+        transitionToPlayer.style.display = "block";
+        transitionToPlayer.play();
+
+        setTimeout(function() {
+            $('body').addClass('fade-to-white');
+        }, 900); // Beginnen Sie den Übergang zu Weiß nach 500ms
+
+        transitionToPlayer.onended = function() {
+            setTimeout(function() {
+                window.location.href = '99pro_media_Player.html';
+            }, 100);
+        };
+    } else if (viewState === 'sichter') {
+        transitionToSichter.style.display = "block";
+        transitionToSichter.play();
+
+        setTimeout(function() {
+            $('body').addClass('fade-to-white');
+        }, 900); // Beginnen Sie den Übergang zu Weiß nach 500ms
+
+        transitionToSichter.onended = function() {
+            setTimeout(function() {
+                window.location.href = '99pro_media_Player_Sichten.html';
+            }, 100);
+        };
     }
+});
 
-    // Call this function when the page loads to hide the button
-    updateButtonLink();
-
-</script>
+        updateButtonVisibility();
+    </script>
 
 </body>
 
