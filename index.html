@@ -170,6 +170,7 @@ object-fit: cover;
 
         setTimeout(function() {
             $('body').addClass('fade-to-white');
+            bgImg.style.opacity = "0"; // Fade out the background image
         }, 900); // Beginnen Sie den Übergang zu Weiß nach 500ms
 
         transitionToPlayer.onended = function() {
@@ -183,6 +184,7 @@ object-fit: cover;
 
         setTimeout(function() {
             $('body').addClass('fade-to-white');
+            bgImg.style.opacity = "0"; // Fade out the background image
         }, 900); // Beginnen Sie den Übergang zu Weiß nach 500ms
 
         transitionToSichter.onended = function() {
