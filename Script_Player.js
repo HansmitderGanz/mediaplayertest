@@ -1,3 +1,4 @@
+
 $(document).ready(function() {
     // Fade out the white overlay on page load
     $("#whiteOverlay").fadeOut(2000);
@@ -112,6 +113,7 @@ function loadTranscript(event) {
             var timestamps = lines[0]; // Der Zeitstempel ist die erste Zeile
             var text = lines.slice(1).join(' '); // Der Rest der Zeilen ist der Transkripttext
             const p = document.createElement('p');
+            p.classList.add("interactable");
             
             // Überprüft, ob der Text einen Sprecher enthält und entfernt ihn
             var speakerIndex = text.indexOf(':');
@@ -219,13 +221,13 @@ function updateMarkerList() {
     markerList.empty();
     markers.forEach(function(marker, index) {
         var listItem = $('<li></li>');
-        var jumpButton = $('<button style="margin-right: 10px;">Gehe zu</button>');
+        var jumpButton = $('<button class="interactable" style="margin-right: 10px;">Gehe zu</button>');
         jumpButton.click(function(){
             videoElement.currentTime = marker.timeInSeconds;
         });
         listItem.text('Timecode: ' + marker.timecode + ', Anmerkung: ' + marker.description);
         listItem.prepend(jumpButton);
-        var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:10px; padding: 5px; border-radius: 5px; cursor: pointer;"><option selected disabled>Aktionen</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
+        var actionSelect = $('<select class="interactable actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:10px; padding: 5px; border-radius: 5px; cursor: pointer;"><option selected disabled>Aktionen</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
         listItem.append(actionSelect);
         markerList.append(listItem);
     });

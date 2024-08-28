@@ -4,9 +4,6 @@
 <style>
 body {
     font-family: Arial, sans-serif;
-background-image: url("NO_PICTURE_HERE.png");
-    background-repeat: no-repeat;
-    background-size: cover;
 }
 
 
@@ -42,6 +39,13 @@ background-image: url("NO_PICTURE_HERE.png");
     height: 100%;
 }
 
+.interactable {
+  transition: transform 0.3s ease;
+}
+
+.interactable:hover {
+  transform: scale(1.05);
+}
 
 .transcript-related {
     display: none;
@@ -51,12 +55,14 @@ background-image: url("NO_PICTURE_HERE.png");
 body {
     background-color: #FAFAFA;
     color: black;
+	transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 /* Dark Mode */
 body.dark-mode {
     background-color: #1a1a1a;
     color: white;
+	transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 body.dark-mode #shortcuts {
@@ -71,15 +77,6 @@ body.dark-mode #shortcuts {
     background-color: darkgray;
 }
 
-#transcript {
-    top: 0;
-    width: 90%;
-    margin-left: 5%;
-    margin-right: 5%;
-}
-
-
-
 #shortcuts {
     /* Andere Stile... */
     z-index: 2; /* Hintergrund */
@@ -89,8 +86,142 @@ body.dark-mode #shortcuts {
     position: relative; 
     /* Andere Stile... */
     z-index: 1; /* Vordergrund */
+	 transition: width 0.5s ease, height 0.5s ease;
 }
 
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+	border: 2px solid #6b6b6b;
+}
+
+.slider:before {
+  position: absolute;
+  content: "🌜"; /* Halbmond-Symbol */
+  height: 26px;
+  width: 26px;
+  left: 3px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  text-align: center;
+  line-height: 26px;
+  font-size: 16px;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #1a1a1a; 
+}
+
+input:checked + .slider:before {
+  content: "☀️"; /* Sonnen-Symbol */
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+  text-align: center;
+  line-height: 26px;
+  font-size: 16px;
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.switch-transcript {
+  position: relative;
+  display: inline-block;
+  width: 110px;
+  height: 34px;
+}
+
+.switch-transcript input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider.transcript {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border: 2px solid #6b6b6b;
+}
+
+.slider.transcript:after {
+  content: "Transkript";
+  color: #000000;
+  display: block;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 63.5%;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+	opacity: 1; /* Default opacity to 1 */
+  transition: opacity 0.2s ease-in-out; /* Transition effect for smooth fade */
+}
+
+.slider.transcript:before {
+  position: absolute;
+  content: "📝";
+  height: 26px;
+  width: 26px;
+  left: 3px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  text-align: center;
+  line-height: 26px;
+  font-size: 16px;
+}
+
+input:checked + .slider.transcript:before {
+  content: "❌";
+  -webkit-transform: translateX(70px);
+  -ms-transform: translateX(70px);
+  transform: translateX(75px);
+}
+
+input:checked + .slider.transcript:after {
+	opacity: 0;
+}
 
 </style>
 </head>
@@ -104,9 +235,9 @@ body.dark-mode #shortcuts {
 
 <div class="page-wrapper">
 
-    <button id="toggleShortcuts" style="position: fixed; top: 130px; left: 10px; padding: 10px; background-color: lightgrey; border-radius: 10px; border: none; cursor: pointer; font-size: 20px;" onclick="toggleShortcuts()">🙈</button>
+    <button class="interactable" id="toggleShortcuts" style="position: fixed; top: 56px; left: 10px; padding: 10px; background-color: lightgrey; border-radius: 10px; border: none; cursor: pointer; font-size: 20px;" onclick="toggleShortcuts()">🙈</button>
 
-    <div id="shortcuts" style="position: fixed; top: 168px; left: 10px; padding: 10px; background-color: lightgrey; border-radius: 10px; display: none;">
+    <div id="shortcuts" style="position: fixed; top: 92px; left: 10px; padding: 10px; background-color: lightgrey; border-radius: 10px; display: none;">
         <h3>Nützliche Shortcuts</h3>
         <table>
             <tr><td><b>Leertaste</b></td><td>: Play/Pause</td></tr>
@@ -119,60 +250,71 @@ body.dark-mode #shortcuts {
         </table>
     </div>
 
-    <div style="position: fixed; top: 10px; left: 10px;">
-        <button onclick="toggleDarkMode()" 
-            style="display: block; background-color: gray; 
-            color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"> 
-            Dark Mode umschalten 
-        </button>
-        <select onchange="changeVideoSize(this.value)" style="padding: 10px; border-radius: 10px; cursor: pointer;">
-            <option value="">Größe</option>
-            <option value="480">Klein</option>
-            <option value="720">Mittel</option>
-            <option value="1280">Groß</option>
-        </select>
-    </div>
+ 
+<div style="position: fixed; top: 4px; left: 10px; display: flex; align-items: center; gap: 10px;">
+  <!-- Darkmode-Slider --> 
+  <label class="switch interactable">
+    <input type="checkbox" id="toggleDarkMode" onclick="toggleDarkMode()">
+    <div class="slider round"></div>
+  </label>
+  
+  <!-- Größe ändern Button -->
+  <select class="interactable" onchange="changeVideoSize(this.value)" style="padding: 10px; border-radius: 10px; cursor: pointer;">
+      <option value="">Größe</option>
+      <option value="480">Klein</option>
+      <option value="720">Mittel</option>
+      <option value="1280">Groß</option>
+  </select>
+</div>
+
 
     <div style="display: flex; justify-content: center; gap: 10px;">
-        <input type="file" id="videoFile" accept=".mp4,.mov" onchange="loadVideo(event)" 
-            style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; 
-            cursor: pointer; margin-right: 10px;">
-        <select onchange="handleSaveOptions(this)" style="padding: 10px; padding-left: 50px; border-radius: 10px; cursor: pointer;">
-            <option selected disabled>Speichern/Laden</option>
-            <option value="save">Stand speichern</option>
-            <option value="load">Speicherstand laden</option>
-        </select>
-        <input type="file" id="loadMarkersFile" style="display: none;" onchange="loadMarkers(event)">
+  <input class="interactable" type="file" id="videoFile" accept=".mp4,.mov" onchange="loadVideo(event)" 
+    style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; 
+    cursor: pointer; margin-right: 10px;">
+  
+  <select class="interactable" onchange="handleSaveOptions(this)" style="padding: 10px; padding-left: 50px; border-radius: 10px; cursor: pointer;">
+    <option selected disabled>Speichern / Laden</option>
+    <option value="save">Stand speichern</option>
+    <option value="load">Speicherstand laden</option>
+  </select>
 
-        <div style="position: absolute; left: 83.75%; top: 50px; width: 15%;">
-            <h2 class="transcript-related">Interaktives Transkript</h2>
-            <input class="transcript-related" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)"
-                style="background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">
-            <input class="transcript-related" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..."
-                style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 100%;">
-            <div class="transcript-related" id="transcript" style="border: solid 1px #ccc; padding: 10px; height: 540px; overflow-y: scroll;"></div>
-        </div>
+  <input type="file" id="loadMarkersFile" style="display: none;" onchange="loadMarkers(event)">
+  
+  <div style="position: absolute; left: 84%; top: 50px; width: 15%;">
+    <input class="transcript-related interactable"" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)"
+      style="background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">
+    
+    <input class="transcript-related interactable"" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..."
+      style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 100%;">
+    
+    <div class="transcript-related" id="transcript" style="border: solid 1px #ccc; padding: 10px; height: 540px; overflow-y: scroll;"></div>
+  </div>
+  
+  <select class="interactable" onchange="handleExportOptions(this)" 
+    style="display: inline-block; background-color: #2E8B57; color: white; padding: 10px; border-radius: 10px; cursor: pointer;">
+    <option selected disabled>Anmerkungen Exportieren</option>
+    <option value="markers">Für AVID exportieren</option>
+    <option value="table"> Als Tabelle exportieren</option>
+  </select>
 
-        <select onchange="handleExportOptions(this)" 
-            style="display: inline-block; background-color: #2E8B57; color: white; padding: 10px; border-radius: 10px; cursor: pointer;">
-            <option selected disabled>Anmerkungen Exportieren</option>
-            <option value="markers">Für AVID exportieren</option>
-            <option value="table"> Als Tabelle exportieren</option>
-        </select>
+  <label class="switch-transcript interactable" style="position: fixed; top: 0.5%; right: 10.2%; cursor: pointer;">
+    <input type="checkbox" id="toggleTranscript" onclick="toggleTranscript()">
+    <div class="slider round transcript"></div>
+  </label> 
 
-    </div>    
-    <button style="position: absolute; top: 0.5%; right: 9.5%; padding: 10px; border-radius: 10px; cursor: pointer;" onclick="toggleTranscript()">Transkript ein/aus</button>
+</div>  
     
     <div style="text-align: center; margin-top: 10px;">
         <video id="myVideo" width="1280" height="720" controls style="display:block; margin: 0 auto; border-radius: 10px;"></video>
     </div>
 
     <div style="text-align: center; margin-top: 10px;">
-        <button onclick="rewind(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;">&#8647 5sek</button>
-        <button onclick="rewind(1/25)" style="padding: 10px; border-radius: 10px; cursor: pointer;">&#8592 Frame</button>
-        <button onclick="setMarker()" style="background-color: #F4A460; padding: 10px; border-radius: 10px; cursor: pointer;">Anmerkung setzen</button>
-        <button onclick="forward(1/25)" style="padding: 10px; border-radius: 10px; cursor: pointer;">Frame &#8594</button>
-        <button onclick="forward(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;">5sek &#8649</button>
+        <button class="interactable" onclick="rewind(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;">&#8647 5sek</button>
+        <button class="interactable" onclick="rewind(1/25)" style="padding: 10px; border-radius: 10px; cursor: pointer;">&#8592 Frame</button>
+        <button class="interactable" onclick="setMarker()" style="background-color: #F4A460; padding: 10px; border-radius: 10px; cursor: pointer;">Anmerkung setzen</button>
+        <button class="interactable" onclick="forward(1/25)" style="padding: 10px; border-radius: 10px; cursor: pointer;">Frame &#8594</button>
+        <button class="interactable" onclick="forward(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;">5sek &#8649</button>
     </div>
 
     <ul id="markerList" style="padding: 20px; height: 100%; overflow: auto; background-color: transparent; max-height: 120px; border: 1px solid lightgray; border-radius: 5px; font-family: Arial; font-weight: bold;"></ul>
