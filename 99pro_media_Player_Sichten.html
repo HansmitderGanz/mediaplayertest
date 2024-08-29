@@ -7,7 +7,7 @@ body {
 	background-image: url("99pro_media_Sichter_Backround.png");
     background-repeat: no-repeat;
     background-size: cover;
-    display: flex;
+    display: center;
     flex-direction: column;
     align-items: flex-start;
 }
@@ -43,11 +43,18 @@ body {
 
 }
 
-
-body.dark-mode {
-    background-image: url("Player Darkmode.png");
+.hidden {
+    display: none;
 }
-	
+
+#transcriptContainer > * {
+   flex-shrink: 0;
+}
+
+textarea {
+    box-sizing: border-box;
+}
+
 
 #myVideo {
     margin-right: 10px;
@@ -70,6 +77,70 @@ body.dark-mode {
     display: block !important;
 }
 
+#toggleEditMode {
+    display: inline-block; 
+    padding: 10px; 
+    border-radius: 10px; 
+    cursor: pointer; 
+    margin-bottom: 10px;
+}
+
+/* Normaler Modus */
+body {
+    background-color: #FAFAFA;
+    color: black;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: white;
+
+body.dark-mode #shortcuts {
+    color: black;
+}
+
+body.dark-mode #toggleEditMode {
+    background-color: #333;
+    color: #fff;
+}
+
+body:not(.dark-mode) #toggleEditMode {
+    background-color: #fff;
+    color: #333;
+}
+
+.videoControlBar {
+    background-color: lightgray;
+}
+
+.videoControlBar.dark-mode {
+    background-color: darkgray;
+}
+
+#markerListContainer {
+    max-height: 400px;
+    overflow-y: auto;
+    border-style: solid;  /* Rahmenstil */
+    border-width: 2px;  /* Rahmendicke */
+    border-color: black;  /* Rahmenfarbe */
+	margin-top: 10px;  /* Abstand von oben */
+}
+
+body.dark-mode #markerListContainer {
+    border-color: white;  /* Rahmenfarbe im Darkmode */
+}
+
+
+#myVideo {
+    position: relative; 
+    /* Andere Stile... */
+    z-index: 2; /* Vordergrund */
+}
+
+
+
+
 </style>
 </head>
 <body>
@@ -78,7 +149,7 @@ body.dark-mode {
 
 <!--_______________________OPTION_Darkmode Knopf/ Video Size / Trasnkript / Shortcuts__________________________-->
 
-   <details style="position: fixed; right: 20px; overflow: auto;">
+   <details style="position: fixed; right: 20px; overflow: auto; z-index: 999;">
       <summary>Optionen</summary>
   <details>
     <summary>Dark Mode umschalten</summary>
@@ -163,12 +234,12 @@ body.dark-mode {
 
 
 
-<div id="transcriptContainer" style="width: 70%; margin-top: 20px;">
-    <h2 class="transcript-title transcript-related" style="font-size: 15px;">Interaktives Transkript</h2>
+<div id="transcriptContainer" class="hidden" style="width: 80%; margin: 20px auto;">
+    <h2 class="transcript-related hidden" style="font-size: 15px;">Transkript</h2>
 
 
-    <input class="transcript-related" type="file" id="transcriptFile" accept=".json,.txt" onchange="loadTranscript(event)"
-        style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">
+    <input class="transcript-related hidden" type="file" id="transcriptFile" accept=".json,.txt" onchange="loadTranscript(event)"
+    style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">
 
 
 
@@ -176,13 +247,13 @@ body.dark-mode {
 <span><span role="img" aria-label="Lautsprecher">🔊</span>
     <input type="range" id="volume" name="volume" min="0" max="1" step="0.01" value="1">
 
-    <input class="transcript-related" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..."
-    style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 80%;">
+   <input class="transcript-related hidden" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..." 
+    style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 50%;">
     
-<button id="toggleEditMode" class="transcript-related" style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"
+<button id="toggleEditMode" class="transcript-related hidden" style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"
     onclick="toggleEditMode()">Bearbeiten</button>
  
-    <div class="transcript-related" id="transcript" style="border: solid 1px #ccc; padding: 10px; height: 250px; overflow-y: scroll;"></div>
+    <div class="transcript-related" id="transcript" style="border: solid 1px #ccc; padding: 10px; height: 250px; overflow-y: scroll; white-space: pre-line; overflow-wrap: break-word; word-wrap: break-word;"></div>
 </div>
 
     </div>
@@ -203,77 +274,6 @@ body.dark-mode {
 
 </script>
 
-<style>
-
-#toggleEditMode {
-    display: inline-block; 
-    padding: 10px; 
-    border-radius: 10px; 
-    cursor: pointer; 
-    margin-bottom: 10px;
-}
-
-/* Normaler Modus */
-body {
-    background-color: #FAFAFA;
-    color: black;
-}
-
-/* Dark Mode */
-body.dark-mode {
-    background-color: #1a1a1a;
-    color: white;
-
-body.dark-mode #shortcuts {
-    color: black;
-}
-
-body.dark-mode #toggleEditMode {
-    background-color: #333;
-    color: #fff;
-}
-
-body:not(.dark-mode) #toggleEditMode {
-    background-color: #fff;
-    color: #333;
-}
-
-.videoControlBar {
-    background-color: lightgray;
-}
-
-.videoControlBar.dark-mode {
-    background-color: darkgray;
-}
-
-#markerListContainer {
-    max-height: 400px;
-    overflow-y: auto;
-    border-style: solid;  /* Rahmenstil */
-    border-width: 2px;  /* Rahmendicke */
-    border-color: black;  /* Rahmenfarbe */
-	margin-top: 10px;  /* Abstand von oben */
-}
-
-body.dark-mode #markerListContainer {
-    border-color: white;  /* Rahmenfarbe im Darkmode */
-}
-
-.textarea {
-    width: 100%; 
-    height: 100%; 
-    border: none;
-}
-
-
-#myVideo {
-    position: relative; 
-    /* Andere Stile... */
-    z-index: 2; /* Vordergrund */
-}
-
-
-</style>
 
 </body>
 </html>

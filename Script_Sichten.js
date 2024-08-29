@@ -208,17 +208,8 @@ window.onclick = function(event) {
 }
 
 function toggleTranscript() {
-    // Selektiert alle Elemente mit der Klasse 'transcript-related'
-    var transcriptRelatedElements = document.getElementsByClassName('transcript-related');
-
-    // Iteriert durch alle Elemente und toggled die Sichtbarkeit
-    for (var i = 0; i < transcriptRelatedElements.length; i++) {
-        if (transcriptRelatedElements[i].style.display === "none") {
-            transcriptRelatedElements[i].style.display = "block";
-        } else {
-            transcriptRelatedElements[i].style.display = "none";
-        }
-    }
+    var transcriptContainer = document.getElementById('transcriptContainer');
+    transcriptContainer.classList.toggle("hidden");
 }
 
 var paragraphsToRead = [];
@@ -278,7 +269,10 @@ function toggleEditMode() {
     paragraphs.forEach(p => {
         if (editMode) {
             var textarea = document.createElement('textarea');
+            textarea.style.width = "100%";
             textarea.setAttribute("class", "editable"); 
+            // Setzt die Zeilenzahl entsprechend der Anzahl der Zeilen in p
+            textarea.rows = p.textContent.split('\n').length || 1;
             textarea.value = p.textContent;
             textarea.style.color = p.style.color;
             textarea.style.fontWeight = p.style.fontWeight;
@@ -300,7 +294,6 @@ function toggleEditMode() {
             para.onclick = () => { 
                 videoElement.currentTime = parseFloat(p.getAttribute('data-time'));
             };
-  
             p.replaceWith(para);
             toggleEditButton.innerHTML = "Bearbeiten"; // Text ändern
         }
@@ -323,6 +316,7 @@ function loadNewTranscriptFormat(transcriptDiv, content) {
       timestamps = timestamps.slice(0, timestamps.lastIndexOf(" - SPRECHER"));
       p.style.color = "green";
       p.style.fontWeight = "bold";
+      
     }
 
     var timeParts = timestamps.split(":");
@@ -376,30 +370,29 @@ let speechSynthesisEnabled = false;
 
 
 
-document.getElementById('transcriptSearch').addEventListener('input', function (e) {
-  var searchString = e.target.value.toLowerCase();
-  var transcriptLines = document.querySelectorAll('#transcript p');
-  transcriptLines.forEach(function (line) {
-    var lineText = line.textContent.toLowerCase();
-    if (lineText.includes(searchString)) {
-      line.style.display = 'block';
-    } else {
-      line.style.display = 'none';
-    }
-  });
-
-  // Wenn das Suchfeld geleert wird, scrollt das Transkript-Fenster zur aktuellen Position im Video
-  if (searchString === '') {
-    var currentTime = videoElement.currentTime;
-    transcriptLines.forEach(function (line) {
-      var lineTime = parseFloat(line.getAttribute('data-time'));
-      if (Math.abs(currentTime - lineTime) <= 0.5) {
-        line.scrollIntoView({behavior: 'smooth'});
-      }
+document.getElementById('transcriptSearch').addEventListener('input', function(e) {
+    var searchString = e.target.value.toLowerCase();
+    var transcriptLines = document.querySelectorAll('#transcript p, #transcript textarea');
+    transcriptLines.forEach(function(line) {
+        var lineText = line.nodeName === 'P' ? line.textContent.toLowerCase() : line.value.toLowerCase();
+        if (lineText.includes(searchString)) {
+            line.style.display = 'block';
+        } else {
+            line.style.display = 'none';
+        }
     });
- // Entfernt den Fokus vom Suchfeld
-    e.target.blur();
-  }
+
+    if (searchString === '') {
+        var currentTime = videoElement.currentTime;
+        transcriptLines.forEach(function(line) {
+            var timeInSeconds = parseFloat(line.getAttribute('data-time') || line.dataset.time);
+            var lineTime = typeof timeInSeconds === 'number' ? timeInSeconds : Infinity;
+            if (Math.abs(currentTime - lineTime) <= 0.5) {
+                line.scrollIntoView({behavior: 'smooth'});
+            }
+        });
+        e.target.blur();
+    }
 });
 
 
