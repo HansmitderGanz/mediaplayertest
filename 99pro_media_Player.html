@@ -257,6 +257,11 @@ input:checked + .slider.transcript:after {
     <input type="checkbox" id="toggleDarkMode" onclick="toggleDarkMode()">
     <div class="slider round"></div>
   </label>
+
+<label class="switch-transcript interactable">
+    <input type="checkbox" id="toggleTranscript" onclick="toggleTranscript()">
+    <div class="slider round transcript"></div>
+  </label> 
   
   <!-- Größe ändern Button -->
   <select class="interactable" onchange="changeVideoSize(this.value)" style="padding: 10px; border-radius: 10px; cursor: pointer;">
@@ -298,10 +303,7 @@ input:checked + .slider.transcript:after {
     <option value="table"> Als Tabelle exportieren</option>
   </select>
 
-  <label class="switch-transcript interactable" style="position: fixed; top: 0.5%; right: 10.2%; cursor: pointer;">
-    <input type="checkbox" id="toggleTranscript" onclick="toggleTranscript()">
-    <div class="slider round transcript"></div>
-  </label> 
+  
 
 </div>  
     
