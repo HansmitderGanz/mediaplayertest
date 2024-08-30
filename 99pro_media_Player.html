@@ -39,6 +39,10 @@ body {
     height: 100%;
 }
 
+.hidden {
+    display: none;
+}
+
 .interactable {
   transition: transform 0.3s ease;
 }
@@ -49,6 +53,7 @@ body {
 
 .transcript-related {
     display: none;
+	border-radius: 10px;
 }
 
 /* Normaler Modus */
@@ -109,7 +114,7 @@ body.dark-mode #shortcuts {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: #dcdcdc;
   -webkit-transition: .4s;
   transition: .4s;
 	border: 2px solid #6b6b6b;
@@ -177,7 +182,7 @@ input:checked + .slider:before {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: #dcdcdc;
   -webkit-transition: .4s;
   transition: .4s;
   border: 2px solid #6b6b6b;
@@ -226,7 +231,7 @@ input:checked + .slider.transcript:after {
 </style>
 </head>
 <body>
-
+<body onload="hideOnLoad();">
 
 </body>
 </html>
@@ -274,9 +279,10 @@ input:checked + .slider.transcript:after {
 
 
     <div style="display: flex; justify-content: center; gap: 10px;">
-  <input class="interactable" type="file" id="videoFile" accept=".mp4,.mov" onchange="loadVideo(event)" 
-    style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; 
-    cursor: pointer; margin-right: 10px;">
+  <label for="videoFile" class="interactable" style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-right: 1px;">
+    Video Importieren
+    <input class="hidden" type="file" id="videoFile" accept=".mp4,.mov" onchange="loadVideo(event)" style="display: none;">
+</label>
   
   <select class="interactable" onchange="handleSaveOptions(this)" style="padding: 10px; padding-left: 50px; border-radius: 10px; cursor: pointer;">
     <option selected disabled>Speichern / Laden</option>
@@ -287,8 +293,9 @@ input:checked + .slider.transcript:after {
   <input type="file" id="loadMarkersFile" style="display: none;" onchange="loadMarkers(event)">
   
   <div style="position: absolute; left: 84%; top: 50px; width: 15%;">
-    <input class="transcript-related interactable"" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)"
-      style="background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">
+  <label for="transcriptFile" class="transcript-related interactable" style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">Transkript Importieren
+    <input class="hidden" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)">
+  </label>
     
     <input class="transcript-related interactable"" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..."
       style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 100%;">

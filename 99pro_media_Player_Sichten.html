@@ -44,7 +44,23 @@ body {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
+}
+
+.interactable {
+  transition: transform 0.3s ease;
+}
+
+.interactable:hover {
+  transform: scale(1.05);
+}
+
+.interactable-transcript {
+    transition: transform 0.3s ease;
+}
+
+.interactable-transcript:hover {
+    transform: scale(1.005); // Ändern Sie den Zoomfaktor hier
 }
 
 textarea {
@@ -85,27 +101,20 @@ textarea {
 body {
     background-color: #FAFAFA;
     color: black;
+transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 /* Dark Mode */
 body.dark-mode {
     background-color: #1a1a1a;
     color: white;
+	transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 body.dark-mode #shortcuts {
     color: black;
 }
 
-body.dark-mode #toggleEditMode {
-    background-color: #333;
-    color: #fff;
-}
-
-body:not(.dark-mode) #toggleEditMode {
-    background-color: #fff;
-    color: #333;
-}
 
 .videoControlBar {
     background-color: lightgray;
@@ -121,18 +130,22 @@ body:not(.dark-mode) #toggleEditMode {
     overflow-y: auto;
     border-style: solid;  /* Rahmenstil */
     border-width: 2px;  /* Rahmendicke */
-    border-color: black;  /* Rahmenfarbe */
-	margin-top: 10px;  /* Abstand von oben */
+    border-color: #676767;  /* Rahmenfarbe */
+	border-radius: 10px;
 	display: none;
 }
 
 body.dark-mode #markerListContainer {
-    border-color: white;  /* Rahmenfarbe im Darkmode */
+    border-color: #c4c4c4;  /* Rahmenfarbe im Darkmode */
 }
 
 #markerList li {
-    border-bottom: 1px solid black;
+    border-bottom: 2px solid #676767;
     padding: 8px 0; /* fügt ein bisschen vertikalen Abstand hinzu, damit die Anmerkungen nicht zu nahe an der Linie sind */
+}
+
+body.dark-mode #markerList li {
+border-color: #c4c4c4;
 }
 
 #myVideo {
@@ -144,12 +157,118 @@ body.dark-mode #markerListContainer {
 #transcriptContainer {
     width: 120%; 
     margin: 20px auto;
+	margin-top: 60px;
+
 }
 
 #transcriptContainer.hidden {
     display: none;
 }
 
+.switch-transcript {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch-transcript input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.switch-darkmode {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.slider.darkmode {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider.darkmode:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider.darkmode {
+    background-color: #2196F3;  /* Farbe für Dark Mode */
+}
+
+input:focus + .slider.darkmode {
+    box-shadow: 0 0 1px #2196F3;  /* Farbe bei Fokus im Dark Mode */
+}
+
+input:checked + .slider.darkmode:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
 
 </style>
 </head>
@@ -159,36 +278,41 @@ body.dark-mode #markerListContainer {
 
 <!--_______________________OPTION_Darkmode Knopf/ Video Size / Trasnkript / Shortcuts__________________________-->
 
-   <details style="position: fixed; right: 20px; overflow: auto; z-index: 999;">
-      <summary>Optionen</summary>
-  <details>
-    <summary>Dark Mode umschalten</summary>
-    <button onclick="toggleDarkMode()" 
-            style="display: block; background-color: gray; 
-            color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"> 
-            Dark Mode umschalten
-    </button>
-  </details>
-  <details>
-    <summary>Transkript ein/aus</summary>
-    <button style="padding: 10px; border-radius: 10px; cursor: pointer;" onclick="toggleTranscript()">Transkript ein/aus</button>
-  </details>
-  <!-- Shortcut Fenster -->
-  <details>
-    <summary>Shortcuts</summary>
-    <div id="shortcuts" style="padding: 10px;  background-color: lightgrey; border-radius: 10px;">
-        <h3>Nützliche Shortcuts</h3>
-        <table>
-            <tr><td><b>Leertaste</b></td><td>: Play/Pause</td></tr>
-            <tr><td><b>M</b></td><td>: Marker setzen</td></tr>
-            <tr><td><b>Alt + S</b></td><td>: Stand speichern</td></tr>
-            <tr><td><b>Pfeil links</b></td><td>: 5sek zurück</td></tr>
-            <tr><td><b>Pfeil rechts</b></td><td>: 5sek vor</td></tr>
-            <tr><td><b>Alt + Pfeil links</b></td><td>: 1 Frame zurück</td></tr>
-            <tr><td><b>Alt + Pfeil rechts</b></td><td>: 1 Frame vor</td></tr>
-        </table>
-    </div>
-  </details>
+   <details style="position: fixed; left: 20px; overflow: auto; z-index: 999;">
+    <summary>Optionen</summary>
+
+    <details>
+        <summary>Dark Mode</summary>
+        <label class="switch-darkmode">
+    <input type="checkbox" onclick="toggleDarkMode()">
+    <div class="slider round darkmode"></div>
+</label>
+    </details>
+
+    <details>
+        <summary>Transkript</summary>
+        <label class="switch-transcript">
+            <input type="checkbox" id="toggleTranscriptVisibility" onclick="toggleTranscript()">
+            <div class="slider round transcript"></div>
+        </label>
+    </details>
+
+    <!-- Shortcut Fenster -->
+    <details>
+        <summary>Shortcuts</summary>
+        <div id="shortcuts" style="padding: 10px;  background-color: lightgrey; border-radius: 10px;">
+            <h3>Nützliche Shortcuts</h3>
+            <table>
+                <tr><td><b>Leertaste</b></td><td>: Play/Pause</td></tr>
+                <tr><td><b>M</b></td><td>: Marker setzen</td></tr>
+                <tr><td><b>Alt + S</b></td><td>: Stand speichern</td></tr>
+                <tr><td><b>Pfeil links</b></td><td>: 5sek zurück</td></tr>
+                <tr><td><b>Pfeil rechts</b></td><td>: 5sek vor</td></tr>
+                <tr><td><b>Alt + Pfeil links</b></td><td>: 1 Frame zurück</td></tr>
+                <tr><td><b>Alt + Pfeil rechts</b></td><td>: 1 Frame vor</td></tr>
+            </table>
+        </div>
+    </details>
 </details>
 
 <div class="page-wrapper">
@@ -199,11 +323,13 @@ body.dark-mode #markerListContainer {
    
     <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
 	<div id="playerTopButtons" style="margin-bottom: 10px;">
-    <input type="file" id="videoFile" accept=".mp4,.mov" onchange="loadVideo(event)" 
-               style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; 
-                      cursor: pointer; margin-right: 1px;">
+
+   <label for="videoFile" class= "interactable" style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; font-size: 14px;">
+    Video einladen
+    <input class="hidden" type="file" id="videoFile" accept=".mp4,.mov" onchange="loadVideo(event)" style="display: none;">
+</label>
     
-        <select onchange="handleSaveOptions(this)" style="padding: 10px; padding-left: 30px; border-radius: 10px; cursor: pointer;">
+        <select onchange="handleSaveOptions(this)" class= "interactable" style="padding: 10px; padding-left: 30px; border-radius: 10px; cursor: pointer;">
     	<option selected disabled>Speichern/Laden</option>
     	<option value="save">Stand speichern</option>
    	<option value="load">Speicherstand laden</option>
@@ -213,7 +339,7 @@ body.dark-mode #markerListContainer {
 <!--__________________________________Exportieren______________________________________________________________________-->
 
 <select onchange="handleExportOptions(this)" 
-                style="display: inline-block; background-color: #2E8B57; color: white; padding: 10px; border-radius: 10px; cursor: pointer;">
+               class= "interactable" style="display: inline-block; background-color: #2E8B57; color: white; padding: 10px; border-radius: 10px; cursor: pointer;">
             <option selected disabled>Anmerkungen Exportieren</option>
             <option value="markers">Für AVID exportieren</option>
             <option value="table"> Als Tabelle exportieren</option>
@@ -226,14 +352,14 @@ body.dark-mode #markerListContainer {
 
 <video id="myVideo" width="720" height="405" controls style="display:block; margin: 0 auto; border-radius: 10px; "></video>
 
-    <button onclick="rewind(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;  margin-top: 5px;">&#8647 5sek</button>
-<button onclick="rewind(1/25)" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 5px">&#8592 Frame</button>
-<button onclick="setMarker()" style="background-color: #F4A460; padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 5px">Anmerkung setzen</button>
-<button onclick="forward(1/25)" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 5px">Frame &#8594</button>
-<button onclick="forward(5)" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 5px">5sek &#8649</button>
+    <button onclick="rewind(5)" class= "interactable" style="padding: 10px; border-radius: 10px; cursor: pointer;  margin-top: 5px;">&#8647 5sek</button>
+<button onclick="rewind(1/25)" class= "interactable" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 5px">&#8592 Frame</button>
+<button onclick="setMarker()" class= "interactable" style="background-color: #F4A460; padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 5px">Anmerkung setzen</button>
+<button onclick="forward(1/25)" class= "interactable" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 5px">Frame &#8594</button>
+<button onclick="forward(5)" class= "interactable" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 5px">5sek &#8649</button>
 </div>
 
-<div id="markerListContainer" style="width: 80%; margin-left: 10px;">
+<div id="markerListContainer" style="width: 80%; margin-left: 10px; margin-top: -33px;">
     <ul id="markerList">
 </ul>
     </div>
@@ -244,28 +370,30 @@ body.dark-mode #markerListContainer {
 
 
 
+
 <div style="display: flex; justify-content: center;">
 <div id="transcriptContainer" class="hidden">
-    <h2 class="transcript-related hidden" style="font-size: 15px;">Transkript</h2>
+    <label for="transcriptFile" class="interactable" style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; font-size: 14px;">
+        Transkript einladen
+        <input class="hidden" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)" style="display: none;">
+    </label>
 
+    <button id="removeTranscriptButton" class="transcriptActions transcript-related hidden interactable" style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"
+    onclick="removeTranscript()">Transkript entfernen</button>
 
-    <input class="transcript-related hidden" type="file" id="transcriptFile" accept=".json,.txt" onchange="loadTranscript(event)"
-    style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">
+    <span class="transcript-related hidden interactable"><span role="img" aria-label="Lautsprecher">🔊</span>
+        <input type="range" id="volume" name="volume" min="0" max="1" step="0.01" value="1">
+    </span>
 
-
-
-
-<span><span role="img" aria-label="Lautsprecher">🔊</span>
-    <input type="range" id="volume" name="volume" min="0" max="1" step="0.01" value="1">
-
-   <input class="transcript-related hidden" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..." 
-    style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 50%;">
+    <input class="transcript-related hidden interactable" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..." 
+            style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 30%;">
     
-<button id="toggleEditMode" class="transcript-related hidden" style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"
-    onclick="toggleEditMode()">Bearbeiten</button>
- 
-    <div class="transcript-related" id="transcript" style="border: solid 1px #ccc; padding: 10px; height: 250px; overflow-y: scroll; white-space: pre-line; overflow-wrap: break-word; word-wrap: break-word;"></div>
+    <button id="toggleEditMode" class="transcriptActions transcript-related hidden interactable" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"
+        onclick="toggleEditMode()">Bearbeiten</button>
+
+    <div class="transcript-related hidden" id="transcript" style="border: solid 2px #676767; padding: 10px; height: 250px; overflow-y: scroll; white-space: pre-line; border-radius: 10px; overflow-wrap: break-word; word-wrap: break-word;"></div>
 </div>
+
 
     </div>
 </div>

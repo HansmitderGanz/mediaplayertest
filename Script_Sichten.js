@@ -1,6 +1,19 @@
 $(document).ready(function() {
-    // Fade out the white overlay on page load
     $("#whiteOverlay").fadeOut(2000);
+
+    // Check for the theme and show tooltip
+
+    // Wenn das Transkript-Feld keinen Text hat 
+    if (!$('#transcript').text().trim().length) { 
+        $('.transcript-related').addClass('hidden');
+        $('#toggleEditMode').addClass('hidden'); // Versteckt den "Bearbeiten" Button
+        $('#removeTranscriptButton').addClass('hidden'); // Versteckt den "Transkript entfernen" Button
+    }
+
+    $("#toggleTranscriptVisibility").prop('checked', true);
+    if ($('#toggleTranscriptVisibility').is(':checked')) {
+        toggleTranscript();
+    }
 });
 
 var markers = [];
@@ -225,6 +238,7 @@ function loadOldTranscriptFormat(transcriptDiv, content) {
         var timestamps = lines[0];
         var text = lines.slice(1).join(" ");
         const p = document.createElement("p");
+        p.classList.add("interactable-transcript");
 
         var speakerIndex = text.indexOf(":");
         if (speakerIndex !== -1) {
@@ -309,6 +323,7 @@ function loadNewTranscriptFormat(transcriptDiv, content) {
     var timestamps = match[1].trim();
     var text = match[2].trim();
     const p = document.createElement("p");
+    p.classList.add("interactable-transcript");
 
     var isSpeaker = timestamps.endsWith("- SPRECHER");
 
@@ -346,15 +361,43 @@ function loadTranscript(event) {
         var content = e.target.result;
         const transcriptDiv = document.getElementById("transcript");
         transcriptDiv.innerHTML = "";
+       
 
         if (content.startsWith("<begin subtitles>")) {
             loadOldTranscriptFormat(transcriptDiv, content);
         } else {
             loadNewTranscriptFormat(transcriptDiv, content);
         }
-transcriptDiv.style.height = '300px';
+        transcriptDiv.style.height = '300px';
+
+        // Code, um die Sichtbarkeit von Elementen zu ändern, nachdem ein Transkript geladen wurde
+        $('.transcript-related').removeClass('hidden'); // Zeigt andere Transkript-bezogene Steuerelemente an
+        $('#removeTranscriptButton').removeClass('hidden'); // Zeigt den "Transkript entfernen" Button
+        $('#toggleEditMode').removeClass('hidden'); // Zeigt den "Bearbeiten" Button
     };
     reader.readAsText(file, 'UTF-8');
+}
+
+function removeTranscript() {
+    // Entfernen Sie alle Absätze aus dem Transkript
+    document.querySelectorAll("#transcript p, #transcript textarea").forEach(function(p) {
+        p.remove();
+    });
+
+    // Verstecke die anderen transkriptbezogenen Elemente und zeige den "Transkript laden" Button
+    $('.transcript-related').addClass('hidden');
+    $('.transcriptActions').addClass('hidden');
+    $('#transcriptFile').removeClass('hidden');
+    $('#toggleEditMode').addClass('hidden'); // Versteckt den "Bearbeiten" Button
+    $('#removeTranscriptButton').addClass('hidden'); // Versteckt den "Transkript entfernen" Butto
+
+    // Zurücksetzen der globalen Variablen, die die Transkriptdaten enthalten
+    // Setzen Sie diese Werte entsprechend Ihren ursprünglichen Werten zurück
+    markers = [];
+    paragraphsToRead = [];
+
+    // Löschen des bisherigen Dateiinputs
+    document.getElementById('transcriptFile').value = null;
 }
 
 function timecodeToSeconds(timecode) {
@@ -455,7 +498,7 @@ function updateMarkerList() {
             });
             listItem.text('Timecode: ' + marker.timecode + ', Anmerkung: ' + marker.description);
             listItem.prepend(jumpButton);
-            var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:1px; margin-top: 4px; padding: 5px 7px; border-radius: 8px; cursor: pointer;"><option selected disabled>Aktionen</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
+            var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:1px; margin-top: 4px; padding: 5px 7px; border-radius: 8px; cursor: pointer;"><option selected disabled>Bearbeiten</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
             listItem.append(actionSelect);
             markerList.append(listItem);
         });

@@ -2,7 +2,16 @@
 $(document).ready(function() {
     // Fade out the white overlay on page load
     $("#whiteOverlay").fadeOut(2000);
+    
 });
+
+
+function hideOnLoad() {
+    let transcriptElements = document.getElementsByClassName('transcript-related');
+    for (let i = 0; i < transcriptElements.length; i++) {
+      transcriptElements[i].style.display = 'none';
+    }
+  }
 
 window.addEventListener('load', function() {
         window.scrollTo(0, 0);
@@ -204,11 +213,14 @@ function changeVideoSize(size) {
 
 function setMarker() {
     var currentTime = videoElement.currentTime;
-    var description = prompt("Bitte geben Sie eine Anmerkung für den Marker ein");
+    var description = '';
 
-if (description === null) {
-        return;
-    }
+    do {
+        description = prompt("Bitte geben Sie eine Anmerkung für den Marker ein");
+        if (description === null) {
+            return;
+        }
+    } while(description.trim() === '');
 
     // Die aktuelle Zeit des Videos wird zur Basiszeit addiert, um den Timecode zu berechnen
     var timecode = convertTimeToTimecode(baseTimecodeInSeconds + currentTime, 25);
@@ -227,8 +239,9 @@ function updateMarkerList() {
         });
         listItem.text('Timecode: ' + marker.timecode + ', Anmerkung: ' + marker.description);
         listItem.prepend(jumpButton);
-        var actionSelect = $('<select class="interactable actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:10px; padding: 5px; border-radius: 5px; cursor: pointer;"><option selected disabled>Aktionen</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
+        var actionSelect = $('<select class="interactable actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:10px; padding: 5px; border-radius: 5px; cursor: pointer;"><option selected disabled>Bearbeiten</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
         listItem.append(actionSelect);
+        listItem.css("margin-bottom", "10px");
         markerList.append(listItem);
     });
 }
