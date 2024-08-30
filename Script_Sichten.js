@@ -425,27 +425,41 @@ function changeVideoSize(size) {
 
 function setMarker() {
     var currentTime = videoElement.currentTime;
-    var description = prompt("Bitte geben Sie eine Anmerkung für den Marker ein");
+    var description = prompt("Bitte fügen Sie eine Anmerkung für den Marker ein");
+
+    // Beenden Sie die Funktion falls keine Beschreibung eingegeben wurde
+    if (!description) return;
+
     var timecode = convertTimeToTimecode(currentTime, 25);
     markers.push({timeInSeconds: currentTime, timecode: timecode, description: description});
+
+    // Wenn Marker hinzugefügt wird, #markerListContainer sichtbar machen
+    document.getElementById('markerListContainer').style.display = 'block';
+
     updateMarkerList();
 }
 
 function updateMarkerList() {
     var markerList = $('#markerList');
     markerList.empty();
-    markers.forEach(function(marker, index) {
-        var listItem = $('<li></li>');
-        var jumpButton = $('<button style="margin-right: 10px;">Gehe zu</button>');
-        jumpButton.click(function(){
-            videoElement.currentTime = marker.timeInSeconds;
+
+    // Überprüfen, ob alle Marker gelöscht wurden
+    if (markers.length === 0) {
+        document.getElementById('markerListContainer').style.display = 'none';
+    } else {
+        markers.forEach(function(marker, index) {
+            var listItem = $('<li></li>');
+            var jumpButton = $('<button style="margin-right: 10px;">Gehe zu</button>');
+            jumpButton.click(function(){
+                videoElement.currentTime = marker.timeInSeconds;
+            });
+            listItem.text('Timecode: ' + marker.timecode + ', Anmerkung: ' + marker.description);
+            listItem.prepend(jumpButton);
+            var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:1px; margin-top: 4px; padding: 5px 7px; border-radius: 8px; cursor: pointer;"><option selected disabled>Aktionen</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
+            listItem.append(actionSelect);
+            markerList.append(listItem);
         });
-        listItem.text('Timecode: ' + marker.timecode + ', Anmerkung: ' + marker.description);
-        listItem.prepend(jumpButton);
-        var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:10px; padding: 10px; border-radius: 10px; cursor: pointer;"><option selected disabled>Aktionen</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
-        listItem.append(actionSelect);
-        markerList.append(listItem);
-    });
+    }
 }
 
 function handleMarkerActions(selectElem, index) {
