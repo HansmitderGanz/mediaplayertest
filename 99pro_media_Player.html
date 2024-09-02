@@ -43,6 +43,7 @@ body {
     display: none;
 }
 
+
 .interactable {
   transition: transform 0.3s ease;
 }
@@ -269,12 +270,12 @@ input:checked + .slider.transcript:after {
   </label> 
   
   <!-- Größe ändern Button -->
-  <select class="interactable" onchange="changeVideoSize(this.value)" style="padding: 10px; border-radius: 10px; cursor: pointer;">
-      <option value="">Größe</option>
-      <option value="480">Klein</option>
-      <option value="720">Mittel</option>
-      <option value="1280">Groß</option>
-  </select>
+  <select class="interactable" onchange="changeVideoSize(this.value); adjustMarkerSize(this.value);" style="padding: 10px; border-radius: 10px; cursor: pointer;">
+  <option value="">Größe</option>
+  <option value="480">Klein</option>
+  <option value="720">Mittel</option>
+  <option value="1280">Groß</option>
+</select>
 </div>
 
 
@@ -326,7 +327,7 @@ input:checked + .slider.transcript:after {
         <button class="interactable" onclick="forward(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;">5sek &#8649</button>
     </div>
 
-    <ul id="markerList" style="padding: 20px; height: 100%; overflow: auto; background-color: transparent; max-height: 120px; border: 1px solid lightgray; border-radius: 5px; font-family: Arial; font-weight: bold;"></ul>
+    <ul id="markerList" style="padding: 20px; overflow: auto; background-color: transparent; border: 1px solid lightgray; border-radius: 5px; font-family: Arial; font-weight: bold;"></ul>
 
 </div>
 

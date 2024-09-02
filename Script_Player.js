@@ -3,6 +3,10 @@ $(document).ready(function() {
     // Fade out the white overlay on page load
     $("#whiteOverlay").fadeOut(2000);
     
+
+      // Set video size to large as soon as the page loads
+  changeVideoSize('1280');
+  adjustMarkerSize('1280');
 });
 
 
@@ -12,6 +16,7 @@ function hideOnLoad() {
       transcriptElements[i].style.display = 'none';
     }
   }
+  
 
 window.addEventListener('load', function() {
         window.scrollTo(0, 0);
@@ -258,6 +263,25 @@ function handleMarkerActions(selectElem, index) {
     }
     selectElem.selectedIndex = 0;
 }
+
+function adjustMarkerSize(size) {
+    var markerList = document.getElementById("markerList");
+  
+    switch (size) {
+      case "480": // Klein
+        markerList.style.height = "500px"; // Setzen Sie die Höhe entsprechend Ihrer Vorlieben
+        break;
+      case "720": // Mittel
+        markerList.style.height = "400px"; // Setzen Sie die Höhe entsprechend Ihrer Vorlieben
+        break;
+      case "1280": // Groß
+        markerList.style.height = "120px"; // Setzen Sie die Höhe entsprechend Ihrer Vorlieben
+        break;
+      default:
+        break;
+    }
+  }
+
 
 
 function convertTimeToTimecode(timeInSeconds, framesPerSecond) {
