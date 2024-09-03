@@ -327,6 +327,10 @@ function toggleEditMode() {
             para.onclick = () => { 
                 videoElement.currentTime = parseFloat(p.getAttribute('data-time'));
             };
+
+            para.style.cursor = "pointer";
+            para.classList.add('interactable-transcript');
+            
             p.replaceWith(para);
             toggleEditButton.innerHTML = "Bearbeiten"; // Text ändern
         }
