@@ -4,6 +4,8 @@
 <style>
 body {
     font-family: Arial, sans-serif;
+	background-image: radial-gradient(circle at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.6) 180%, rgba(0,0,0,1) 20%);
+    display: center;
 }
 
 
@@ -86,14 +88,21 @@ body.dark-mode #shortcuts {
 #shortcuts {
     /* Andere Stile... */
     z-index: 2; /* Hintergrund */
+	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.75);
 }
 
 #myVideo {
     position: relative; 
     /* Andere Stile... */
+	box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.75); /* Horizontale Verschiebung, vertikale Verschiebung, Unschärfe, Farbe */
     z-index: 1; /* Vordergrund */
 	 transition: width 0.5s ease, height 0.5s ease;
 }
+
+body.dark-mode #myVideo {
+    box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.6); /* Helle Schatten im dunklen Modus */
+}
+
 
 .switch {
   position: relative;
@@ -115,7 +124,7 @@ body.dark-mode #shortcuts {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #dcdcdc;
+  background-color: #e1e1e1;
   -webkit-transition: .4s;
   transition: .4s;
 	border: 2px solid #6b6b6b;
@@ -134,6 +143,8 @@ body.dark-mode #shortcuts {
   text-align: center;
   line-height: 26px;
   font-size: 16px;
+box-shadow: 0px 3px 1px rgba(0, 0, 0, 0.4), /* inner shadow */
+                0px 2px 2px rgba(0, 0, 0, 0.3); /* outer shadow */
 }
 
 input:checked + .slider {
@@ -154,9 +165,11 @@ input:checked + .slider:before {
   font-size: 16px;
 }
 
-/* Rounded sliders */
+
 .slider.round {
   border-radius: 34px;
+box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.3), /* inner shadow */
+                0px 2px 2px rgba(0, 0, 0, 0.3); /* outer shadow */
 }
 
 .slider.round:before {
@@ -183,7 +196,7 @@ input:checked + .slider:before {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #dcdcdc;
+  background-color: #e1e1e1;
   -webkit-transition: .4s;
   transition: .4s;
   border: 2px solid #6b6b6b;
@@ -229,6 +242,23 @@ input:checked + .slider.transcript:after {
 	opacity: 0;
 }
 
+button.interactable, select.interactable, #videoFileLabel {
+    /* Ihre bisherigen Stile ... */
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);  /* Dadurch wirkt es so, als ob der Button erhaben ist */
+    transition: all 0.3s;  /* Der Übergang macht die Änderungen weicher */
+}
+
+/* Änderung der Schatteneffekte beim Überfahren mit der Maus */
+button.interactable:hover, select.interactable:hover, #videoFileLabel:hover {
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);  /* Der Schatten wird dunkler */
+}
+
+/* Änderung der Schatteneffekte beim Anklicken des Buttons */
+button.interactable:active, select.interactable:active, #videoFileLabel:active {
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);  /* Der Schatten wird kleiner, was den Eindruck erweckt, der Button wäre gedrückt */
+}
+
+
 </style>
 </head>
 <body>
@@ -241,9 +271,9 @@ input:checked + .slider.transcript:after {
 
 <div class="page-wrapper">
 
-    <button class="interactable" id="toggleShortcuts" style="position: fixed; top: 56px; left: 10px; padding: 10px; background-color: lightgrey; border-radius: 10px; border: none; cursor: pointer; font-size: 20px;" onclick="toggleShortcuts()">🙈</button>
+    <button class="interactable" id="toggleShortcuts" style="position: fixed; top: 56px; left: 10px; padding: 10px; background-color: #e1e1e1; border-radius: 10px; border: none; cursor: pointer; font-size: 20px; z-index: 3;" onclick="toggleShortcuts()">🙈</button>
 
-    <div id="shortcuts" style="position: fixed; top: 92px; left: 10px; padding: 10px; background-color: lightgrey; border-radius: 10px; display: none;">
+    <div id="shortcuts" style="position: fixed; top: 92px; left: 10px; padding: 10px; background-color: #e1e1e1; border-radius: 10px; display: none;">
         <h3>Nützliche Shortcuts</h3>
         <table>
             <tr><td><b>Leertaste</b></td><td>: Play/Pause</td></tr>
@@ -270,7 +300,8 @@ input:checked + .slider.transcript:after {
   </label> 
   
   <!-- Größe ändern Button -->
-  <select class="interactable" onchange="changeVideoSize(this.value); adjustMarkerSize(this.value);" style="padding: 10px; border-radius: 10px; cursor: pointer;">
+  <select class="interactable" onchange="changeVideoSize(this.value); adjustMarkerSize(this.value);"
+        style="padding: 7px; border-radius: 10px; cursor: pointer; background-color: #e1e1e1 !important; border: 2px solid #6b6b6b;">
   <option value="">Größe</option>
   <option value="480">Klein</option>
   <option value="720">Mittel</option>
@@ -280,7 +311,7 @@ input:checked + .slider.transcript:after {
 
 
     <div style="display: flex; justify-content: center; gap: 10px;">
-  <label for="videoFile" class="interactable" style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-right: 1px;">
+ <label for="videoFile" id="videoFileLabel" class="interactable" style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-right: 1px;">
     Video Importieren
     <input class="hidden" type="file" id="videoFile" accept=".mp4,.mov" onchange="loadVideo(event)" style="display: none;">
 </label>

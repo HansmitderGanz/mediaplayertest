@@ -32,6 +32,8 @@ function loadVideo(event) {
     var file = event.target.files[0];
     videoFile = file.name;
     var url = URL.createObjectURL(file);
+    var videoLabel = document.getElementById("videoFileLabel"); 
+    videoLabel.title = "Hochgeladene Datei: " + videoFile;
 
     videoElement = document.getElementById("myVideo"); 
     videoElement.src = url;
