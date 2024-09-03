@@ -77,16 +77,35 @@ window.addEventListener('keydown', function(event) {
 
 
 
+// Deklaration der booleschen Variable zu Beginn des Skripts
+var isFirstVideoLoad = true;
+
 function loadVideo(event) {
     var file = event.target.files[0];
     videoFile = file.name;
     var url = URL.createObjectURL(file);
 
-    videoElement = document.getElementById("myVideo"); 
+    videoElement = document.getElementById("myVideo");
     videoElement.src = url;
     videoElement.load();
-    markers = [];
-    updateMarkerList();
+
+    // Überprüfen Sie, ob es das erste Mal ist, dass ein Video geladen wurde
+    if (!isFirstVideoLoad) {
+        // Löschen der Marker, wenn es nicht das erste Mal ist
+        markers = [];
+        updateMarkerList();
+
+        // Ausblenden der Markerliste, wenn keine Marker vorhanden sind 
+        var markerListContainerElement = document.getElementById('markerListContainer');
+        if (markers.length === 0) {
+            markerListContainerElement.classList.add('hidden');
+        }
+    } else {
+        // Setzen Sie isFirstVideoLoad auf false, nachdem das erste Video geladen wurde
+        isFirstVideoLoad = false;
+    }
+
+    
 
 videoElement.addEventListener('canplay', function () {
     pendingParagraphIndex = paragraphsToRead.findIndex(p => p.startTime > 0);
@@ -470,14 +489,16 @@ function setMarker() {
     var currentTime = videoElement.currentTime;
     var description = prompt("Bitte fügen Sie eine Anmerkung für den Marker ein");
 
+    
     // Beenden Sie die Funktion falls keine Beschreibung eingegeben wurde
     if (!description) return;
 
     var timecode = convertTimeToTimecode(currentTime, 25);
     markers.push({timeInSeconds: currentTime, timecode: timecode, description: description});
 
-    // Wenn Marker hinzugefügt wird, #markerListContainer sichtbar machen
-    document.getElementById('markerListContainer').style.display = 'block';
+
+    // Show marker list as a new marker is added
+    document.getElementById('markerListContainer').classList.remove('hidden');
 
     updateMarkerList();
 }
@@ -486,14 +507,12 @@ function updateMarkerList() {
     var markerList = $('#markerList');
     markerList.empty();
 
-    // Überprüfen, ob alle Marker gelöscht wurden
-    if (markers.length === 0) {
-        document.getElementById('markerListContainer').style.display = 'none';
-    } else {
+    // Marker zur Liste hinzufügen und Marker-Liste anzeigen, wenn Marker vorhanden sind
+    if (markers.length > 0) {
         markers.forEach(function(marker, index) {
             var listItem = $('<li></li>');
             var jumpButton = $('<button style="margin-right: 10px;">Gehe zu</button>');
-            jumpButton.click(function(){
+            jumpButton.click(function() {
                 videoElement.currentTime = marker.timeInSeconds;
             });
             listItem.text('Timecode: ' + marker.timecode + ', Anmerkung: ' + marker.description);
@@ -502,6 +521,11 @@ function updateMarkerList() {
             listItem.append(actionSelect);
             markerList.append(listItem);
         });
+
+        document.getElementById('markerListContainer').classList.remove('hidden');
+    } else {
+        // Marker-Liste verbergen, wenn keine Marker vorhanden sind
+        document.getElementById('markerListContainer').classList.add('hidden');
     }
 }
 
@@ -621,6 +645,9 @@ function createTranscriptElement(line) {
             videoElement.currentTime = line.dataTime;
         }
     }
+
+    p.classList.add("interactable-transcript"); // CSS-Klasse für Interaktives Transkript hinzufügen
+    
     return p;
 }
 
@@ -641,10 +668,29 @@ function loadMarkers(event) {
             transcriptContainer.appendChild(newElem);
         });
 
+        // Show the marker list container if there are markers
+        var markerListContainerElement = document.getElementById('markerListContainer');
+        if (markers.length > 0) {
+            markerListContainerElement.classList.remove('hidden');
+        }
+
         updateMarkerList();
+
+        // Ensure that the transcript-related elements are shown
+        var transcriptRelatedElements = document.getElementsByClassName('transcript-related');
+        Array.from(transcriptRelatedElements).forEach(element => {
+            element.classList.remove('hidden');
+        });
+
+        // Make sure the 'Transcript Load' button always appears
+        var transcriptImportButton = document.querySelector('label[for="transcriptFile"]');
+        if (transcriptImportButton) {
+            transcriptImportButton.classList.remove('hidden');
+        }
     };
     reader.readAsText(file);
 }
+
 
 function handleExportOptions(selectElem) {
     var selectedOption = selectElem.value;
