@@ -78,6 +78,7 @@ body.dark-mode #myVideo {
 
 #markerList {
     flex-grow: 1;
+	
 }
 
 
@@ -136,6 +137,7 @@ body.dark-mode #shortcuts {
     border-color: #676767;  /* Rahmenfarbe */
 	border-radius: 10px;
 	display: block;
+	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
 }
 
 #markerListContainer.hidden {
@@ -149,6 +151,7 @@ body.dark-mode #markerListContainer {
 #markerList li {
     border-bottom: 2px solid #676767;
     padding: 8px 0; /* fügt ein bisschen vertikalen Abstand hinzu, damit die Anmerkungen nicht zu nahe an der Linie sind */
+	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-mode #markerList li {
@@ -412,12 +415,17 @@ button.interactable:active, select.interactable:active, label.interactable:activ
     <button id="toggleEditMode" class="transcriptActions transcript-related hidden interactable" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"
         onclick="toggleEditMode()">Bearbeiten</button>
 
-    <div class="transcript-related hidden" id="transcript" style="border: solid 2px #676767; padding: 10px; height: 250px; overflow-y: scroll; white-space: pre-line; border-radius: 10px; overflow-wrap: break-word; word-wrap: break-word;"></div>
+    <div class="transcript-related hidden" id="transcript" style="border: solid 2px #676767; padding: 10px; height: 250px; overflow-y: scroll; white-space: pre-line; border-radius: 10px; overflow-wrap: break-word; word-wrap: break-word; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);"></div>
 </div>
 
 
     </div>
 </div>
+
+
+<footer style="position: fixed; bottom: 5px; right: 5px; font-size: 10px; color: gray;">
+    developed and designed by Hans Höpfner
+</footer>
 
 </body>
 </html>

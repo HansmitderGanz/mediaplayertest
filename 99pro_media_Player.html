@@ -148,7 +148,7 @@ box-shadow: 0px 3px 1px rgba(0, 0, 0, 0.4), /* inner shadow */
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: #ffc47e;
 }
 
 input:focus + .slider {
@@ -259,6 +259,64 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 }
 
 
+.size-slider {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        border: 2px solid #000; 
+        border-radius: 20px; 
+        padding: 10px 20px;
+	box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.3), /* inner shadow */
+                0px 2px 2px rgba(0, 0, 0, 0.3); /* outer shadow */
+    }
+
+    .station {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        transition: font-size 0.3s;
+	z-index: 0;
+	font-size: 16;
+	transition: font-size 0.3s, background-color 0.3s, color 0.3s;
+	
+	
+    }
+
+    .station::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        border-radius: 50%;
+        z-index: -1;
+        transition: transform 0.3s;
+	
+    box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.3), /* inner shadow */
+                0px 2px 2px rgba(0, 0, 0, 0.3); /* outer shadow */
+    }
+
+    .magnified {
+        font-size: 20px;
+	transition: font-size 0.3s;
+	font-size: 22px;
+    }
+
+    .magnified::before {
+        transform: scale(1.4); /* Increase background size */
+    }
+
+.selected::before {
+    background-color: #ffc47e;
+}
+
 </style>
 </head>
 <body>
@@ -299,14 +357,11 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
     <div class="slider round transcript"></div>
   </label> 
   
-  <!-- Größe ändern Button -->
-  <select class="interactable" onchange="changeVideoSize(this.value); adjustMarkerSize(this.value);"
-        style="padding: 7px; border-radius: 10px; cursor: pointer; background-color: #e1e1e1 !important; border: 2px solid #6b6b6b;">
-  <option value="">Größe</option>
-  <option value="480">Klein</option>
-  <option value="720">Mittel</option>
-  <option value="1280">Groß</option>
-</select>
+  <div class="size-slider interactable" style="padding: 6px; border-radius: 20px; cursor: pointer; background-color: #e1e1e1 !important; border: 2px solid #6b6b6b; width: 100px;">
+    <div class="station" onclick="changeVideoSize(480); adjustMarkerSize(480);" title="Klein">🐁</div>
+<div class="station" onclick="changeVideoSize(720); adjustMarkerSize(720);" title="Mittel">🦍</div>
+<div class="station magnified selected" onclick="changeVideoSize(1280); adjustMarkerSize(1280);" title="Groß">🐋</div></div>
+
 </div>
 
 
@@ -332,7 +387,7 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
     <input class="transcript-related interactable"" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..."
       style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 100%;">
     
-    <div class="transcript-related" id="transcript" style="border: solid 1px #ccc; padding: 10px; height: 540px; overflow-y: scroll;"></div>
+    <div class="transcript-related" id="transcript" style="border: solid 2px #ccc; padding: 10px; height: 540px; overflow-y: scroll; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);"></div>
   </div>
   
   <select class="interactable" onchange="handleExportOptions(this)" 
@@ -358,9 +413,16 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
         <button class="interactable" onclick="forward(5)" style="padding: 10px; border-radius: 10px; cursor: pointer;">5sek &#8649</button>
     </div>
 
-    <ul id="markerList" style="padding: 20px; overflow: auto; background-color: transparent; border: 1px solid lightgray; border-radius: 5px; font-family: Arial; font-weight: bold;"></ul>
+    <ul id="markerList" style="padding: 20px; overflow: auto; background-color: transparent; border: 1px solid lightgray; border-radius: 5px; font-family: Arial; font-weight: bold; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);"></ul>
 
 </div>
+
+<footer style="position: fixed; bottom: 5px; right: 5px; font-size: 10px; color: gray;">
+    developed and designed by Hans Höpfner
+</footer>
+
+</body>
+</html> 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

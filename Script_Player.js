@@ -5,8 +5,11 @@ $(document).ready(function() {
     
 
       // Set video size to large as soon as the page loads
-  changeVideoSize('1280');
-  adjustMarkerSize('1280');
+  changeVideoSize(1280);
+  adjustMarkerSize(1280);
+
+  $('.station').removeClass('selected');
+    $('.station[title="Groß"]').addClass('selected');
 });
 
 
@@ -101,6 +104,22 @@ function timecodeToSeconds(input) {
                frames / 25;
     }
 }
+
+var slider = document.querySelector(".size-slider");
+    var stations = Array.from(document.querySelectorAll(".station"));
+    
+function magnify(stationElement) {
+    stations.forEach(s => s.classList.remove("magnified"));
+    stationElement.classList.add("magnified");
+}
+
+slider.addEventListener('click', function(event) {
+    if (event.target.classList.contains('station')) {
+        magnify(event.target);
+    }
+    event.stopPropagation();
+});
+
 
 function toggleTranscript() {
     // Selektiert alle Elemente mit der Klasse 'transcript-related'
@@ -216,6 +235,18 @@ function changeVideoSize(size) {
     var videoElement = document.getElementById('myVideo');
     videoElement.style.width = size + 'px';
     videoElement.style.height = 'auto';
+
+    // Entfernen von 'selected' und 'magnified' von allen Stationen
+    $('.station').removeClass('selected magnified');
+
+    // Hinzufügen von 'selected' und 'magnified' zur passenden Station
+    if (size === 480) {
+        $('.station[title="Klein"]').addClass('selected magnified');
+    } else if (size === 720) {
+        $('.station[title="Mittel"]').addClass('selected magnified');
+    } else if (size === 1280) {
+        $('.station[title="Groß"]').addClass('selected magnified');
+    }
 }
 
 function setMarker() {
@@ -267,22 +298,15 @@ function handleMarkerActions(selectElem, index) {
 }
 
 function adjustMarkerSize(size) {
-    var markerList = document.getElementById("markerList");
-  
-    switch (size) {
-      case "480": // Klein
-        markerList.style.height = "500px"; // Setzen Sie die Höhe entsprechend Ihrer Vorlieben
-        break;
-      case "720": // Mittel
-        markerList.style.height = "400px"; // Setzen Sie die Höhe entsprechend Ihrer Vorlieben
-        break;
-      case "1280": // Groß
-        markerList.style.height = "120px"; // Setzen Sie die Höhe entsprechend Ihrer Vorlieben
-        break;
-      default:
-        break;
+    var markerList = document.getElementById("markerList");  
+    if (size === 480) {
+        markerList.style.height = "500px";
+    } else if (size === 720) {
+        markerList.style.height = "400px";
+    } else if (size === 1280) {
+        markerList.style.height = "120px";
     }
-  }
+}
 
 
 
