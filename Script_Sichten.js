@@ -1,6 +1,30 @@
 $(document).ready(function() {
     $("#whiteOverlay").fadeOut(2000);
 
+    document.body.addEventListener("dragover", function (evt) {
+        evt.preventDefault();
+    }, false);
+    
+    document.body.addEventListener("drop", function (evt) {
+        // create a pseudo-event
+        evt.preventDefault();
+        var files = evt.dataTransfer.files;
+        if (files.length > 0) {
+            var file = files[0];
+            if (file.type.startsWith("video/")) {
+                // Call loadVideo() function
+                var pseudoEvent = { target: { files: [file] } };
+                loadVideo(pseudoEvent);
+
+            } else if (file.type.startsWith("text/")) {
+                let pseudoEvent = { target: { files: [file] } };
+                loadTranscript(pseudoEvent);
+            } else {
+                alert("Bitte ziehen Sie nur .mp4/.mov- oder .txt-Dateien auf diese Seite.");
+            }
+        }
+    }, false);
+
     // Check for the theme and show tooltip
 
     // Wenn das Transkript-Feld keinen Text hat 
@@ -744,6 +768,8 @@ function exportTable(userName) {
     var transcriptState = Array.from(document.querySelectorAll('#transcriptContainer p, #transcriptContainer textarea'))
         .map(p => ({ text: p.textContent || p.value,  dataTime: p.getAttribute('data-time') }));
     text += exportTranscript(transcriptState);
+
+
 
     var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
     var a = document.createElement("a");

@@ -12,6 +12,31 @@ $(document).ready(function() {
     $('.station[title="Groß"]').addClass('selected');
 });
 
+document.body.addEventListener("dragover", function (evt) {
+    evt.preventDefault();
+}, false);
+
+document.body.addEventListener("drop", function (evt) {
+    // create a pseudo-event
+    evt.preventDefault();
+    var files = evt.dataTransfer.files;
+    if (files.length > 0) {
+        var file = files[0];
+
+        if (file.type.startsWith("video/")) {
+            // Call loadVideo() function
+            var pseudoEvent = { target: { files: [file] } };
+            loadVideo(pseudoEvent);
+            
+        } else if (file.type.startsWith("text/")) {
+            let pseudoEvent = { target: { files: [file] } };
+            loadTranscript(pseudoEvent);
+        } else {
+            alert("Bitte ziehen Sie nur .mp4/.mov- oder .txt-Dateien auf diese Seite.");
+        }
+    }
+}, false);
+
 
 function hideOnLoad() {
     let transcriptElements = document.getElementsByClassName('transcript-related');
@@ -304,7 +329,7 @@ function adjustMarkerSize(size) {
     } else if (size === 720) {
         markerList.style.height = "400px";
     } else if (size === 1280) {
-        markerList.style.height = "120px";
+        markerList.style.height = "110px";
     }
 }
 
