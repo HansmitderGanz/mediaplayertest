@@ -756,13 +756,18 @@ function exportTable(userName) {
     var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
 
     // Exportiert Markerliste
-    var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + userName + '\n\nNummer\tTimecode\tAnmerkung\n';
+    var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + userName; 
+
+    text += '\n\n-------------- AUFLISTUNG ANMERKUNGEN -------------\n\n';
+
+   text += '\n\nNummer\tTimecode\tAnmerkung\n\n';
     markers.forEach(function(marker, index) {
         text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + '\n';
     });
 
-    // Trennung zwischen den Exportteilen
-    text += '\n\n----------\n\n';
+    text += '\n\n-------------- AUFLISTUNG SPRECHERTEXT -------------\n\n' + extractSpeakerLines() + '\n\n--------------------- GESAMT TRANSKRIPT ---------------------\n\n';
+
+
 
     // Exportiert Transcript
     var transcriptState = Array.from(document.querySelectorAll('#transcriptContainer p, #transcriptContainer textarea'))
@@ -780,4 +785,25 @@ function exportTable(userName) {
     a.download = nameWithoutExtension + '_Anmerkungen_Tabelle.txt';
     a.click();
     window.URL.revokeObjectURL(url);
+}
+
+function extractSpeakerLines() {
+    var speakerText = '';
+    document.querySelectorAll('#transcript p').forEach(p => {
+        if (p.style.color === 'green') { // Prüfen, ob die Zeile ein Sprechertext ist 
+            var timecode = convertTimeToHrsMinsSecs(parseFloat(p.getAttribute('data-time')));
+            speakerText += timecode + '\n' + p.getAttribute('data-saved') + '\n\n';
+        }
+    });
+    return speakerText;
+}
+
+function convertTimeToHrsMinsSecs(timeInSeconds) {
+    var hours = Math.floor(timeInSeconds / 3600);
+    timeInSeconds %= 3600;
+    var minutes = Math.floor(timeInSeconds / 60);
+    var seconds = Math.floor(timeInSeconds % 60);
+    return (hours > 0 ? hours.toString().padStart(2, '0') + ":" : "") + 
+            minutes.toString().padStart(2, '0') + ":" + 
+            seconds.toString().padStart(2, '0');
 }
