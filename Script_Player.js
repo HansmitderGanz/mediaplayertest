@@ -492,3 +492,25 @@ window.addEventListener('keydown', function(event) {
         }
     }
 });
+
+var transcriptWindow = document.getElementById('draggableTranscript'),
+    transcriptHeader = document.getElementById('transcriptHeader'),
+    offsetX = 0, offsetY = 0,
+    mouseIsDown = false;
+
+transcriptHeader.addEventListener('mousedown', function(e) {
+    offsetX = transcriptWindow.offsetLeft - e.clientX;
+    offsetY = transcriptWindow.offsetTop - e.clientY;
+    mouseIsDown = true;
+}, true);
+
+document.addEventListener('mouseup', function() {
+    mouseIsDown = false;
+}, true);
+
+document.addEventListener('mousemove', function(e) {
+    if(mouseIsDown) {
+        transcriptWindow.style.left = (e.clientX + offsetX) + 'px';
+        transcriptWindow.style.top = (e.clientY + offsetY) + 'px';
+    }
+}, true);

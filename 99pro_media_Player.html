@@ -57,6 +57,8 @@ body {
 .transcript-related {
     display: none;
 	border-radius: 10px;
+	z-index: 10;
+	position: relative;
 }
 
 /* Normaler Modus */
@@ -81,6 +83,16 @@ body.dark-mode #shortcuts {
     background-color: lightgray;
 }
 
+#transcript {
+background-color: #dbdcdc;
+transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.dark-mode #transcript {
+    background-color: #1a1a1a;
+transition: background-color 0.5s ease, color 0.5s ease;
+}
+
 .videoControlBar.dark-mode {
     background-color: darkgray;
 }
@@ -95,7 +107,7 @@ body.dark-mode #shortcuts {
     position: relative; 
     /* Andere Stile... */
 	box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.75); /* Horizontale Verschiebung, vertikale Verschiebung, Unschärfe, Farbe */
-    z-index: 1; /* Vordergrund */
+    z-index: 2; /* Vordergrund */
 	 transition: width 0.5s ease, height 0.5s ease;
 }
 
@@ -317,6 +329,7 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
     background-color: #ffc47e;
 }
 
+
 </style>
 </head>
 <body>
@@ -379,16 +392,15 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 
   <input type="file" id="loadMarkersFile" style="display: none;" onchange="loadMarkers(event)">
   
-  <div style="position: absolute; left: 84%; top: 50px; width: 15%;">
-  <label for="transcriptFile" class="transcript-related interactable" style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;">Transkript Importieren
-    <input class="hidden" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)">
-  </label>
-    
-    <input class="transcript-related interactable"" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..."
-      style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 100%;">
-    
-    <div class="transcript-related" id="transcript" style="border: solid 2px #ccc; padding: 10px; height: 540px; overflow-y: scroll; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);"></div>
-  </div>
+  <div id="draggableTranscript" style="position: absolute; left: 84%; top: 5px; width: 15%; padding: 10px; border-radius: 10px;">
+     <div id="transcriptHeader" class="transcript-related interactable" style="cursor: move; color: black; font-size: 20px; margin-left: 120px; margin-bottom: 10px; text-shadow: 2px 2px 2px rgba(0,0,0,0.5);">📌</div>
+     <label for="transcriptFile" class="transcript-related interactable" style="display: inline-block; color: white; cursor: pointer; padding: 10px; border-radius: 10px; margin-bottom: 10px; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); background-color: #DC143C">Transkript Importieren
+          <input class="hidden" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)">
+     </label>
+     <input class="transcript-related interactable" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..."
+           style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 100%; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);">
+     <div class="transcript-related" id="transcript" style="border: solid 2px #ccc; padding: 10px; height: 540px; overflow-y: scroll; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);"></div>
+</div>
   
   <select class="interactable" onchange="handleExportOptions(this)" 
     style="display: inline-block; background-color: #2E8B57; color: white; padding: 10px; border-radius: 10px; cursor: pointer;">
