@@ -329,6 +329,21 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
     background-color: #ffc47e;
 }
 
+#transcriptHeader {
+    text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+    font-size: 20px;
+    transition: all 0.3s;
+}
+
+#transcriptHeader:hover {
+    text-shadow: 5px 5px 7px rgba(0, 0, 0, 0.7);
+}
+
+#transcriptHeader:active {
+    text-shadow: none;
+    font-size: 40px; /* Vergrößert das Emoji beim Klicken auf einen deutlichen Grad */
+}
+
 
 </style>
 </head>
@@ -393,7 +408,9 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
   <input type="file" id="loadMarkersFile" style="display: none;" onchange="loadMarkers(event)">
   
   <div id="draggableTranscript" style="position: absolute; left: 84%; top: 5px; width: 15%; padding: 10px; border-radius: 10px;">
-     <div id="transcriptHeader" class="transcript-related interactable" style="cursor: move; color: black; font-size: 20px; margin-left: 120px; margin-bottom: 10px; text-shadow: 2px 2px 2px rgba(0,0,0,0.5);">📌</div>
+
+     <div id="transcriptHeader" class="transcript-related interactable" style="cursor: move; color: black; font-size: 20px; margin-left: 120px; margin-bottom: 10px; text-shadow: 2px 2px 2px rgba(0,0,0,0.5); transition: all 0.3s;">📌</div>
+
      <label for="transcriptFile" class="transcript-related interactable" style="display: inline-block; color: white; cursor: pointer; padding: 10px; border-radius: 10px; margin-bottom: 10px; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); background-color: #DC143C">Transkript Importieren
           <input class="hidden" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)">
      </label>

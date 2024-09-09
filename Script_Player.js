@@ -514,3 +514,14 @@ document.addEventListener('mousemove', function(e) {
         transcriptWindow.style.top = (e.clientY + offsetY) + 'px';
     }
 }, true);
+
+
+var pin = document.getElementById('transcriptHeader');
+
+pin.addEventListener('mousedown', function() {
+    pin.style.fontSize = '30px';
+});
+
+pin.addEventListener('mouseup', function() {
+    pin.style.fontSize = '20px';
+});
