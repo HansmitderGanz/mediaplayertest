@@ -541,10 +541,23 @@ pin.addEventListener('mouseup', function() {
 
 
 function createScreenshot(index) {
+    
+   drawingPaths = [];
+ 
     // Check if a canvas instance already exists
-    if (markers[index].canvas) {
-        markers[index].canvas.dispose();
-        markers[index].canvas = null;
+    function createScreenshot(index) {
+        // Überprüfe ob ein Canvas existiert
+        if (markers[index].canvas && markers[index].canvas.dispose) {
+            try {
+                markers[index].canvas.dispose();
+            } catch (error) {
+                console.error('Error disposing canvas:', error);
+            } finally {
+                markers[index].canvas = null;
+            }
+        }
+    
+        // Der Rest deines Codes ...
     }
 
     // Setzt die aktuelle Zeit des Videos auf die Markerposition und pausiert das Video
@@ -686,6 +699,7 @@ function saveScreenshot() {
       top: 10,
       fill: 'black',
       fontSize: 20,
+      textBackgroundColor: 'white'
     });
   
     var markerText = new fabric.Text(
@@ -695,6 +709,7 @@ function saveScreenshot() {
         top: 40,
         fill: 'black',
         fontSize: 20,
+        textBackgroundColor: 'white'
       }
     );
   
@@ -705,6 +720,7 @@ function saveScreenshot() {
         top: 70,
         fill: 'black',
         fontSize: 20,
+        textBackgroundColor: 'white'
       }
     );
   
@@ -735,6 +751,10 @@ function saveScreenshot() {
   
     // Aufräumen: Alle Objekte entfernen und Canvas neu zeichnen
     fabricCanvas.clear().renderAll();
+
+    fabricCanvas.dispose();
+    fabricCanvas = null;
+    drawingPaths = [];
   
     document.getElementById("screenshotContainer").style.display = "none";
     document.getElementById("saveScreenshotButton").style.display = "none";
