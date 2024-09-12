@@ -337,6 +337,12 @@ function toggleEditMode() {
             textarea.style.fontWeight = p.style.fontWeight;
             textarea.setAttribute('data-time', p.getAttribute('data-time'));
             textarea.setAttribute('data-saved', p.getAttribute('data-saved'));
+            textarea.onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            };
+        
             p.replaceWith(textarea);
             toggleEditButton.innerHTML = "Bearbeitung beenden"; // Text ändern
         } else {
