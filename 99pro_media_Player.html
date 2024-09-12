@@ -344,16 +344,73 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
     font-size: 40px; /* Vergrößert das Emoji beim Klicken auf einen deutlichen Grad */
 }
 
+#screenshotContainer {
+    position: absolute;
+    top: 5.15%;  
+    left: 50%; 
+    transform: translateX(-50%);
+    display: none;
+    z-index: 10;
+	max-width: 1280px;
+    max-height: 720px;
+}
+
+#saveScreenshotButton {
+	position: absolute;
+    top: 10px;
+    background-color:  #2E8B57;
+	color: white;
+}
+
+#closeScreenshotButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px;
+    z-index: 10;
+    color: white;
+    background-color: red;
+}
+
+#toolsContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+#overlay {
+    /* Overlay nimmt den gesamten Bildschirm in Anspruch */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+	backdrop-filter: blur(1px);
+    /* Setzen Sie den Hintergrund auf schwarz mit 50% Transparenz */
+    background-color: rgba(0,0,0,0.7);
+    /* Setzen Sie den Standarddisplay-Wert auf 'none' */
+    display: none;
+    /* Hängen hinter dem Screenshot-Container den Zeichenfolgewert an */
+    z-index: 5;
+    /* Fügen Sie den Übergangseffekt hinzu, um es ausblenden zu lassen */
+    transition: all 0.5s ease;
+}
 
 </style>
 </head>
 <body>
 <body onload="hideOnLoad();">
-
-</body>
-</html>
+    
 
 <div id="whiteOverlay"></div>
+
+
 
 <div class="page-wrapper">
 
@@ -428,7 +485,9 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 
   
 
-</div>  
+</div>
+
+<div id="overlay"></div>  
     
     <div style="text-align: center; margin-top: 10px;">
         <video id="myVideo" width="1280" height="720" controls style="display:block; margin: 0 auto; border-radius: 10px;"></video>
@@ -444,6 +503,24 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 
     <ul id="markerList" style="padding: 20px; overflow: auto; background-color: transparent; border: 1px solid lightgray; border-radius: 5px; font-family: Arial; font-weight: bold; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);"></ul>
 
+<div id="screenshotContainer" style="display: none;">
+    <canvas id="screenshotCanvas"></canvas>
+    <button id="saveScreenshotButton" style="display: none;" onclick="saveScreenshot()">Screenshot speichern</button>
+    <button id="closeScreenshotButton" style="display: none;">X</button>
+    <div id="toolsContainer">
+<button title="Undo" onclick="undoDrawing()">⏪</button>
+    <button title="Pencil" onclick="selectBrush('Pencil')">✏️</button>
+	<button title="Black" onclick="setBrushColor('black')">⬛</button>
+	<button title="White" onclick="setBrushColor('white')">⬜</button>
+    <button title="Red" onclick="setBrushColor('red')">🟥</button>
+    <button title="Green" onclick="setBrushColor('green')">🟩</button>
+    <button title="Blue" onclick="setBrushColor('blue')">🟦</button>
+    <button title="Thin" onclick="setBrushWidth(2)">➖</button>
+    <button title="Medium" onclick="setBrushWidth(5)">🟣</button>
+    <button title="Thick" onclick="setBrushWidth(10)">➕</button>
+</div>
+</div>
+
 </div>
 
 <footer style="position: fixed; bottom: 5px; right: 5px; font-size: 10px; color: gray;">
@@ -456,6 +533,8 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script src="Script_Player.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.3.1/fabric.min.js"></script>
 
 <script>
 
