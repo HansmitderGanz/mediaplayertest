@@ -44,6 +44,7 @@ var markers = [];
 var videoFile = '';
 var videoElement;
 var pendingParagraphIndex = 0;
+var drawingPaths = [];
 
 
 // Globale Variable, die den Index des aktuellen Absatzes speichert
@@ -499,10 +500,10 @@ function toggleShortcuts() {
   var shortcutsDiv = document.getElementById('shortcuts');
   if (shortcutsDiv.style.display === "none") {
       shortcutsDiv.style.display = "block";
-      button.innerHTML = "&#8963;"; // Pfeil-nach-oben Symbol
+      button.innerHTML = "🙉"; // Pfeil-nach-oben Symbol
   } else {
       shortcutsDiv.style.display = "none";
-      button.innerHTML = "&#8964;"; // Pfeil-nach-unten Symbol
+      button.innerHTML = "🙈"; // Pfeil-nach-unten Symbol
   }
 }
 
@@ -530,13 +531,21 @@ function setMarker() {
     if (!description) return;
 
     var timecode = convertTimeToTimecode(currentTime, 25);
-    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description});
+    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, canvas: new fabric.Canvas(), screenshot: null});
+    updateMarkerList();
+
+// Create the screenshot button
+var screenshotBtn = document.createElement("button");
+screenshotBtn.innerText = "Create Screenshot";
+screenshotBtn.onclick = createScreenshot;
 
 
     // Show marker list as a new marker is added
     document.getElementById('markerListContainer').classList.remove('hidden');
 
     updateMarkerList();
+
+
 }
 
 function updateMarkerList() {
@@ -553,7 +562,7 @@ function updateMarkerList() {
             });
             listItem.text('Timecode: ' + marker.timecode + ', Anmerkung: ' + marker.description);
             listItem.prepend(jumpButton);
-            var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:1px; margin-top: 4px; padding: 5px 7px; border-radius: 8px; cursor: pointer;"><option selected disabled>Bearbeiten</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option></select>');
+            var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:1px; margin-top: 4px; padding: 5px 7px; border-radius: 8px; cursor: pointer;"><option selected disabled>Bearbeiten</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option><option value="screenshot">Screenshot</option></select>');
             listItem.append(actionSelect);
             markerList.append(listItem);
         });
@@ -574,6 +583,8 @@ function handleMarkerActions(selectElem, index) {
     } else if (selectedOption === 'delete') {
         markers.splice(index, 1);
         updateMarkerList();
+    } else if (selectedOption === 'screenshot') {
+        createScreenshot(index);
     }
     selectElem.selectedIndex = 0;
 }
@@ -813,3 +824,270 @@ function convertTimeToHrsMinsSecs(timeInSeconds) {
             minutes.toString().padStart(2, '0') + ":" + 
             seconds.toString().padStart(2, '0');
 }
+
+function createScreenshot(index) {
+    
+    drawingPaths = [];
+
+     function createScreenshot(index) {
+         if (markers[index].canvas && markers[index].canvas.dispose) {
+             try {
+                 markers[index].canvas.dispose();
+             } catch (error) {
+                 console.error('Error disposing canvas:', error);
+             } finally {
+                 markers[index].canvas = null;
+             }
+         }
+     
+         // Der Rest deines Codes ...
+     }
+ 
+     // Setzt die aktuelle Zeit des Videos auf die Markerposition und pausiert das Video
+     videoElement.currentTime = markers[index].timeInSeconds;
+     videoElement.pause();
+     currentMarkerIndex = index;
+ 
+     // Sobald das Video die Markerposition erreicht hat, erstellen wir den Screenshot
+     videoElement.onseeked = function() {
+         var canvas = document.createElement('canvas');
+         var context = canvas.getContext('2d');
+ 
+         canvas.width = videoElement.videoWidth;
+         canvas.height = videoElement.videoHeight;
+         context.drawImage(videoElement, 0, 0, videoElement.videoWidth, videoElement.videoHeight);
+ 
+         // Get the screenshot dataURL
+         var imgSrc = canvas.toDataURL();
+ 
+         // Fabric canvas
+         markers[currentMarkerIndex].canvas = new fabric.Canvas('screenshotCanvas', { isDrawingMode: true });
+         fabricCanvas = markers[currentMarkerIndex].canvas;
+         fabricCanvas.freeDrawingBrush.width = 5;
+         fabricCanvas.on('path:created', function(e) {
+             drawingPaths.push(e.path);
+         });
+ 
+         fabricCanvas.setHeight(canvas.height);
+         fabricCanvas.setWidth(canvas.width);
+ 
+         fabricCanvas.clear();
+ 
+ fabric.Image.fromURL(imgSrc, function(img) {
+     img.scaleToWidth(1280);
+ 
+     img.set({
+         left: 0,
+         top: 0
+     });
+ 
+     // Passt den Canvas an die Größe des Bildes an
+     fabricCanvas.setWidth(img.width);
+     fabricCanvas.setHeight(img.height);
+ 
+     // Fügt das Bild zum Canvas hinzu und rendert es
+     fabricCanvas.add(img);
+     fabricCanvas.renderAll();
+ 
+     
+             // Zeige den Screenshot-Container
+             document.getElementById("screenshotContainer").style.display = "block";
+             document.getElementById("saveScreenshotButton").style.display = "block";
+             document.getElementById("closeScreenshotButton").style.display = "block";
+             document.getElementById("overlay").style.display = "block";
+ 
+         });
+ 
+         // Entfernt den Event-Listener, nachdem er einmal ausgeführt wurde
+         videoElement.onseeked = null;
+     }
+ }
+ 
+ function drawOnScreenshot(screenshotWindow, imgSrc) {
+     // You need to include the Fabric.js library in your project
+     var canvas = new fabric.Canvas('screenshotCanvas');
+     fabric.Image.fromURL(imgSrc, function(img) {
+         // add background image
+         canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+             scaleX: canvas.width / img.width,
+             scaleY: canvas.height / img.height
+         });
+ 
+         // add event listeners to enable drawing
+         canvas.isDrawingMode = true;
+         canvas.freeDrawingBrush.color = "#f00";
+     });
+     
+     // Add buttons to screenshotWindow to allow user to choose between drawing and saving the screenshot
+ 
+     // Button to toggle drawing
+     var drawBtn = screenshotWindow.document.createElement("button");
+     drawBtn.innerHTML = "Draw";
+     drawBtn.onclick = function(){canvas.isDrawingMode = !canvas.isDrawingMode;};
+     screenshotWindow.document.body.appendChild(drawBtn);
+ 
+    // Button zum Speichern des Screenshots
+    var saveBtn = screenshotWindow.document.createElement("button");
+    saveBtn.innerHTML = "Screenshot speichern";
+    saveBtn.onclick = function() {
+        var link = screenshotWindow.document.createElement('a');
+        link.download = "screenshot.png";
+        link.href = canvas.toDataURL();
+        screenshotWindow.document.body.appendChild(link);
+        link.click();
+        screenshotWindow.close();
+    };
+ 
+    screenshotWindow.document.body.appendChild(saveBtn);
+    
+ }
+ 
+ function selectBrush(brush) {
+     switch (brush) {
+         case "Pencil":
+             fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(fabricCanvas);
+             fabricCanvas.freeDrawingBrush.color = 'black';
+             fabricCanvas.freeDrawingBrush.width = 5; 
+             fabricCanvas.isDrawingMode = true;
+         default:
+             console.log("Unbekannter Zeichenmodus.");
+     }
+ }
+ 
+ function setBrushColor(color) {
+     // Change the color of brush
+     if(fabricCanvas.isDrawingMode) {
+         fabricCanvas.freeDrawingBrush.color = color;
+     }
+ }
+ 
+ document.getElementById('brushSize').oninput = function() {
+     var fabricCanvas = markers[currentMarkerIndex].canvas;
+     if(fabricCanvas) {
+         setBrushWidth(this.value);
+     }
+ }
+ 
+ function setBrushWidth(width) {
+     var fabricCanvas = markers[currentMarkerIndex].canvas;
+     if(fabricCanvas && fabricCanvas.isDrawingMode) {
+         fabricCanvas.freeDrawingBrush.width = parseInt(width, 10) || 1;
+         fabricCanvas.renderAll();
+     }
+ }
+ 
+ 
+ 
+ function undoDrawing() {
+     if (drawingPaths.length > 0) {
+         var lastPath = drawingPaths.pop();
+         fabricCanvas.remove(lastPath);
+     }
+ }
+ 
+ function saveScreenshot() {
+     var clipNameText = new fabric.Text('Clip Name: ' + videoFile, {
+       left: 10,
+       top: 10,
+       fill: 'black',
+       fontSize: 20,
+       textBackgroundColor: 'white'
+     });
+   
+     var markerText = new fabric.Text(
+       'Timecode: ' + markers[currentMarkerIndex].timecode,
+       {
+         left: 10,
+         top: 40,
+         fill: 'black',
+         fontSize: 20,
+         textBackgroundColor: 'white'
+       }
+     );
+   
+     var noteText = new fabric.Text(
+       'Anmerkung: ' + markers[currentMarkerIndex].description,
+       {
+         left: 10,
+         top: 70,
+         fill: 'black',
+         fontSize: 20,
+         textBackgroundColor: 'white'
+       }
+     );
+   
+     fabricCanvas.add(clipNameText);
+     fabricCanvas.add(markerText);
+     fabricCanvas.add(noteText);
+   
+     // Erzeugen einer Gruppe aus allen Objekten und Abrufen des umschließenden Rechtecks
+     var group = new fabric.Group(fabricCanvas.getObjects());
+     var boundingRect = group.getBoundingRect();
+   
+     // Bild extrahieren nur aus dem benötigten Bereich
+     var croppedImageDataURL = fabricCanvas.toDataURL({
+       left: boundingRect.left,
+       top: boundingRect.top,
+       width: boundingRect.width,
+       height: boundingRect.height,
+     });
+   
+     var a = document.createElement('a');
+     a.href = croppedImageDataURL;
+   
+     var videoName = videoFile.split('.').slice(0, -1).join('.');
+     var markerNumber = currentMarkerIndex + 1;
+     a.download = `${videoName}_Screenshot_zu_Anmerkung_${markerNumber}.png`;
+   
+     a.click();
+   
+     // Aufräumen: Alle Objekte entfernen und Canvas neu zeichnen
+     fabricCanvas.clear().renderAll();
+ 
+     fabricCanvas.dispose();
+     fabricCanvas = null;
+     drawingPaths = [];
+   
+     document.getElementById("screenshotContainer").style.display = "none";
+     document.getElementById("saveScreenshotButton").style.display = "none";
+     document.getElementById("closeScreenshotButton").style.display = "none";
+     document.getElementById("overlay").style.display = "none";
+   }
+   document.addEventListener('DOMContentLoaded', (event) => {
+ document.getElementById("closeScreenshotButton").addEventListener("click", closeScreenshot);
+ });
+
+ document.addEventListener('DOMContentLoaded', (event) => {
+    console.log('DOM fully loaded and parsed');
+    document.getElementById("closeScreenshotButton").addEventListener("click", closeScreenshot);
+   });
+   
+ function closeScreenshot() {
+    console.log('Closing screenshot...');  // Zur Überprüfung ob die Funktion aufgerufen wird
+
+    document.getElementById("screenshotContainer").style.display = "none";
+    document.getElementById("closeScreenshotButton").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+
+    console.log('Current marker index:', currentMarkerIndex);  // Überprüfung des aktuellen Marker-Indexes
+    console.log('Current marker:', markers[currentMarkerIndex]);  // Überprüfung des aktuellen Markers
+
+    if (markers[currentMarkerIndex] && markers[currentMarkerIndex].canvas) {
+        console.log('Disposing canvas...')  // Zur Bestätigung, dass diese Bedingung erfüllt ist
+
+        markers[currentMarkerIndex].canvas.dispose();
+        markers[currentMarkerIndex].canvas = null;
+    }
+}
+ 
+ var paintingTools = document.querySelectorAll('.station');
+ paintingTools.forEach(function(tool) {
+     tool.addEventListener('click', function(e) {
+         // Entferne die ausgewählte Klasse von allen Werkzeugen
+         paintingTools.forEach(function(tool) {
+             tool.classList.remove('selected');
+         });
+         // Füge die ausgewählte Klasse zum angeklickten Werkzeug hinzu
+         e.target.classList.add('selected');
+     });
+ });
