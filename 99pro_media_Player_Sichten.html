@@ -395,6 +395,11 @@ div.top-container {
 z-index: 50;
 }
 
+#toolsContainer button {
+    width: 30px;  /* Stellen Sie die Werte entsprechend Ihren Bedürfnissen ein */
+    height: 30px;
+}
+
 
 </style>
 </head>
@@ -500,16 +505,18 @@ z-index: 50;
     <button id="saveScreenshotButton" style="display: none;" onclick="saveScreenshot()">Screenshot speichern</button>
     <button id="closeScreenshotButton" onclick="closeScreenshot()">X</button>
     <div id="toolsContainer">
-<button title="Undo" onclick="undoDrawing()">↩️</button>
-    <button title="Pencil" onclick="selectBrush('Pencil')">✏️</button>
-	<button title="Black" onclick="setBrushColor('black')">⬛</button>
-	<button title="White" onclick="setBrushColor('white')">⬜</button>
-    <button title="Red" onclick="setBrushColor('red')">🟥</button>
-    <button title="Green" onclick="setBrushColor('green')">🟩</button>
-    <button title="Blue" onclick="setBrushColor('blue')">🟦</button>
-    <button title="Thin" onclick="setBrushWidth(2)">➖</button>
-    <button title="Medium" onclick="setBrushWidth(5)">🟣</button>
-    <button title="Thick" onclick="setBrushWidth(20)">➕</button>
+<button title="Undo" onclick="undoDrawing()" style="display: flex; justify-content: center; align-items: center;">↩️</button>
+    <button title="Pencil" onclick="selectBrush('Pencil')" style="display: flex; justify-content: center; align-items: center;">✏️</button>
+	<button title="Black" onclick="setBrushColor('black')" style="display: flex; justify-content: center; align-items: center;">⬛</button>
+	<button title="White" onclick="setBrushColor('white')" style="display: flex; justify-content: center; align-items: center;">⬜</button>
+    <button title="Red" onclick="setBrushColor('red')" style="display: flex; justify-content: center; align-items: center;">🟥</button>
+    <button title="Green" onclick="setBrushColor('green')" style="display: flex; justify-content: center; align-items: center;">🟩</button>
+    <button title="Blue" onclick="setBrushColor('blue')" style="display: flex; justify-content: center; align-items: center;">🟦</button>
+    <button title="Thin" onclick="setBrushWidth(2)">
+  <span style="font-size: 5px;" style="display: flex; justify-content: center; align-items: center;">🟣</span>
+</button>
+    <button title="Medium" onclick="setBrushWidth(5)" style="display: flex; justify-content: center; align-items: center;"><span style="font-size: 10px;">🟣</span>
+    <button title="Thick" onclick="setBrushWidth(20)" style="display: flex; justify-content: center; align-items: center;"><span style="font-size: 20px;">🟣</span>
 </div>
 </div>
 
