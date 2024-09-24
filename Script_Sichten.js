@@ -376,6 +376,44 @@ function toggleEditMode() {
     });
 }
 
+
+// EventListener für das Doppelklicken 
+document.body.addEventListener("dblclick", function (evt) {
+    // Überprüfen, ob das Transkript-Feld im Bearbeitungsmodus ist und ob das Ziel ein Textbereich ist
+    if (editMode && evt.target.tagName.toLowerCase() === 'textarea') {
+        
+        // Überprüfen, ob der Text bereits formatiert ist
+        var isFormatted = evt.target.style.fontWeight === 'bold';
+        var confirmed;
+      
+        if (isFormatted) {
+            // Bitten Sie um Bestätigung, um den Text in normalen Text zu kovertieren
+            confirmed = confirm("Möchten Sie diesen Text zu einem normalen Text konvertieren?");
+
+            if (confirmed) {
+                // die Formatierung zurücksetzen
+                evt.target.style.color = "black"; 
+                evt.target.style.fontWeight = "normal";
+            }
+        } else {
+            // Bitten Sie um Bestätigung, um den Text in Sprechertext zu konvertieren
+            confirmed = confirm("Möchten Sie diesen Text zu einem Sprechertext konvertieren?");
+            
+            if (confirmed) {
+                // Die entsprechende Formatierung anwenden
+                evt.target.style.color = "green";
+                evt.target.style.fontWeight = "bold";
+            }
+        }
+
+        // Wenn bestätigt, extrahieren und speichern des Texts (ohne "Sprechertext: ") in beiden Fällen
+        if (confirmed) {
+            var savedText = evt.target.value.replace(/^Sprechertext: /, "");  
+            evt.target.setAttribute('data-saved', savedText);
+        }
+    } 
+}, false);
+
 function loadNewTranscriptFormat(transcriptDiv, content) {
   var matches = content.matchAll(
     /([\t\s]*\d{2}:\d{2}(?: - SPRECHER)?)([\s\S]*?)(?=\n[\t\s]*\d{2}:\d{2}|$)/g
@@ -776,6 +814,8 @@ function exportTranscript(transcriptState) {
     return text;
 }
 
+
+
 function exportTable(userName) {
     var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
 
@@ -800,7 +840,8 @@ function exportTable(userName) {
     var noteHeader = 'Anmerkung';
     var userHeader = 'gesetzt von'; // Neue Spalte hinzufügen für den Benutzernamen
     var speechHeaderText = 'Sprechertext';
-    text += 'Nummer\tTimecode\t' + noteHeader + ' '.repeat(maxNoteLength - noteHeader.length + 1) + '\t' + userHeader + '\t' + speechHeaderText + '\n';
+    let repeatCount = Math.max(0, maxNoteLength - noteHeader.length + 1);
+text += 'Nummer\tTimecode\t' + noteHeader + ' '.repeat(repeatCount) + '\t' + userHeader + '\t' + speechHeaderText + '\n';
 
     // Anmerkung und Benutzerinformationen zur ausgegebenen Tabelle hinzufügen
     markers.forEach(function(marker, index) {
@@ -1123,3 +1164,5 @@ function createScreenshot(index) {
          e.target.classList.add('selected');
      });
  });
+
+ 
