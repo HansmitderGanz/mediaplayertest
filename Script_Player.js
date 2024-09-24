@@ -2,6 +2,11 @@
 $(document).ready(function() {
     // Fade out the white overlay on page load
     $("#whiteOverlay").fadeOut(2000);
+
+    // setTimeout to ask for the user's name after the fade out transition is over
+    setTimeout(function(){ 
+        currentUserName = prompt("Bitte geben Sie Ihren Namen ein");
+    }, 2000);
     
 
       // Set video size to large as soon as the page loads
@@ -56,8 +61,10 @@ var videoElement;
 var baseTimecodeInSeconds = 0;
 var isBaseTimecodeSet = false;
 var drawingPaths = [];
+let currentUserName = '';
 
 function loadVideo(event) {
+    console.table(markers);  // Debug log hier
     var file = event.target.files[0];
     videoFile = file.name;
     var url = URL.createObjectURL(file);
@@ -291,8 +298,9 @@ function setMarker() {
     } while(description.trim() === '');
 
     // Die aktuelle Zeit des Videos wird zur Basiszeit addiert, um den Timecode zu berechnen
+    var userName = currentUserName ? currentUserName : 'Unbekannter Benutzer';
     var timecode = convertTimeToTimecode(baseTimecodeInSeconds + currentTime, 25);
-    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, canvas: new fabric.Canvas(), screenshot: null});
+    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, userName: userName, canvas: new fabric.Canvas(), screenshot: null});
     updateMarkerList();
 
     // Create the screenshot button
@@ -310,13 +318,14 @@ function updateMarkerList() {
         jumpButton.click(function(){
             videoElement.currentTime = marker.timeInSeconds;
         });
-        listItem.text('Timecode: ' + marker.timecode + ', Anmerkung: ' + marker.description);
+        listItem.text('TC: ' + marker.timecode + ' - Anmerkung: ' + marker.description + ' - ' + marker.userName);
         listItem.prepend(jumpButton);
         var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:1px; margin-top: 4px; padding: 5px 7px; border-radius: 8px; cursor: pointer;"><option selected disabled>Bearbeiten</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option><option value="screenshot">Screenshot</option></select>');
         listItem.append(actionSelect);
         listItem.css("margin-bottom", "10px");
         markerList.append(listItem);
     });
+    console.log(markerList);  // Debug log hier
 }
 
 function handleMarkerActions(selectElem, index) {
@@ -326,11 +335,14 @@ function handleMarkerActions(selectElem, index) {
         markers[index].description = newDescription;
         updateMarkerList();
     } else if (selectedOption === 'delete') {
-        markers.splice(index, 1);
-        updateMarkerList();
+        var reallyDelete = confirm("Möchten Sie wirklich die Anmerkung von " + markers[index].userName + " löschen?");
+        if (reallyDelete) {
+            markers.splice(index, 1);
+            updateMarkerList();
+        }
     } else if (selectedOption === 'screenshot') {
         createScreenshot(index);
-    }
+    }    
     selectElem.selectedIndex = 0; // Reset the dropdown
 }
 
@@ -370,9 +382,15 @@ function rewind(seconds) {
 
 function exportMarkers() {
     var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
+
+    // Erzeugt ein neues Datum und formatiert es als tt.mm.jjjj
+    var date = new Date();
+    var dateFormatted = ('0' + date.getDate()).slice(-2) + '.' + ('0' + (date.getMonth()+1)).slice(-2) + '.' + date.getFullYear();
+
     var text = '';
     markers.forEach(function(marker) {
-        text += 'Sichtungsanmerkung\t' + marker.timecode + '\tTC\tred\t' + marker.description + '\t1\t\n';
+        // Fügt das formatierte Datum hinzu
+        text += 'Sichtungsanmerkung vom ' + dateFormatted + '\t' + marker.timecode + '\tTC\tred\t' + marker.description + ' (gesetzt von ' + marker.userName + ')\t1\t\n';
     });
 
     var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
@@ -381,7 +399,7 @@ function exportMarkers() {
     a.style = "display: none";
     url = window.URL.createObjectURL(blob);
     a.href = url;
-    a.download = nameWithoutExtension + '_Anmerkungen_AvidMarker.txt';
+    a.download = nameWithoutExtension + '_Anmerkungen_AvidMarker_Sichtung_' + currentUserName + '.txt';
     a.click();
     window.URL.revokeObjectURL(url);
 }
@@ -414,54 +432,62 @@ function saveMarkers() {
 function loadMarkers(event) {
     var file = event.target.files[0];
     var reader = new FileReader();
-    reader.onload = function(e){
+    reader.onload = async function(e) {
         var content = e.target.result;
-        markers = JSON.parse(content);
-        updateMarkerList();
+        try {
+            markers = JSON.parse(content);
+            console.table(markers);  // Debug log hier
+            await updateMarkerList();
+        } catch (error) {
+            console.error("Fehler beim Parsen des Speicherstands:", error);
+        }
     }
     reader.readAsText(file);
+
+    // Hier setzen wir das Eingabefeld zurück
+    event.target.value = null;
 }
 
 function handleExportOptions(selectElem) {
     var selectedOption = selectElem.value;
 
-    // Fenster erscheint, um den Namen des Benutzers zu erfassen
-    var userName = prompt("Bitte geben Sie Ihren Namen ein");
-    if (!userName) {
-        alert('Abbruch des Exports: Kein Name eingegeben.');
-        selectElem.selectedIndex = 0;
-        return;
-    }
-
     if (selectedOption === 'markers') {
-        exportMarkers(userName);
+        exportMarkers();
     } else if (selectedOption === 'table') {
-        exportTable(userName);
+        exportTable();
     }
     selectElem.selectedIndex = 0;
 }
 
 
-function exportTable(userName) {
+function exportTable() {
     var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
 
-    // Hinzufügen von "Sichtung durch: " und dem Namen des Benutzers unter dem Titel
-    var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + userName + '\n\nNummer\tTimecode\tAnmerkung\n';
+    // Findet die längste Anmerkung zuerst
+    var maxNoteLength = 0;
+    markers.forEach(function(marker) {
+        if (marker.description.length > maxNoteLength) {
+            maxNoteLength = marker.description.length;
+        }
+    });
 
+    var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + currentUserName + '\n\nNummer\tTimecode\tAnmerkung' + ' '.repeat(maxNoteLength - 'Anmerkung'.length + 4) + '\tangemerkt von\n';
+    
     markers.forEach(function(marker, index) {
-        text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + '\n';
+        text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + ' '.repeat(maxNoteLength - marker.description.length + 4) + '\t' + marker.userName + '\n';
     });
 
     var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
     var a = document.createElement("a");
     document.body.appendChild(a);
     a.style = "display: none";
-    url = window.URL.createObjectURL(blob);
+    var url = window.URL.createObjectURL(blob);
     a.href = url;
     a.download = nameWithoutExtension + '_Anmerkungen_Tabelle.txt';
     a.click();
     window.URL.revokeObjectURL(url);
 }
+
 function togglePlayPause() {
     var videoElement = document.getElementById("myVideo");
     if (videoElement.paused || videoElement.ended) {

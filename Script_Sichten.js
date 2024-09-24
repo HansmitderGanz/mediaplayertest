@@ -1,6 +1,11 @@
 $(document).ready(function() {
     $("#whiteOverlay").fadeOut(2000);
 
+    // setTimeout to ask for the user's name after the fade out transition is over
+    setTimeout(function(){ 
+        currentUserName = prompt("Bitte geben Sie Ihren Namen ein");
+    }, 2000);
+
     document.body.addEventListener("dragover", function (evt) {
         evt.preventDefault();
     }, false);
@@ -54,6 +59,7 @@ let isSpeaking = false;
 let lastSpokenText = null;
 let paragraphBeingRead = false; // Neue Variable
 let nextSpeakTime = Infinity;
+let currentUserName = '';
 
 function togglePlayPause() {
     var videoElement = document.getElementById("myVideo");
@@ -530,8 +536,9 @@ function setMarker() {
     // Beenden Sie die Funktion falls keine Beschreibung eingegeben wurde
     if (!description) return;
 
+    var userName = currentUserName ? currentUserName : 'Unbekannter Benutzer';
     var timecode = convertTimeToTimecode(currentTime, 25);
-    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, canvas: new fabric.Canvas(), screenshot: null});
+    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, userName: userName, canvas: new fabric.Canvas(), screenshot: null});
     updateMarkerList();
 
 // Create the screenshot button
@@ -560,7 +567,7 @@ function updateMarkerList() {
             jumpButton.click(function() {
                 videoElement.currentTime = marker.timeInSeconds;
             });
-            listItem.text('Timecode: ' + marker.timecode + ', Anmerkung: ' + marker.description);
+            listItem.text('TC: ' + marker.timecode + ' - Anmerkung: ' + marker.description + ' - ' + marker.userName);
             listItem.prepend(jumpButton);
             var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:1px; margin-top: 4px; padding: 5px 7px; border-radius: 8px; cursor: pointer;"><option selected disabled>Bearbeiten</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option><option value="screenshot">Screenshot</option></select>');
             listItem.append(actionSelect);
@@ -581,8 +588,11 @@ function handleMarkerActions(selectElem, index) {
         markers[index].description = newDescription;
         updateMarkerList();
     } else if (selectedOption === 'delete') {
-        markers.splice(index, 1);
-        updateMarkerList();
+        var reallyDelete = confirm("Möchten Sie wirklich die Anmerkung von '" + markers[index].userName + "' löschen?");
+        if (reallyDelete) {
+            markers.splice(index, 1);
+            updateMarkerList();
+        }
     } else if (selectedOption === 'screenshot') {
         createScreenshot(index);
     }
@@ -613,18 +623,23 @@ function rewind(seconds) {
 
 function exportMarkers() {
     var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
+    
+    // Erzeugt ein neues Datum und formatiert es als tt.mm.jjjj
+    var date = new Date();
+    var dateFormatted = ('0' + date.getDate()).slice(-2) + '.' + ('0' + (date.getMonth()+1)).slice(-2) + '.' + date.getFullYear();
+
     var text = '';
     markers.forEach(function(marker) {
-        text += 'Sichtungsanmerkung\t' + marker.timecode + '\tTC\tred\t' + marker.description + '\t1\t\n';
+        text += 'Sichtungsanmerkung vom ' + dateFormatted + '\t' + marker.timecode + '\tTC\tred\t' + marker.description + ' (gesetzt von ' + marker.userName + ')\t1\t\n';
     });
 
     var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
     var a = document.createElement("a");
     document.body.appendChild(a);
     a.style = "display: none";
-    url = window.URL.createObjectURL(blob);
+    var url = window.URL.createObjectURL(blob);
     a.href = url;
-    a.download = nameWithoutExtension + '_Anmerkungen_AvidMarker.txt';
+    a.download = nameWithoutExtension + '_Anmerkungen_AvidMarker_Sichtung_' + currentUserName + '.txt';
     a.click();
     window.URL.revokeObjectURL(url);
 }
@@ -742,18 +757,10 @@ function loadMarkers(event) {
 function handleExportOptions(selectElem) {
     var selectedOption = selectElem.value;
 
-    // Fenster erscheint, um den Namen des Benutzers zu erfassen
-    var userName = prompt("Bitte geben Sie Ihren Namen ein");
-    if (!userName) {
-        alert('Abbruch des Exports: Kein Name eingegeben.');
-        selectElem.selectedIndex = 0;
-        return;
-    }
-
     if (selectedOption === 'markers') {
-        exportMarkers(userName);
+        exportMarkers();
     } else if (selectedOption === 'table') {
-        exportTable(userName);
+        exportTable();
     }
     selectElem.selectedIndex = 0;
 }
@@ -773,7 +780,7 @@ function exportTable(userName) {
     var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
 
     // Exportiert Markerliste
-    var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + userName; 
+    var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + currentUserName; 
 
 
     text += '\n\n-------------- AUFLISTUNG ANMERKUNGEN/SPRECHERTEXT -------------\n\n';
@@ -789,19 +796,16 @@ function exportTable(userName) {
         }
     });
 
-    // Tabellenüberschriften kalkulieren
+    // Tabellenüberschriften berechnen und eine zusätzliche Benutzer-Spalte hinzufügen
     var noteHeader = 'Anmerkung';
+    var userHeader = 'gesetzt von'; // Neue Spalte hinzufügen für den Benutzernamen
     var speechHeaderText = 'Sprechertext';
-    text += 'Nummer\tTimecode\t' + noteHeader + ' '.repeat(maxNoteLength - noteHeader.length + 1) + '\t' + speechHeaderText + '\n';
+    text += 'Nummer\tTimecode\t' + noteHeader + ' '.repeat(maxNoteLength - noteHeader.length + 1) + '\t' + userHeader + '\t' + speechHeaderText + '\n';
 
-        // Eine zusätzliche Zeile hinzufügen
-        text += '\n';
-
-    // Über alle Marker iterieren
+    // Anmerkung und Benutzerinformationen zur ausgegebenen Tabelle hinzufügen
     markers.forEach(function(marker, index) {
-        // Entsprechenden Absatz des Transkripts finden
         var correspondingTranscriptLine = transcriptLines.find(p => {
-            return Math.abs(parseFloat(p.getAttribute('data-time')) - marker.timeInSeconds) <= 1; // Der Unterschied ist weniger oder gleich einer Sekunde
+            return Math.abs(parseFloat(p.getAttribute('data-time')) - marker.timeInSeconds) <= 1;
         });
 
         var speechText = '';
@@ -809,7 +813,7 @@ function exportTable(userName) {
             speechText = correspondingTranscriptLine.getAttribute('data-saved').trim();
         }
 
-        text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + ' '.repeat(maxNoteLength - marker.description.length + 1) + '\t' + speechText + '\n';
+        text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + ' '.repeat(maxNoteLength - marker.description.length + 1) + '\t' + marker.userName + '\t' + speechText + '\n'; // Marker.userName zur Ausgabe hinzufügen
     });
 
     text += '\n\n-------------- AUFLISTUNG SPRECHERTEXT -------------\n\n' + extractSpeakerLines() + '\n\n--------------------- GESAMT TRANSKRIPT ---------------------\n\n';
