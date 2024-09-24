@@ -658,6 +658,8 @@ function drawOnScreenshot(screenshotWindow, imgSrc) {
    
 }
 
+
+
 function selectBrush(brush) {
     switch (brush) {
         case "Pencil":

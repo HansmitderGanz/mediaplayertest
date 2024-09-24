@@ -775,16 +775,44 @@ function exportTable(userName) {
     // Exportiert Markerliste
     var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + userName; 
 
-    text += '\n\n-------------- AUFLISTUNG ANMERKUNGEN -------------\n\n';
 
-   text += '\n\nNummer\tTimecode\tAnmerkung\n\n';
+    text += '\n\n-------------- AUFLISTUNG ANMERKUNGEN/SPRECHERTEXT -------------\n\n';
+
+    // Alle Absätze des Transkripts abrufen
+    var transcriptLines = Array.from(document.querySelectorAll('#transcript p'));
+
+    // Die längste Anmerkung zuerst finden
+    var maxNoteLength = 0;
+    markers.forEach(function(marker) {
+        if (marker.description.length > maxNoteLength) {
+            maxNoteLength = marker.description.length;
+        }
+    });
+
+    // Tabellenüberschriften kalkulieren
+    var noteHeader = 'Anmerkung';
+    var speechHeaderText = 'Sprechertext';
+    text += 'Nummer\tTimecode\t' + noteHeader + ' '.repeat(maxNoteLength - noteHeader.length + 1) + '\t' + speechHeaderText + '\n';
+
+        // Eine zusätzliche Zeile hinzufügen
+        text += '\n';
+
+    // Über alle Marker iterieren
     markers.forEach(function(marker, index) {
-        text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + '\n';
+        // Entsprechenden Absatz des Transkripts finden
+        var correspondingTranscriptLine = transcriptLines.find(p => {
+            return Math.abs(parseFloat(p.getAttribute('data-time')) - marker.timeInSeconds) <= 1; // Der Unterschied ist weniger oder gleich einer Sekunde
+        });
+
+        var speechText = '';
+        if (correspondingTranscriptLine && correspondingTranscriptLine.style.color === 'green') {
+            speechText = correspondingTranscriptLine.getAttribute('data-saved').trim();
+        }
+
+        text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + ' '.repeat(maxNoteLength - marker.description.length + 1) + '\t' + speechText + '\n';
     });
 
     text += '\n\n-------------- AUFLISTUNG SPRECHERTEXT -------------\n\n' + extractSpeakerLines() + '\n\n--------------------- GESAMT TRANSKRIPT ---------------------\n\n';
-
-
 
     // Exportiert Transcript
     var transcriptState = Array.from(document.querySelectorAll('#transcriptContainer p, #transcriptContainer textarea'))
