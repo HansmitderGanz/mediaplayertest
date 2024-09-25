@@ -471,7 +471,8 @@ function exportTable() {
         }
     });
 
-    var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + currentUserName + '\n\nNummer\tTimecode\tAnmerkung' + ' '.repeat(maxNoteLength - 'Anmerkung'.length + 4) + '\tangemerkt von\n';
+    var repeatCount = Math.max(0, maxNoteLength - 'Anmerkung'.length + 4);
+var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + currentUserName + '\n\nNummer\tTimecode\tAnmerkung' + ' '.repeat(repeatCount) + '\tangemerkt von\n';
     
     markers.forEach(function(marker, index) {
         text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + ' '.repeat(maxNoteLength - marker.description.length + 4) + '\t' + marker.userName + '\n';
