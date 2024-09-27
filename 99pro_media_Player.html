@@ -466,7 +466,8 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
     <option selected disabled>Speichern / Laden</option>
     <option value="save">Stand speichern</option>
     <option value="load">Speicherstand laden</option>
-  </select>
+    <option value="loadEDL">EDL laden</option> 
+</select>
 
   <input type="file" id="loadMarkersFile" style="display: none;" onchange="loadMarkers(event)">
   
@@ -474,7 +475,7 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 
      <div id="transcriptHeader" class="transcript-related interactable" style="cursor: move; color: black; font-size: 20px; margin-left: 120px; margin-bottom: 10px; text-shadow: 2px 2px 2px rgba(0,0,0,0.5); transition: all 0.3s;">📌</div>
 
-     <label for="transcriptFile" class="transcript-related interactable" style="display: inline-block; color: white; cursor: pointer; padding: 10px; border-radius: 10px; margin-bottom: 10px; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); background-color: #DC143C">Transkript Importieren
+     <label for="transcriptFile" class="transcript-related interactable" style="display: inline-block; color: white; cursor: pointer; padding: 10px; border-radius: 10px; margin-bottom: 10px; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); background-color: #DC143C">Trint Transkript Importieren
           <input class="hidden" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)">
      </label>
      <input class="transcript-related interactable" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..."

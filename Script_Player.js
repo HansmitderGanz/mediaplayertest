@@ -300,7 +300,8 @@ function setMarker() {
     // Die aktuelle Zeit des Videos wird zur Basiszeit addiert, um den Timecode zu berechnen
     var userName = currentUserName ? currentUserName : 'Unbekannter Benutzer';
     var timecode = convertTimeToTimecode(baseTimecodeInSeconds + currentTime, 25);
-    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, userName: userName, canvas: new fabric.Canvas(), screenshot: null});
+    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, userName: userName, canvas: new fabric.Canvas(), screenshot: null, hasScreenshot: false, screenshotTime: null});
+    
     updateMarkerList();
 
     // Create the screenshot button
@@ -322,6 +323,11 @@ function updateMarkerList() {
         listItem.prepend(jumpButton);
         var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:1px; margin-top: 4px; padding: 5px 7px; border-radius: 8px; cursor: pointer;"><option selected disabled>Bearbeiten</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option><option value="screenshot">Screenshot</option></select>');
         listItem.append(actionSelect);
+
+        if (marker.hasScreenshot) {
+            listItem.append(' - siehe Screenshot NR ' + marker.screenshotTime);
+        }
+
         listItem.css("margin-bottom", "10px");
         markerList.append(listItem);
     });
@@ -388,9 +394,8 @@ function exportMarkers() {
     var dateFormatted = ('0' + date.getDate()).slice(-2) + '.' + ('0' + (date.getMonth()+1)).slice(-2) + '.' + date.getFullYear();
 
     var text = '';
-    markers.forEach(function(marker) {
-        // Fügt das formatierte Datum hinzu
-        text += 'Sichtungsanmerkung vom ' + dateFormatted + '\t' + marker.timecode + '\tTC\tred\t' + marker.description + ' (gesetzt von ' + marker.userName + ')\t1\t\n';
+    markers.forEach(function(marker, index) {
+        text += 'Sichtungsanmerkung ' + dateFormatted + '\t' + marker.timecode + '\tTC\tred\t' + marker.description + (marker.hasScreenshot ? ' - s. Screenshot NR' + marker.screenshotTime + '' : '') + ' (gesetzt von ' + marker.userName + ')\t2\t\n';
     });
 
     var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
@@ -410,8 +415,10 @@ function handleSaveOptions(selectElem) {
         saveMarkers();
     } else if (selectedOption === 'load') {
         document.getElementById('loadMarkersFile').click();
+    } else if (selectedOption === 'loadEDL') {
+        document.getElementById('loadEDLFile').click();
     }
-    selectElem.selectedIndex = 0;
+    selectElem.selectedIndex = 0; // Reset the dropdown
 }
 
 function saveMarkers() {
@@ -463,6 +470,18 @@ function handleExportOptions(selectElem) {
 function exportTable() {
     var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
 
+    // Aktuelles Datum erstellen
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //Januar ist 0
+    var yyyy = today.getFullYear();
+    var todayDate =  dd + '.' + mm + '.' + yyyy;
+
+    // Exportiert Markerliste
+    var text = 'Dateiname: ' + nameWithoutExtension 
+    + '\nSichtung durch: ' + currentUserName 
+    + '\nSichtungsdatum: ' + todayDate;  // Das heutige Datum als Sichtungsdatum hinzufügen
+
     // Findet die längste Anmerkung zuerst
     var maxNoteLength = 0;
     markers.forEach(function(marker) {
@@ -472,8 +491,8 @@ function exportTable() {
     });
 
     var repeatCount = Math.max(0, maxNoteLength - 'Anmerkung'.length + 4);
-var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + currentUserName + '\n\nNummer\tTimecode\tAnmerkung' + ' '.repeat(repeatCount) + '\tangemerkt von\n';
-    
+    text += '\n\nNummer\tTimecode\tAnmerkung' + ' '.repeat(repeatCount) + '\tangemerkt von\n'; // Nutzen Sie '+=' anstatt '='
+
     markers.forEach(function(marker, index) {
         text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + ' '.repeat(maxNoteLength - marker.description.length + 4) + '\t' + marker.userName + '\n';
     });
@@ -484,7 +503,7 @@ var text = 'Sichtungsname: ' + nameWithoutExtension + '\nSichtung durch: ' + cur
     a.style = "display: none";
     var url = window.URL.createObjectURL(blob);
     a.href = url;
-    a.download = nameWithoutExtension + '_Anmerkungen_Tabelle.txt';
+    a.download = nameWithoutExtension + '_Anmerkungen_Liste.txt';
     a.click();
     window.URL.revokeObjectURL(url);
 }
@@ -730,38 +749,36 @@ function saveScreenshot() {
       fontSize: 20,
       textBackgroundColor: 'white'
     });
-  
+    
     var markerText = new fabric.Text(
-      'Timecode: ' + markers[currentMarkerIndex].timecode,
-      {
-        left: 10,
-        top: 40,
-        fill: 'black',
-        fontSize: 20,
-        textBackgroundColor: 'white'
-      }
+        'Timecode: ' + markers[currentMarkerIndex].timecode,
+        {
+            left: 10,
+            top: 40,
+            fill: 'black',
+            fontSize: 20,
+            textBackgroundColor: 'white'
+        }
     );
-  
+    
     var noteText = new fabric.Text(
-      'Anmerkung: ' + markers[currentMarkerIndex].description,
-      {
-        left: 10,
-        top: 70,
-        fill: 'black',
-        fontSize: 20,
-        textBackgroundColor: 'white'
-      }
+        'Anmerkung: ' + markers[currentMarkerIndex].description,
+        {
+            left: 10,
+            top: 70,
+            fill: 'black',
+            fontSize: 20,
+            textBackgroundColor: 'white'
+        }
     );
-  
+    
     fabricCanvas.add(clipNameText);
     fabricCanvas.add(markerText);
     fabricCanvas.add(noteText);
-  
-    // Erzeugen einer Gruppe aus allen Objekten und Abrufen des umschließenden Rechtecks
+    
     var group = new fabric.Group(fabricCanvas.getObjects());
     var boundingRect = group.getBoundingRect();
-  
-    // Bild extrahieren nur aus dem benötigten Bereich
+    
     var croppedImageDataURL = fabricCanvas.toDataURL({
       left: boundingRect.left,
       top: boundingRect.top,
@@ -769,27 +786,29 @@ function saveScreenshot() {
       height: boundingRect.height,
     });
   
+    markers[currentMarkerIndex].hasScreenshot = true;
+    var date = new Date();
+    var timestamp = "" + date.getFullYear() + ("0" + (date.getMonth() + 1)).slice(-2) + ("0" + date.getDate()).slice(-2) + ("0" + date.getHours()).slice(-2) + ("0" + date.getMinutes()).slice(-2) + ("0" + date.getSeconds()).slice(-2);
+    markers[currentMarkerIndex].screenshotTime = timestamp;
+
     var a = document.createElement('a');
     a.href = croppedImageDataURL;
-  
+
     var videoName = videoFile.split('.').slice(0, -1).join('.');
-    var markerNumber = currentMarkerIndex + 1;
-    a.download = `${videoName}_Screenshot_zu_Anmerkung_${markerNumber}.png`;
-  
+    a.download = `${videoName}_TC_${markers[currentMarkerIndex].timecode}_Screenshot_NR_${markers[currentMarkerIndex].screenshotTime}.png`;
+    
     a.click();
   
-    // Aufräumen: Alle Objekte entfernen und Canvas neu zeichnen
     fabricCanvas.clear().renderAll();
-
     fabricCanvas.dispose();
     fabricCanvas = null;
     drawingPaths = [];
-  
+    
     document.getElementById("screenshotContainer").style.display = "none";
     document.getElementById("saveScreenshotButton").style.display = "none";
     document.getElementById("closeScreenshotButton").style.display = "none";
     document.getElementById("overlay").style.display = "none";
-  }
+}
 
 document.getElementById("closeScreenshotButton").addEventListener("click", closeScreenshot);
 
@@ -802,3 +821,68 @@ function closeScreenshot() {
     markers[currentMarkerIndex].canvas = null;    //  Set to null, entirely de-referencing the fabric canvas object and releasing it for garbage collection
 }
 
+
+// 1. Datei-Input-Button erstellen
+var loadEDLButton = document.createElement('input');
+loadEDLButton.setAttribute('type', 'file');
+loadEDLButton.setAttribute('id', 'loadEDLFile');
+loadEDLButton.style.display = 'none';
+loadEDLButton.addEventListener('change', loadEDL);
+document.body.appendChild(loadEDLButton);
+
+
+
+
+// 2. Funktion zum Lesen der Datei und zur Extraktion der Markerinformationen
+function loadEDL(event) {
+    var file = event.target.files[0];
+    var reader = new FileReader();
+    
+    reader.onload = async function(e) {
+        var content = e.target.result;
+        console.log('Loaded file content:', content);
+        
+        // Extract markers from EDL content
+        var extractedMarkers = extractMarkersFromEdlContent(content);
+        console.log(extractedMarkers);
+        
+        // Add extracted markers to your markers array
+        markers = [...markers, ...extractedMarkers];
+        
+        await updateMarkerList();
+    }
+
+    reader.readAsText(file);
+
+    // Resets the input field
+    event.target.value = null;
+}
+
+function extractMarkersFromEdlContent(content) {
+    var markers = [];
+    var lines = content.split('\n');
+
+    // Regex to match the specific format, adjust as needed:
+    var re = /(\d{2}:\d{2}:\d{2}:\d{2})\s+(\d{2}:\d{2}:\d{2}:\d{2})\s+(DUELL_K2_D174_\d{4})/;
+
+    for(var i=0; i<lines.length; i++){
+        var line = lines[i];
+        console.log('Reading line:', line);  // Add this line
+        var match = line.match(re);
+        if (match) {
+            var startTimeCode = match[1];
+            var clipName = match[3];
+                
+            var marker = {
+                timeInSeconds: timecodeToSeconds(startTimeCode),
+                description: clipName,
+                timecode: startTimeCode  // Das wurde hinzugefügt
+            };
+            markers.push(marker);
+        }
+    }
+
+    console.log('Extracted markers:', markers);
+
+    return markers;
+}
