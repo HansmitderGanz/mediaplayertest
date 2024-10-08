@@ -88,6 +88,17 @@ window.addEventListener('keydown', function(event) {
         event.preventDefault();
         togglePlayPause();
     }
+    else if (event.key === '/'){  // Hinzugefügt code zum Einholen des Timecode
+        event.preventDefault();
+        var input = prompt("Bitte geben Sie den Timecode ein, zu dem Sie springen möchten (im Format HH:MM:SS:FF)");
+        
+        if (input === null || input === "") { 
+          alert("Sie müssen einen gültigen Timecode eingeben");
+        } else {
+          var seconds = timecodeToSeconds(input);
+          videoElement.currentTime = seconds - baseTimecodeInSeconds;
+        }
+     }
     else if (event.key === 'ArrowLeft') {
         event.preventDefault();
         if (event.altKey) {

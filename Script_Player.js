@@ -113,6 +113,16 @@ function loadVideo(event) {
                     p.style.color = isDarkMode ? 'white' : 'black';
             }
         });
+        document.querySelectorAll('#markerList li').forEach((markerItem, index) => {
+            // Marker-Zeit
+            let markerTime = markers[index].timeInSeconds;
+            if(Math.abs(currentTime - markerTime) <= 1) {
+                markerItem.style.border = '2px solid purple';
+                markerItem.style.borderRadius = '5px'; // Zusätzlicher Stil
+            } else if (Math.abs(currentTime - markerTime) > 2 && markers[index].source === 'user') {
+                markerItem.style.border = 'none'; // Entfernt die Hervorhebung, wenn wir uns vom aktuellen Marker entfernt haben
+            }
+        });
     });
     
     markers = [];
@@ -120,6 +130,7 @@ function loadVideo(event) {
 }
 
 function timecodeToSeconds(input) {
+    console.log("Received timecode: ", input);  // Debug Log here
     if (input.includes(":")) {
         var parts = input.split(':');
         return parts[0] * 3600 +  // Stunden
@@ -297,11 +308,16 @@ function setMarker() {
         }
     } while(description.trim() === '');
 
+   
+
     // Die aktuelle Zeit des Videos wird zur Basiszeit addiert, um den Timecode zu berechnen
     var userName = currentUserName ? currentUserName : 'Unbekannter Benutzer';
     var timecode = convertTimeToTimecode(baseTimecodeInSeconds + currentTime, 25);
-    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, userName: userName, canvas: new fabric.Canvas(), screenshot: null, hasScreenshot: false, screenshotTime: null});
+    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, userName: userName, canvas: new fabric.Canvas(), screenshot: null, hasScreenshot: false, screenshotTime: null, source: 'user'})
     
+    console.log("Setting marker at time: ", currentTime);
+    console.log("Calculated timecode: ", timecode);
+
     updateMarkerList();
 
     // Create the screenshot button
@@ -313,11 +329,25 @@ function setMarker() {
 function updateMarkerList() {
     var markerList = $('#markerList');
     markerList.empty();
-    markers.forEach(function(marker, index) {
+
+  
+
+    markers.forEach(function (marker, index) {
+        var markerTime = marker.timeInSeconds;
         var listItem = $('<li></li>');
         var jumpButton = $('<button class="interactable" style="margin-right: 10px;">Gehe zu</button>');
         jumpButton.click(function(){
-            videoElement.currentTime = marker.timeInSeconds;
+            if (markerTime !== undefined) {
+                console.log("Jumping to Timecode: ", marker.timecode); // Add `console.log()` to log the timecode.
+                console.log("markerTime is: ", markerTime);
+                videoElement.currentTime = markerTime;
+                if (marker.source === 'edl') {  // Check if the source is 'edl'
+                    marker.visited = true;  // Add a new property `visited`
+                    updateMarkerList();  // Update the marker list after setting `visited`
+                }
+            } else {
+                console.log("No marker to jump to"); // Log when there's no marker to jump to.
+            }
         });
         listItem.text('TC: ' + marker.timecode + ' - Anmerkung: ' + marker.description + ' - ' + marker.userName);
         listItem.prepend(jumpButton);
@@ -328,11 +358,23 @@ function updateMarkerList() {
             listItem.append(' - siehe Screenshot NR ' + marker.screenshotTime);
         }
 
+        if (marker.source === 'edl') {
+            listItem.addClass('edl-marker');
+            if (marker.visited) {  // Check if the marker has been visited
+                listItem.css("opacity", "0.5");
+            }
+        } else {
+            listItem.addClass('user-marker');
+        }
+
         listItem.css("margin-bottom", "10px");
         markerList.append(listItem);
     });
-    console.log(markerList);  // Debug log hier
+
+    console.log(markerList);  // Debug log here
 }
+
+
 
 function handleMarkerActions(selectElem, index) {
     var selectedOption = selectElem.value;
@@ -533,6 +575,17 @@ window.addEventListener('keydown', function(event) {
         event.preventDefault();
         togglePlayPause();
     }
+    else if (event.key === '/'){  // Hinzugefügt code zum Einholen des Timecode
+        event.preventDefault();
+        var input = prompt("Bitte geben Sie den Timecode ein, zu dem Sie springen möchten (im Format HH:MM:SS:FF)");
+        
+        if (input === null || input === "") { 
+          alert("Sie müssen einen gültigen Timecode eingeben");
+        } else {
+          var seconds = timecodeToSeconds(input);
+          videoElement.currentTime = seconds - baseTimecodeInSeconds;
+        }
+     }
     else if (event.key === 'ArrowLeft') {
         event.preventDefault();
         if (event.altKey) {
@@ -549,6 +602,31 @@ window.addEventListener('keydown', function(event) {
             forward(5); // 5 Sekunden vor
         }
     }
+});
+
+var currentMarkerSelection = 0; // Variabel um die aktuelle Marker-Auswahl zu speichern
+
+window.addEventListener('keydown', function(event) {
+    if (document.activeElement.nodeName === 'INPUT') {
+        return;
+    }
+  if (event.key === 'ArrowUp') { // Pfeil nach oben
+    event.preventDefault();
+    if(currentMarkerSelection > 0) { // Überprüfen, ob wir nicht am Anfang der Markierung sind
+      currentMarkerSelection--; 
+      videoElement.currentTime = markers[currentMarkerSelection].timeInSeconds; // springt zur vorherigen Markierung
+      markers[currentMarkerSelection].visited = true; // Set marker as visited
+      updateMarkerList();
+    }
+  } else if (event.key === 'ArrowDown') { // Pfeil nach unten
+    event.preventDefault();
+    if(currentMarkerSelection < markers.length - 1) { // Überprüfen, ob wir nicht am Ende der Markierung sind
+      currentMarkerSelection++;
+      videoElement.currentTime = markers[currentMarkerSelection].timeInSeconds; // springt zur nächsten Markierung
+      markers[currentMarkerSelection].visited = true; // Set marker as visited
+      updateMarkerList();
+    }
+  }
 });
 
 var transcriptWindow = document.getElementById('draggableTranscript'),
@@ -830,59 +908,87 @@ loadEDLButton.style.display = 'none';
 loadEDLButton.addEventListener('change', loadEDL);
 document.body.appendChild(loadEDLButton);
 
-
-
-
-// 2. Funktion zum Lesen der Datei und zur Extraktion der Markerinformationen
+// 2. Funktion zum Laden und Auslesen der EDL-Datei
 function loadEDL(event) {
     var file = event.target.files[0];
     var reader = new FileReader();
     
     reader.onload = async function(e) {
         var content = e.target.result;
-        console.log('Loaded file content:', content);
-        
-        // Extract markers from EDL content
+
+        // Normalisiere die Zeilenumbrüche
+        content = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+        // Marker aus EDL-Inhalt extrahieren
         var extractedMarkers = extractMarkersFromEdlContent(content);
-        console.log(extractedMarkers);
+        console.log('Extracted markers', extractedMarkers); // Debug log hier
         
-        // Add extracted markers to your markers array
+        // Extrahierte Marker zur Marker-Liste hinzufügen
         markers = [...markers, ...extractedMarkers];
         
         await updateMarkerList();
     }
 
     reader.readAsText(file);
-
     // Resets the input field
     event.target.value = null;
 }
 
+
 function extractMarkersFromEdlContent(content) {
+    // Marker-Liste
     var markers = [];
+
+    // EDL-Inhalte Zeile für Zeile durchlaufen
     var lines = content.split('\n');
 
-    // Regex to match the specific format, adjust as needed:
-    var re = /(\d{2}:\d{2}:\d{2}:\d{2})\s+(\d{2}:\d{2}:\d{2}:\d{2})\s+(DUELL_K2_D174_\d{4})/;
+    // Regex to match the desired format and capture the timecode and clip name
+    var re = /(\d{2}:\d{2}:\d{2}:\d{2})\s+\d{2}:\d{2}:\d{2}:\d{2}\s+(.+)/;
 
-    for(var i=0; i<lines.length; i++){
+    for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
-        console.log('Reading line:', line);  // Add this line
         var match = line.match(re);
+
+        // Wenn die Zeile mit dem gewünschten Format übereinstimmt
         if (match) {
             var startTimeCode = match[1];
-            var clipName = match[3];
-                
-            var marker = {
-                timeInSeconds: timecodeToSeconds(startTimeCode),
+            var clipName = match[2];
+
+            var startTimeInSeconds = timecodeToSeconds(startTimeCode);
+            var timeForMarker = startTimeInSeconds - baseTimecodeInSeconds;
+
+            // Neuer Marker erstellen
+            var newMarker = {
+                timeInSeconds: timeForMarker,
                 description: clipName,
-                timecode: startTimeCode  // Das wurde hinzugefügt
+                timecode: startTimeCode,
+                userName: currentUserName ? currentUserName : 'Unbekannter Benutzer',
+                source: 'edl',
             };
-            markers.push(marker);
+
+            // Überprüfen, ob der Marker bereits in der Liste ist
+            var markerExists = markers.some(marker => 
+                marker.timeInSeconds === newMarker.timeInSeconds &&
+                marker.description === newMarker.description &&
+                marker.timecode === newMarker.timecode &&
+                marker.userName === newMarker.userName
+            );
+
+            // Marker zur Liste hinzufügen, wenn er noch nicht vorhanden ist
+            if (!markerExists) {
+                markers.push(newMarker);
+            }
         }
     }
 
-    console.log('Extracted markers:', markers);
-
+    // Rückgabe der gefilterten Marker-Liste
     return markers;
 }
+
+
+
+
+
+
+
+
