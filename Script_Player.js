@@ -559,6 +559,18 @@ function togglePlayPause() {
     }
 }
 
+function deleteEdlMarkers(){
+    let confirmDeletion = window.confirm("Möchten Sie die EDL-Markierungen wirklich löschen?");
+
+    if(confirmDeletion) {
+        markers = markers.filter(marker => marker.source !== 'edl');
+        updateMarkerList();
+    } else {
+        // Aktion abgebrochen
+        console.log("Löschvorgang abgebrochen!");
+    }
+}
+
 window.addEventListener('keydown', function(event) {
     // Überprüfen, ob das Transkript-Suchfeld den Fokus hat
     if (document.activeElement.id === 'transcriptSearch') {
@@ -601,6 +613,23 @@ window.addEventListener('keydown', function(event) {
         } else {
             forward(5); // 5 Sekunden vor
         }
+    }
+});
+
+window.addEventListener('keydown', function(event) {
+    if (document.activeElement.nodeName === 'INPUT') {
+        return;
+    }
+    if (event.key === 'e' || event.key === 'E') {
+        Epressed = true;
+    }
+    else if (event.key === 'Delete') {
+        if(Epressed){
+            deleteEdlMarkers();
+        }
+    }
+    else {
+        Epressed = false;
     }
 });
 

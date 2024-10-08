@@ -117,6 +117,31 @@ window.addEventListener('keydown', function(event) {
     }
 });
 
+var currentMarkerSelection = 0; // Variabel um die aktuelle Marker-Auswahl zu speichern
+
+window.addEventListener('keydown', function(event) {
+    if (document.activeElement.nodeName === 'INPUT') {
+        return;
+    }
+  if (event.key === 'ArrowUp') { // Pfeil nach oben
+    event.preventDefault();
+    if(currentMarkerSelection > 0) { // Überprüfen, ob wir nicht am Anfang der Markierung sind
+      currentMarkerSelection--; 
+      videoElement.currentTime = markers[currentMarkerSelection].timeInSeconds; // springt zur vorherigen Markierung
+      markers[currentMarkerSelection].visited = true; // Set marker as visited
+      updateMarkerList();
+    }
+  } else if (event.key === 'ArrowDown') { // Pfeil nach unten
+    event.preventDefault();
+    if(currentMarkerSelection < markers.length - 1) { // Überprüfen, ob wir nicht am Ende der Markierung sind
+      currentMarkerSelection++;
+      videoElement.currentTime = markers[currentMarkerSelection].timeInSeconds; // springt zur nächsten Markierung
+      markers[currentMarkerSelection].visited = true; // Set marker as visited
+      updateMarkerList();
+    }
+  }
+});
+
 
 
 // Deklaration der booleschen Variable zu Beginn des Skripts
@@ -195,6 +220,8 @@ if (Math.abs(currentTime - pTime) <= underlineDuration) {
         }
     });
 });
+
+
 
 
 videoElement.addEventListener('play', function () {
@@ -616,6 +643,8 @@ function updateMarkerList() {
             var jumpButton = $('<button style="margin-right: 10px;">Gehe zu</button>');
             jumpButton.click(function() {
                 videoElement.currentTime = marker.timeInSeconds;
+                currentMarkerSelection = index; // Aktualisieren der aktuellen Markerauswahl
+                updateMarkerList(); // Aktualisieren der Markerliste
             });
             listItem.text('TC: ' + marker.timecode + ' - Anmerkung: ' + marker.description + ' - ' + marker.userName);
             listItem.prepend(jumpButton);
@@ -623,7 +652,12 @@ function updateMarkerList() {
             listItem.append(actionSelect);
             if (marker.hasScreenshot) {
                 listItem.append(' - siehe Screenshot NR ' + marker.screenshotTime);
-            }        
+            }
+
+            // Wenn der aktuelle Marker ausgewählt ist, fügt ihm einen violetten Rand hinzu
+            if (currentMarkerSelection === index) {
+                listItem.css('border', '2px solid purple');
+            }
             markerList.append(listItem);
         });
 
