@@ -88,17 +88,6 @@ window.addEventListener('keydown', function(event) {
         event.preventDefault();
         togglePlayPause();
     }
-    else if (event.key === '/'){  // Hinzugefügt code zum Einholen des Timecode
-        event.preventDefault();
-        var input = prompt("Bitte geben Sie den Timecode ein, zu dem Sie springen möchten (im Format HH:MM:SS:FF)");
-        
-        if (input === null || input === "") { 
-          alert("Sie müssen einen gültigen Timecode eingeben");
-        } else {
-          var seconds = timecodeToSeconds(input);
-          videoElement.currentTime = seconds - baseTimecodeInSeconds;
-        }
-     }
     else if (event.key === 'ArrowLeft') {
         event.preventDefault();
         if (event.altKey) {
@@ -113,6 +102,16 @@ window.addEventListener('keydown', function(event) {
             forward(1/25); // 1 Frame vor
         } else {
             forward(5); // 5 Sekunden vor
+        }
+    }
+    var videoElement = document.getElementById("myVideo");
+
+    if (event.key === '/') {
+        event.preventDefault();
+        var timecode = prompt('Bitte geben Sie den Timecode im Format HH:MM:SS ein');
+        if (timecode !== null) {
+            var seconds = timecodeToSeconds(timecode);
+            videoElement.currentTime = seconds;
         }
     }
 });
@@ -538,11 +537,24 @@ function removeTranscript() {
     document.getElementById('transcriptFile').value = null;
 }
 
-function timecodeToSeconds(timecode) {
-    var parts = timecode.split(':');
-    return parts[0] * 3600 + // Stunden
-           parts[1] * 60 + // Minuten
-           parts[2] * 1; // Sekunden
+function timecodeToSeconds(input) {
+    console.log("Received timecode: ", input);  // Debug Log here
+    if (input.includes(":")) {
+        var parts = input.split(':');
+        return parts[0] * 3600 +  // Stunden
+               parts[1] * 60 +   // Minuten
+               parts[2] * 1 +    // Sekunden
+               parts[3] / 25;    // Frames
+    } else {
+        var hours = input.slice(0, 2);
+        var minutes = input.slice(2, 4);
+        var seconds = input.slice(4, 6);
+        var frames = input.slice(6, 8);
+        return hours * 3600 +
+               minutes * 60 +
+               seconds * 1 +
+               frames / 25;
+    }
 }
 
 
@@ -636,6 +648,11 @@ function updateMarkerList() {
     var markerList = $('#markerList');
     markerList.empty();
 
+     // Sortiert die Markierungen in chronologischer Reihenfolge
+  markers.sort((a, b) => {
+    return a.timeInSeconds - b.timeInSeconds;
+});
+
     // Marker zur Liste hinzufügen und Marker-Liste anzeigen, wenn Marker vorhanden sind
     if (markers.length > 0) {
         markers.forEach(function(marker, index) {
@@ -656,7 +673,7 @@ function updateMarkerList() {
 
             // Wenn der aktuelle Marker ausgewählt ist, fügt ihm einen violetten Rand hinzu
             if (currentMarkerSelection === index) {
-                listItem.css('border', '2px solid purple');
+                listItem.css('border', '2px solid #673AB7');
             }
             markerList.append(listItem);
         });

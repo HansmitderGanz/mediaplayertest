@@ -117,7 +117,7 @@ function loadVideo(event) {
             // Marker-Zeit
             let markerTime = markers[index].timeInSeconds;
             if(Math.abs(currentTime - markerTime) <= 1) {
-                markerItem.style.border = '2px solid purple';
+                markerItem.style.border = '2px solid #673AB7';
                 markerItem.style.borderRadius = '5px'; // Zusätzlicher Stil
             } else if (Math.abs(currentTime - markerTime) > 2 && markers[index].source === 'user') {
                 markerItem.style.border = 'none'; // Entfernt die Hervorhebung, wenn wir uns vom aktuellen Marker entfernt haben
@@ -330,7 +330,10 @@ function updateMarkerList() {
     var markerList = $('#markerList');
     markerList.empty();
 
-  
+  // Sortiert die Markierungen in chronologischer Reihenfolge
+  markers.sort((a, b) => {
+    return a.timeInSeconds - b.timeInSeconds;
+});
 
     markers.forEach(function (marker, index) {
         var markerTime = marker.timeInSeconds;
@@ -349,7 +352,11 @@ function updateMarkerList() {
                 console.log("No marker to jump to"); // Log when there's no marker to jump to.
             }
         });
-        listItem.text('TC: ' + marker.timecode + ' - Anmerkung: ' + marker.description + ' - ' + marker.userName);
+        // Check the marker's source and format the list item text accordingly
+        var listItemText = marker.source === 'edl' ?
+            'TC: ' + marker.timecode + ' - Clip: ' + marker.description + ' - ' + marker.userName :
+            'TC: ' + marker.timecode + ' - Anmerkung: ' + marker.description + ' - ' + marker.userName;
+        listItem.text(listItemText);
         listItem.prepend(jumpButton);
         var actionSelect = $('<select class="actionSelect" onchange="handleMarkerActions(this, ' + index + ')" style="margin-left:1px; margin-top: 4px; padding: 5px 7px; border-radius: 8px; cursor: pointer;"><option selected disabled>Bearbeiten</option><option value="edit">Anmerkung ändern</option><option value="delete">Löschen</option><option value="screenshot">Screenshot</option></select>');
         listItem.append(actionSelect);
@@ -365,6 +372,8 @@ function updateMarkerList() {
             }
         } else {
             listItem.addClass('user-marker');
+            // fügt einen Tabulator vor dem Textinhalt hinzu
+            listItem.css('text-indent', '30px');
         }
 
         listItem.css("margin-bottom", "10px");
