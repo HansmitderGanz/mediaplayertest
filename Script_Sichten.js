@@ -108,7 +108,7 @@ window.addEventListener('keydown', function(event) {
 
     if (event.key === '/') {
         event.preventDefault();
-        var timecode = prompt('Bitte geben Sie den Timecode im Format HH:MM:SS ein');
+        var timecode = prompt('Bitte geben Sie den Timecode im Format HH:MM:SS:FF ein');
         if (timecode !== null) {
             var seconds = timecodeToSeconds(timecode);
             videoElement.currentTime = seconds;
