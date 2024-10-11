@@ -71,6 +71,8 @@ function togglePlayPause() {
 }
 
 
+// Fügen Sie eine Kontrollvariable hinzu, um zu prüfen, ob das FAQ-Fenster offen oder geschlossen ist
+var isFAQOpen = false;
 
 window.addEventListener('keydown', function(event) {
 // Überprüfen, ob das Transkript-Suchfeld den Fokus hat
@@ -104,6 +106,17 @@ window.addEventListener('keydown', function(event) {
             forward(5); // 5 Sekunden vor
         }
     }
+    else if (event.altKey && event.key === 'f') { // `ALT + F` 
+        event.preventDefault();
+
+        var faqModal = document.querySelector('.faq-modal');
+        if (faqModal) {
+            document.body.removeChild(faqModal);
+        } else {
+            openFAQs();
+        }
+    }
+
     var videoElement = document.getElementById("myVideo");
 
     if (event.key === '/') {
@@ -362,6 +375,101 @@ function loadOldTranscriptFormat(transcriptDiv, content) {
         });
     });
 }
+
+
+var faqModal;
+function openFAQs() {
+    
+    // Erstellen Sie ein Modalfenster
+    var modal = document.createElement('div');
+    modal.className = 'faq-modal';
+    modal.style.position = 'fixed';
+    modal.style.zIndex = 1;
+    modal.style.left = '0';
+    modal.style.top = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.overflow = 'hidden'; // Nehmen Sie overflow:hidden statt overflow:auto, um das Scrollen zu verhindern
+    modal.style.backgroundColor = 'rgba(0,0,0,0.4)';
+
+    // Erstellen Sie einen Container für die FAQs
+    var container = document.createElement('div');
+container.style.overflow = 'auto';
+container.style.backgroundColor = '#fefefe';
+container.style.margin = '5% auto';
+container.style.padding = '20px';
+container.style.border = '1px solid #888';
+container.style.width = '80%';
+container.style.maxHeight = '70%'; // Stellen Sie maxHeight für den Container ein
+modal.appendChild(container);
+
+
+
+// Erstellen Sie den Inhalt des Modals
+faqs.forEach(function (faq, index) {
+    var faqElement = document.createElement('div');
+    faqElement.setAttribute('data-question', faq.frage); // Setzen Sie das 'data-question' Attribut
+    faqElement.className = 'faq'; // Fügen Sie diese Linie hinzu
+    faqElement.innerHTML = '<h3>' + (index + 1) + '. <b>' + faq.frage + '</b></h3><p>Antwort: ' + faq.antwort + '</p>';
+    container.appendChild(faqElement);
+});
+
+    // Fügen Sie einen Schließen-Button hinzu, der sich oben rechts befindet
+    var closeButton = document.createElement('button');
+    closeButton.textContent = 'Schließe FAQs';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '0';
+    closeButton.style.right = '0';
+    closeButton.addEventListener('click', function () {
+        document.body.removeChild(modal);
+    });
+    modal.appendChild(closeButton);
+
+    // Erstellen Sie ein Input-Feld für die Suche
+var searchInput = document.createElement('input');
+searchInput.placeholder = 'Suche...';
+searchInput.style.width = '100%';
+searchInput.addEventListener('input', function() {
+    var searchText = searchInput.value.toLowerCase(); // Text im Eingabefeld
+    var faqElements = modal.getElementsByClassName('faq'); // Alle FAQ Elemente im modal
+
+    for (var i = 0; i < faqElements.length; i++) {
+        var faq = faqElements[i];
+        var question = faq.getAttribute('data-question').toLowerCase(); // Frage für dieses FAQ Element
+
+        // Überprüft, ob der Suchtext in der Frage enthalten ist
+        if (question.includes(searchText)) {
+            faq.style.display = ''; // Zeigt das FAQ Element an
+        } else {
+            faq.style.display = 'none'; // Versteckt das FAQ Element
+        }
+    }
+});
+container.insertBefore(searchInput, container.firstChild); // Änderungen hier
+
+modal.appendChild(container);
+
+    document.body.appendChild(modal);
+}
+
+var faqs = [
+    { frage: 'Wie benutze ich den Video-Player?', antwort: 'Sie können auf Play klicken oder die Leertaste drücken, um das Video abzuspielen und zu pausieren. Verwenden Sie die linken und rechten Pfeiltasten, um vorwärts und rückwärts zu spulen.' },
+    { frage: 'Wie füge ich Marker hinzu?', antwort: 'Drücken Sie "m" auf Ihrer Tastatur, um einen Marker hinzuzufügen.' },
+    { frage: 'Wie kann ich die Wiedergabegeschwindigkeit eines Videos ändern?', antwort: 'Die Wiedergabegeschwindigkeit kann direkt im Playerfenster geändert werden.' },
+    { frage: 'Kann ich Anmerkungen in einem Video setzen?', antwort: 'Ja, Sie können Marker setzen, diese werden dann in der Marker-Liste angezeigt.' },
+    { frage: 'Ich sehe das Transkript nicht. Warum?', antwort: 'Überprüfen Sie das Kontrollkästchen Transkript anzeigen, um das Transkript anzuzeigen oder auszublenden.' },
+    { frage: 'Wie kann ich das Transkript bearbeiten?', antwort: 'Klicken Sie auf die Schaltfläche "Bearbeiten", um das Transkript zu bearbeiten. Wenn Sie mit den Änderungen fertig sind, klicken Sie auf "Bearbeitung beenden".' },
+    { frage: 'Wie kann ich zum vorherigen oder nächsten Marker springen?', antwort: 'Mit den Pfeiltasten Up (zum vorherigen Marker) und Down (zum nächsten Marker) können Sie zwischen den Markern navigieren.' },
+    { frage: 'Was bedeutet das grüne und schwarze Highlighting im Transkript?', antwort: 'Die grüne Hervorhebung im Transkript bedeutet, dass es sich um einen Sprechertext handelt.' },
+    { frage: 'Wie wechsele ich den Zeichenmodus?', antwort: 'Sie können auf den Stift in der unteren rechten Ecke des Screenshots klicken und dann die Farbe und Größe des Stifts ändern.' },
+    { frage: 'Kann ich meine Marker speichern und laden?', antwort: 'Ja, Sie können Ihre Marker über die Dropdown-Liste "Markeroptionen" speichern und laden.' },
+    { frage: 'Wie erstelle ich einen Screenshot?', antwort: 'Um einen Screenshot zu erstellen, wählen Sie "Screenshot" aus der Dropdown-Liste bei einem Marker.' },
+    { frage: 'Wie kann ich die Marker-Liste exportieren?', antwort: 'Die Marker-Liste kann über die Dropdown-Liste "Exportoptionen" exportiert werden.' },
+    { frage: 'Was mache ich, wenn die Anwendung nicht reagiert?', antwort: 'Wenn die Anwendung nicht reagiert, aktualisieren Sie die Seite oder starten Sie Ihren Browser neu.' },
+    { frage: 'Wie kann ich den Dunkelmodus ein- und ausschalten?', antwort: 'Klicken Sie auf den "Dunkelmodus ein/ausschalten"-Button in der oberen linken Ecke, um den Dunkelmodus ein- oder auszuschalten.' },
+    { frage: 'Kann ich den Videoplayer im Hintergrund laufen lassen?', antwort: 'Ja, der Video-Player kann im Hintergrund laufen, solange das Browserfenster geöffnet ist.' },
+    // Fügen Sie so viele Fragen und Antworten hinzu, wie Sie möchten
+];
 
 let editMode = false;
 function toggleEditMode() {
@@ -1246,5 +1354,7 @@ function createScreenshot(index) {
          e.target.classList.add('selected');
      });
  });
+
+ 
 
  

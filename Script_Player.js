@@ -580,6 +580,93 @@ function deleteEdlMarkers(){
     }
 }
 
+var faqModal;
+function openFAQs() {
+    
+    // Erstellen Sie ein Modalfenster
+    var modal = document.createElement('div');
+    modal.className = 'faq-modal';
+    modal.style.position = 'fixed';
+    modal.style.zIndex = 1;
+    modal.style.left = '0';
+    modal.style.top = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.overflow = 'hidden'; // Nehmen Sie overflow:hidden statt overflow:auto, um das Scrollen zu verhindern
+    modal.style.backgroundColor = 'rgba(0,0,0,0.4)';
+
+    // Erstellen Sie einen Container für die FAQs
+    var container = document.createElement('div');
+container.style.overflow = 'auto';
+container.style.backgroundColor = '#fefefe';
+container.style.margin = '5% auto';
+container.style.padding = '20px';
+container.style.border = '1px solid #888';
+container.style.width = '80%';
+container.style.maxHeight = '70%'; // Stellen Sie maxHeight für den Container ein
+modal.appendChild(container);
+
+
+
+// Erstellen Sie den Inhalt des Modals
+faqs.forEach(function (faq, index) {
+    var faqElement = document.createElement('div');
+    faqElement.setAttribute('data-question', faq.frage); // Setzen Sie das 'data-question' Attribut
+    faqElement.className = 'faq'; // Fügen Sie diese Linie hinzu
+    faqElement.innerHTML = '<h3>' + (index + 1) + '. <b>' + faq.frage + '</b></h3><p>Antwort: ' + faq.antwort + '</p>';
+    container.appendChild(faqElement);
+});
+
+    // Fügen Sie einen Schließen-Button hinzu, der sich oben rechts befindet
+    var closeButton = document.createElement('button');
+    closeButton.textContent = 'Schließe FAQs';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '0';
+    closeButton.style.right = '0';
+    closeButton.addEventListener('click', function () {
+        document.body.removeChild(modal);
+    });
+    modal.appendChild(closeButton);
+
+    // Erstellen Sie ein Input-Feld für die Suche
+var searchInput = document.createElement('input');
+searchInput.placeholder = 'Suche...';
+searchInput.style.width = '100%';
+searchInput.addEventListener('input', function() {
+    var searchText = searchInput.value.toLowerCase(); // Text im Eingabefeld
+    var faqElements = modal.getElementsByClassName('faq'); // Alle FAQ Elemente im modal
+
+    for (var i = 0; i < faqElements.length; i++) {
+        var faq = faqElements[i];
+        var question = faq.getAttribute('data-question').toLowerCase(); // Frage für dieses FAQ Element
+
+        // Überprüft, ob der Suchtext in der Frage enthalten ist
+        if (question.includes(searchText)) {
+            faq.style.display = ''; // Zeigt das FAQ Element an
+        } else {
+            faq.style.display = 'none'; // Versteckt das FAQ Element
+        }
+    }
+});
+container.insertBefore(searchInput, container.firstChild); // Änderungen hier
+
+modal.appendChild(container);
+
+    document.body.appendChild(modal);
+}
+
+var faqs = [
+    { frage: 'Wie benutze ich den Video-Player?', antwort: 'Sie können auf Play klicken oder die Leertaste drücken, um das Video abzuspielen und zu pausieren. Verwenden Sie die linken und rechten Pfeiltasten, um vorwärts und rückwärts zu spulen.' },
+    { frage: 'Wie füge ich Marker hinzu?', antwort: 'Drücken Sie "m" auf Ihrer Tastatur, um einen Marker hinzuzufügen.' },
+    { frage: 'Wie benutze ich den Video-Player?', antwort: 'Sie können auf Play klicken oder die Leertaste drücken, um das Video abzuspielen und zu pausieren. Verwenden Sie die linken und rechten Pfeiltasten, um vorwärts und rückwärts zu spulen.' },
+    { frage: 'Wie füge ich Marker hinzu?', antwort: 'Drücken Sie "m" auf Ihrer Tastatur, um einen Marker hinzuzufügen.' },
+    { frage: 'Wie benutze ich den Video-Player?', antwort: 'Sie können auf Play klicken oder die Leertaste drücken, um das Video abzuspielen und zu pausieren. Verwenden Sie die linken und rechten Pfeiltasten, um vorwärts und rückwärts zu spulen.' },
+    { frage: 'Wie füge ich Marker hinzu?', antwort: 'Drücken Sie "m" auf Ihrer Tastatur, um einen Marker hinzuzufügen.' },
+    { frage: 'Wie benutze ich den Video-Player?', antwort: 'Sie können auf Play klicken oder die Leertaste drücken, um das Video abzuspielen und zu pausieren. Verwenden Sie die linken und rechten Pfeiltasten, um vorwärts und rückwärts zu spulen.' },
+    { frage: 'Wie füge ich Marker hinzu?', antwort: 'Drücken Sie "m" auf Ihrer Tastatur, um einen Marker hinzuzufügen.' },
+    // Fügen Sie so viele Fragen und Antworten hinzu, wie Sie möchten
+];
+
 window.addEventListener('keydown', function(event) {
     // Überprüfen, ob das Transkript-Suchfeld den Fokus hat
     if (document.activeElement.id === 'transcriptSearch') {
@@ -613,6 +700,16 @@ window.addEventListener('keydown', function(event) {
             rewind(1/25); // 1 Frame zurück
         } else {
             rewind(5); // 5 Sekunden zurück
+        }
+    }
+    else if (event.altKey && event.key === 'f') { // `ALT + F` 
+        event.preventDefault();
+
+        var faqModal = document.querySelector('.faq-modal');
+        if (faqModal) {
+            document.body.removeChild(faqModal);
+        } else {
+            openFAQs();
         }
     }
     else if (event.key === 'ArrowRight') {
