@@ -82,7 +82,6 @@ body.dark-mode #shortcuts {
 }
 
 
-
 body.dark-mode .faq-modal div {
         color: #000000;
 }
@@ -454,6 +453,7 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 	    <tr><td><b>Pfeil unten</b></td><td>: nächster Marker</td></tr>
 	    <tr><td><b>E + Entf</b></td><td>: EDL Marker löschen</td></tr>
 	    <tr><td><b>/</b></td><td>: Timecodesuche</td></tr>
+	    <tr><td><b>ALT + T</b></td><td>: Start-Timecode</td></tr>
 	    <tr><td><b>Alt + F</b></td><td>: FAQ</td></tr>
         </table>
     </div>
@@ -490,7 +490,11 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
     <option value="save">Stand speichern</option>
     <option value="load">Speicherstand laden</option>
     <option value="loadEDL">EDL laden</option> 
+    <option value="loadMarkerList">Avid Marker laden</option> 
 </select>
+
+
+<input type="file" id="loadMarkerListFile" style="display: none;">
 
   <input type="file" id="loadMarkersFile" style="display: none;" onchange="loadMarkers(event)">
   

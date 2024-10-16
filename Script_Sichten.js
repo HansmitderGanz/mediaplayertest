@@ -11,10 +11,9 @@ $(document).ready(function() {
     }, false);
     
     document.body.addEventListener("drop", function (evt) {
-        // create a pseudo-event
         evt.preventDefault();
         var files = evt.dataTransfer.files;
-        if (files.length > 0) {
+        if (files && files.length > 0) {
             var file = files[0];
             if (file.type.startsWith("video/")) {
                 // Call loadVideo() function
@@ -50,6 +49,7 @@ var videoFile = '';
 var videoElement;
 var pendingParagraphIndex = 0;
 var drawingPaths = [];
+
 
 
 // Globale Variable, die den Index des aktuellen Absatzes speichert
@@ -460,14 +460,19 @@ var faqs = [
     { frage: 'Ich sehe das Transkript nicht. Warum?', antwort: 'Überprüfen Sie das Kontrollkästchen Transkript anzeigen, um das Transkript anzuzeigen oder auszublenden.' },
     { frage: 'Wie kann ich das Transkript bearbeiten?', antwort: 'Klicken Sie auf die Schaltfläche "Bearbeiten", um das Transkript zu bearbeiten. Wenn Sie mit den Änderungen fertig sind, klicken Sie auf "Bearbeitung beenden".' },
     { frage: 'Wie kann ich zum vorherigen oder nächsten Marker springen?', antwort: 'Mit den Pfeiltasten Up (zum vorherigen Marker) und Down (zum nächsten Marker) können Sie zwischen den Markern navigieren.' },
-    { frage: 'Was bedeutet das grüne und schwarze Highlighting im Transkript?', antwort: 'Die grüne Hervorhebung im Transkript bedeutet, dass es sich um einen Sprechertext handelt.' },
+    { frage: 'Was bedeutet das grüne Highlighting im Transkript?', antwort: 'Die grüne Hervorhebung im Transkript bedeutet, dass es sich um einen Sprechertext handelt.' },
     { frage: 'Wie wechsele ich den Zeichenmodus?', antwort: 'Sie können auf den Stift in der unteren rechten Ecke des Screenshots klicken und dann die Farbe und Größe des Stifts ändern.' },
     { frage: 'Kann ich meine Marker speichern und laden?', antwort: 'Ja, Sie können Ihre Marker über die Dropdown-Liste "Markeroptionen" speichern und laden.' },
     { frage: 'Wie erstelle ich einen Screenshot?', antwort: 'Um einen Screenshot zu erstellen, wählen Sie "Screenshot" aus der Dropdown-Liste bei einem Marker.' },
-    { frage: 'Wie kann ich die Marker-Liste exportieren?', antwort: 'Die Marker-Liste kann über die Dropdown-Liste "Exportoptionen" exportiert werden.' },
+    { frage: 'Wie kann ich die Marker-Liste exportieren?', antwort: 'Die Marker-Liste kann über die Dropdown-Liste "Anmerkungen exportieren" exportiert werden.' },
     { frage: 'Was mache ich, wenn die Anwendung nicht reagiert?', antwort: 'Wenn die Anwendung nicht reagiert, aktualisieren Sie die Seite oder starten Sie Ihren Browser neu.' },
     { frage: 'Wie kann ich den Dunkelmodus ein- und ausschalten?', antwort: 'Klicken Sie auf den "Dunkelmodus ein/ausschalten"-Button in der oberen linken Ecke, um den Dunkelmodus ein- oder auszuschalten.' },
     { frage: 'Kann ich den Videoplayer im Hintergrund laufen lassen?', antwort: 'Ja, der Video-Player kann im Hintergrund laufen, solange das Browserfenster geöffnet ist.' },
+    { frage: 'Kann ich meine Arbeit speichern und an einem anderen Tag weitermachen?', antwort: 'Ja, Sie können über das Dropdown-Menü "Stand Speichern / Laden" die Aktion "Stand speichern" auswählen. Der Player speichert nun eine .txt-Datei auf Ihrem Rechner, die Ihren aktuellen Speicherstand darstellt. Beim erneuten Öffnen oder Neuladen des Players können Sie nun über dasselbe Dropdown-Menü Ihren Speicherstand laden. Wählen Sie dazu die Option "Speicherstand laden", wählen Sie die .txt-Datei aus und bestätigen Sie Ihre Auswahl.' },
+    { frage: 'Kann ich meinen Speicherstand an jemand anderen weitergeben?', antwort: 'Ja, Sie können Ihren Speicherstand auch an eine andere Person weitergeben. Diese Person kann dann die Speicherstand .txt im Player laden und mit Ihrem Speicherstand weiterarbeiten.' },
+    { frage: 'Warum muss ich meinen Namen eingeben?', antwort: 'Die Abfrage des Namens erfolgt, um anzuzeigen welche Person eine entsprechende Anmerkung oder Bearbeitung durchgeführt hat. Bei Fragen oder Unklarheiten ist damit sofort ein Ansprechpartner oder Ansprechpartnerin erkennbar.' },
+    { frage: 'Warum gibt es dieses mega Tool erst jetzt?', antwort: 'Gute Frage, das muss ich mal an die KI weitergeben. Weitere Informationen finden Sie <a href="https://www.youtube.com/watch?v=1P5yyeeYF9o" target="_blank">hier</a>.' },
+    { frage: 'Kann ich auch für Microsoft Word exportieren?', antwort: 'Der Player bietet zum jetzigen Zeitpunkt nur die Möglichkeit eine .txt-Datei zu exportieren. Die Inhalte müssen dann außerhalb des Players in Microsoft Office übertragen werden.' },
     // Fügen Sie so viele Fragen und Antworten hinzu, wie Sie möchten
 ];
 
@@ -753,6 +758,7 @@ screenshotBtn.onclick = createScreenshot;
 }
 
 function updateMarkerList() {
+    console.log('updateMarkerList has been called');
     var markerList = $('#markerList');
     markerList.empty();
 
@@ -790,6 +796,7 @@ function updateMarkerList() {
     } else {
         // Marker-Liste verbergen, wenn keine Marker vorhanden sind
         document.getElementById('markerListContainer').classList.add('hidden');
+        let markers = [];
     }
 }
 
@@ -862,8 +869,10 @@ function handleSaveOptions(selectElem) {
         saveMarkers();
     } else if (selectedOption === 'load') {
         document.getElementById('loadMarkersFile').click();
+    } else if (selectedOption === 'loadMarkerList') {
+        document.getElementById('loadMarkerListFile').click();
     }
-    selectElem.selectedIndex = 0;
+    selectElem.selectedIndex = 0; // Reset the dropdown
 
 }
 
@@ -896,7 +905,7 @@ function saveMarkers() {
     a.style = "display: none";
     var url = window.URL.createObjectURL(blob);
     a.href = url;
-    a.download = videoFile.replace(/\.[^/.]+$/, "") + "_Anmerkungen_Speicherstand_" + dateString + ".txt";
+    a.download = videoFile.replace(/\.[^/.]+$/, "") + "_99proMP_Vorschnitt" + "_Speicherstand_" + dateString + ".txt";
     a.click();
     window.URL.revokeObjectURL(url);
 }
@@ -926,9 +935,11 @@ function createTranscriptElement(line) {
 }
 
 function loadMarkers(event) {
+    console.log('loadMarkers has been called');
     var file = event.target.files[0];
     var reader = new FileReader();
     reader.onload = function (e) {
+        console.log('File has been read'); 
         var content = e.target.result;
         var loadData = JSON.parse(content);
         markers = loadData.markers; 
@@ -942,9 +953,12 @@ function loadMarkers(event) {
             transcriptContainer.appendChild(newElem);
         });
 
+        console.log('Markers and the transcript have been updated');
+
         // Show the marker list container if there are markers
+        
         var markerListContainerElement = document.getElementById('markerListContainer');
-        if (markers.length > 0) {
+        if (markers && markers.length > 0) {
             markerListContainerElement.classList.remove('hidden');
         }
 
@@ -963,7 +977,59 @@ function loadMarkers(event) {
         }
     };
     reader.readAsText(file);
+    
 }
+
+// Datei-Input-Button erstellen
+var loadMarkerListButton = document.createElement('input');
+loadMarkerListButton.setAttribute('type', 'file');
+loadMarkerListButton.setAttribute('id', 'loadMarkerListFile');
+loadMarkerListButton.style.display = 'none';
+document.body.appendChild(loadMarkerListButton);
+
+// Funktion zum Laden der Markerliste
+function loadMarkerList(event) {
+    var file = event.target.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var content = e.target.result;
+
+        // Split the content into lines
+        var lines = content.split('\n');
+
+        // Initialize 'markers' as an empty array
+        markers = [];
+        
+        lines.forEach(function(line) {
+            var parts = line.split('\t');
+            
+            // Check if all parts exist
+            if (parts.length < 5) {
+                console.log('Unexpected line structure, less than 5 elements: ', line);
+                return;
+            }
+
+            var marker = {
+                timeInSeconds: parseFloat(parts[0]),
+                timecode: parts[1],
+                description: parts[2],
+                userName: parts[3],
+                // Interpret the string 'true' as true, and anything else as false
+                hasScreenshot: parts[4].toLowerCase() === 'true' ? true : false,
+            };
+            markers.push(marker);
+        });
+
+        // Update the marker list after loading the markers
+        updateMarkerList();
+    };
+    reader.readAsText(file);
+}
+        
+          
+
+// Verknüpft die Funktion mit dem 'MarkerListe importieren' Button
+document.getElementById('loadMarkersFile').addEventListener('change', loadMarkerList);
 
 
 function handleExportOptions(selectElem) {
@@ -996,40 +1062,34 @@ function exportTranscript(transcriptState) {
 
 function exportTable() {
     var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
-
-    // Aktuelles Datum erstellen
+    
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //Januar ist 0
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
     var yyyy = today.getFullYear();
     var todayDate =  dd + '.' + mm + '.' + yyyy;
-
-    // Exportiert Markerliste
+    
     var text = 'Dateiname: ' + nameWithoutExtension 
     + '\nSichtung durch: ' + currentUserName 
-    + '\nSichtungsdatum: ' + todayDate;  // Das heutige Datum als Sichtungsdatum hinzufügen
+    + '\nSichtungsdatum: ' + todayDate;
 
     text += '\n\n-------------- AUFLISTUNG ANMERKUNGEN/SPRECHERTEXT -------------\n\n';
-
-    // Alle Absätze des Transkripts abrufen
     var transcriptLines = Array.from(document.querySelectorAll('#transcript p'));
-
-    // Die längste Anmerkung zuerst finden
     var maxNoteLength = 0;
+    
     markers.forEach(function(marker) {
-        if (marker.description.length > maxNoteLength) {
-            maxNoteLength = marker.description.length;
+        var fullDescription = marker.description + (marker.hasScreenshot ? ' - siehe Screenshot NR' + marker.screenshotTime : '');
+        if (fullDescription.length > maxNoteLength) {
+            maxNoteLength = fullDescription.length;
         }
     });
 
-    // Tabellenüberschriften berechnen und eine zusätzliche Benutzer-Spalte hinzufügen
     var noteHeader = 'Anmerkung';
-    var userHeader = 'gesetzt von'; // Neue Spalte hinzufügen für den Benutzernamen
+    var userHeader = 'gesetzt von'; 
     var speechHeaderText = 'Sprechertext';
-    let repeatCount = Math.max(0, maxNoteLength - noteHeader.length + 1);
-text += 'Nummer\tTimecode\t' + noteHeader + ' '.repeat(repeatCount) + '\t' + userHeader + '\t' + speechHeaderText + '\n';
+    let repeatCount = Math.max(0, maxNoteLength - noteHeader.length + 2);
+    text += 'Nummer\tTimecode\t' + noteHeader + ' '.repeat(repeatCount) + '\t' + userHeader + '\t' + speechHeaderText + '\n';
 
-    // Anmerkung und Benutzerinformationen zur ausgegebenen Tabelle hinzufügen
     markers.forEach(function(marker, index) {
         var correspondingTranscriptLine = transcriptLines.find(p => {
             return Math.abs(parseFloat(p.getAttribute('data-time')) - marker.timeInSeconds) <= 1;
@@ -1040,12 +1100,12 @@ text += 'Nummer\tTimecode\t' + noteHeader + ' '.repeat(repeatCount) + '\t' + use
             speechText = correspondingTranscriptLine.getAttribute('data-saved').trim();
         }
 
-        text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + ' '.repeat(maxNoteLength - marker.description.length + 1) + '\t' + marker.userName + '\t' + speechText + '\n'; // Marker.userName zur Ausgabe hinzufügen
+        var fullDescription = marker.description + (marker.hasScreenshot ? ' - siehe Screenshot NR' + marker.screenshotTime : '');
+        text += (index + 1) + '\t' + marker.timecode + '\t' + fullDescription + ' '.repeat(maxNoteLength - fullDescription.length + 2) + '\t' + marker.userName + '\t' + speechText + '\n';
     });
 
     text += '\n\n-------------- AUFLISTUNG SPRECHERTEXT -------------\n\n' + extractSpeakerLines() + '\n\n--------------------- GESAMT TRANSKRIPT ---------------------\n\n';
 
-    // Exportiert Transcript
     var transcriptState = Array.from(document.querySelectorAll('#transcriptContainer p, #transcriptContainer textarea'))
     .map(p => ({ 
         text: p.textContent || p.value,  

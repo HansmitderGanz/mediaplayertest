@@ -81,11 +81,11 @@ function loadVideo(event) {
         }
     });
 
-    // "Wartezeit" für das Laden des ersten Videoframes
-    setTimeout(function() {
+   // "Wartezeit" für das Laden des ersten Videoframes
+setTimeout(function() {
     var startTC = null;
     while (!startTC) {
-        startTC = prompt('Bitte geben Sie den Start Timecode ein (im Format HH:MM:SS:FF)');
+        startTC = prompt('Bitte Treffen sie eine Auswahl! \n-------------------\nSchauen sie eine Rohmaterial Sequenz mit Start-Timecode 00:00:00:00 = Bestätigen Sie mit ENTER/OK.\n-------------------\nSchauen sie einzel Rohmaterial Clips = Bitte geben Sie den im Video angezeigten Start-Timecode ein (im Format HH:MM:SS:FF)', '00:00:00:00');
         if (startTC === null) {
             alert('Sie müssen einen Start-Timecode eingeben, um das Video abspielen zu können.');
         }
@@ -302,18 +302,15 @@ function setMarker() {
     var description = '';
 
     do {
-        description = prompt("Bitte geben Sie eine Anmerkung für den Marker ein");
+        description = prompt("Please enter a description for the marker");
         if (description === null) {
             return;
         }
     } while(description.trim() === '');
 
-   
-
     // Die aktuelle Zeit des Videos wird zur Basiszeit addiert, um den Timecode zu berechnen
-    var userName = currentUserName ? currentUserName : 'Unbekannter Benutzer';
     var timecode = convertTimeToTimecode(baseTimecodeInSeconds + currentTime, 25);
-    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, userName: userName, canvas: new fabric.Canvas(), screenshot: null, hasScreenshot: false, screenshotTime: null, source: 'user'})
+    markers.push({timeInSeconds: currentTime, timecode: timecode, description: description, source: 'user', userName: currentUserName })
     
     console.log("Setting marker at time: ", currentTime);
     console.log("Calculated timecode: ", timecode);
@@ -343,7 +340,7 @@ function updateMarkerList() {
             if (markerTime !== undefined) {
                 console.log("Jumping to Timecode: ", marker.timecode); // Add `console.log()` to log the timecode.
                 console.log("markerTime is: ", markerTime);
-                videoElement.currentTime = markerTime;
+                videoElement.currentTime = marker.timeInSeconds;
                 if (marker.source === 'edl') {  // Check if the source is 'edl'
                     marker.visited = true;  // Add a new property `visited`
                     updateMarkerList();  // Update the marker list after setting `visited`
@@ -468,9 +465,13 @@ function handleSaveOptions(selectElem) {
         document.getElementById('loadMarkersFile').click();
     } else if (selectedOption === 'loadEDL') {
         document.getElementById('loadEDLFile').click();
+    } else if (selectedOption === 'loadMarkerList') {
+        document.getElementById('loadMarkerListFile').click();
     }
     selectElem.selectedIndex = 0; // Reset the dropdown
 }
+
+
 
 function saveMarkers() {
     var date = new Date();
@@ -482,7 +483,7 @@ function saveMarkers() {
     a.style = "display: none";
     var url = window.URL.createObjectURL(blob);
     a.href = url;
-    a.download = videoFile.replace(/\.[^/.]+$/, "") + "_Anmerkungen_Speicherstand_" + dateString + ".txt";
+    a.download = videoFile.replace(/\.[^/.]+$/, "") + "_99proMP_Vorschnitt" + "_Speicherstand_" + dateString + ".txt";
     a.click();
     window.URL.revokeObjectURL(url);
 }
@@ -505,6 +506,59 @@ function loadMarkers(event) {
     // Hier setzen wir das Eingabefeld zurück
     event.target.value = null;
 }
+
+// Datei-Input-Button erstellen
+var loadMarkerListButton = document.createElement('input');
+loadMarkerListButton.setAttribute('type', 'file');
+loadMarkerListButton.setAttribute('id', 'loadMarkerListFile');
+loadMarkerListButton.style.display = 'none';
+document.body.appendChild(loadMarkerListButton);
+
+// Funktion zum Laden der Markerliste
+function loadMarkerList(event) {
+    var file = event.target.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var content = e.target.result;
+        
+        var lines = content.split('\n');
+        // Initialisiere markers als leeren Array
+        markers = [];
+        lines.forEach(function(line) {
+            var parts = line.split('\t');
+
+            // Überprüfe ob alle Teile existieren
+            if (parts.length < 5) {
+                console.log('Unerwartete Zeilenstruktur, weniger als 5 Elemente: ', line);
+                return;
+            }
+        
+            var timecode = parts[1];
+            var description = parts[4].split(' (gesetzt')[0];
+            var userName = parts[4].split(' ')[parts[4].split(' ').length-1].slice(0, -1);
+            var source = description.startsWith('Clip: ') ? 'edl' : 'user';
+            var timeInSeconds = timecodeToSeconds(timecode) - baseTimecodeInSeconds;
+
+            markers.push({
+              timeInSeconds: timeInSeconds,
+              timecode: timecode,
+              description: description,
+              source: source,
+              userName: userName
+            });
+        });
+
+        updateMarkerList();
+    }
+
+    reader.readAsText(file);
+
+    // Setzt das Eingabefeld zurück
+    event.target.value = null;
+}
+
+// Verknüpft die Funktion mit dem 'MarkerListe importieren' Button
+document.getElementById('loadMarkerListFile').addEventListener('change', loadMarkerList);
 
 function handleExportOptions(selectElem) {
     var selectedOption = selectElem.value;
@@ -531,21 +585,31 @@ function exportTable() {
     // Exportiert Markerliste
     var text = 'Dateiname: ' + nameWithoutExtension 
     + '\nSichtung durch: ' + currentUserName 
-    + '\nSichtungsdatum: ' + todayDate;  // Das heutige Datum als Sichtungsdatum hinzufügen
+    + '\nSichtungsdatum: ' + todayDate; 
+
+    var transcriptLines = Array.from(document.querySelectorAll('#transcript p'));
 
     // Findet die längste Anmerkung zuerst
     var maxNoteLength = 0;
     markers.forEach(function(marker) {
-        if (marker.description.length > maxNoteLength) {
-            maxNoteLength = marker.description.length;
+        var fullDescription = marker.description + (marker.hasScreenshot ? ' - siehe Screenshot NR' + marker.screenshotTime : '');
+        if (fullDescription.length > maxNoteLength) {
+            maxNoteLength = fullDescription.length;
         }
     });
 
-    var repeatCount = Math.max(0, maxNoteLength - 'Anmerkung'.length + 4);
-    text += '\n\nNummer\tTimecode\tAnmerkung' + ' '.repeat(repeatCount) + '\tangemerkt von\n'; // Nutzen Sie '+=' anstatt '='
+    var noteHeader = 'Anmerkung';
+    var userHeader = 'angemerkt von'; 
+    let repeatCount = Math.max(0, maxNoteLength - noteHeader.length + 2);
+    text += '\n\nNummer\tTimecode\t' + noteHeader + ' '.repeat(repeatCount) + '\t' + userHeader + '\n';
 
     markers.forEach(function(marker, index) {
-        text += (index + 1) + '\t' + marker.timecode + '\t' + marker.description + ' '.repeat(maxNoteLength - marker.description.length + 4) + '\t' + marker.userName + '\n';
+        var correspondingTranscriptLine = transcriptLines.find(p => {
+            return Math.abs(parseFloat(p.getAttribute('data-time')) - marker.timeInSeconds) <= 1;
+        });
+
+        var fullDescription = marker.description + (marker.hasScreenshot ? ' - siehe Screenshot NR' + marker.screenshotTime : '');
+        text += (index + 1) + '\t' + marker.timecode + '\t' + fullDescription + ' '.repeat(maxNoteLength - fullDescription.length + 2) + '\t' + marker.userName + '\n';
     });
 
     var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
@@ -658,12 +722,13 @@ modal.appendChild(container);
 var faqs = [
     { frage: 'Wie benutze ich den Video-Player?', antwort: 'Sie können auf Play klicken oder die Leertaste drücken, um das Video abzuspielen und zu pausieren. Verwenden Sie die linken und rechten Pfeiltasten, um vorwärts und rückwärts zu spulen.' },
     { frage: 'Wie füge ich Marker hinzu?', antwort: 'Drücken Sie "m" auf Ihrer Tastatur, um einen Marker hinzuzufügen.' },
-    { frage: 'Wie benutze ich den Video-Player?', antwort: 'Sie können auf Play klicken oder die Leertaste drücken, um das Video abzuspielen und zu pausieren. Verwenden Sie die linken und rechten Pfeiltasten, um vorwärts und rückwärts zu spulen.' },
-    { frage: 'Wie füge ich Marker hinzu?', antwort: 'Drücken Sie "m" auf Ihrer Tastatur, um einen Marker hinzuzufügen.' },
-    { frage: 'Wie benutze ich den Video-Player?', antwort: 'Sie können auf Play klicken oder die Leertaste drücken, um das Video abzuspielen und zu pausieren. Verwenden Sie die linken und rechten Pfeiltasten, um vorwärts und rückwärts zu spulen.' },
-    { frage: 'Wie füge ich Marker hinzu?', antwort: 'Drücken Sie "m" auf Ihrer Tastatur, um einen Marker hinzuzufügen.' },
-    { frage: 'Wie benutze ich den Video-Player?', antwort: 'Sie können auf Play klicken oder die Leertaste drücken, um das Video abzuspielen und zu pausieren. Verwenden Sie die linken und rechten Pfeiltasten, um vorwärts und rückwärts zu spulen.' },
-    { frage: 'Wie füge ich Marker hinzu?', antwort: 'Drücken Sie "m" auf Ihrer Tastatur, um einen Marker hinzuzufügen.' },
+    { frage: 'Warum wird mein Transkript nicht angezeigt?', antwort: 'Für diesen Player müssen die Transkripte in Trint erstellt werden. Exportieren Sie das Transkript als Avid Subtitle Datei im .txt Format.' },
+    { frage: 'Warum wird mein Sprechertext nicht grün markiert?', antwort: 'Bei der Transkripterstellung in Trint müssen Sprechertexte die Zuordnung "Sprechertext" erhalten. Ist das nicht der Fall, so werden sie vom Player nicht als Sprechertext erkannt.' },
+    { frage: 'Kann ich meine Arbeit speichern und an einem anderen Tag weitermachen?', antwort: 'Ja, Sie können über das Dropdown-Menü "Stand Speichern / Laden" die Aktion "Stand speichern" auswählen. Der Player speichert nun eine .txt-Datei auf Ihrem Rechner, die Ihren aktuellen Speicherstand darstellt. Beim erneuten Öffnen oder Neuladen des Players können Sie nun über dasselbe Dropdown-Menü Ihren Speicherstand laden. Wählen Sie dazu die Option "Speicherstand laden", wählen Sie die .txt-Datei aus und bestätigen Sie Ihre Auswahl.' },
+    { frage: 'Kann ich meinen Speicherstand an jemand anderen weitergeben?', antwort: 'Ja, Sie können Ihren Speicherstand auch an eine andere Person weitergeben. Diese Person kann dann die Speicherstand .txt im Player laden und mit Ihrem Speicherstand weiterarbeiten.' },
+    { frage: 'Warum muss ich meinen Namen eingeben?', antwort: 'Die Abfrage des Namens erfolgt, um anzuzeigen welche Person eine entsprechende Anmerkung oder Bearbeitung durchgeführt hat. Bei Fragen oder Unklarheiten ist damit sofort ein Ansprechpartner oder Ansprechpartnerin erkennbar.' },
+    { frage: 'Warum gibt es dieses mega Tool erst jetzt?', antwort: 'Gute Frage, das muss ich mal an die KI weitergeben.Weitere Informationen finden Sie <a href="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYm81dmUzY2V1ZWhwMGV2dndoNmxqZzhqOGFqY2NiemM0b2c4czF1biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/kE6xCyOOHoxlS/giphy.webp" target="_blank">hier</a>.' },
+    { frage: 'Kann ich auch für Microsoft Word exportieren?', antwort: 'Der Player bietet zum jetzigen Zeitpunkt nur die Möglichkeit eine .txt-Datei zu exportieren. Die Inhalte müssen dann außerhalb des Players in Microsoft Office übertragen werden.' },
     // Fügen Sie so viele Fragen und Antworten hinzu, wie Sie möchten
 ];
 
@@ -721,6 +786,40 @@ window.addEventListener('keydown', function(event) {
         }
     }
 });
+
+window.addEventListener('keydown', function(event) {
+    switch (event.key) {
+        case "Alt":
+            break;
+        case "t":
+        case "T":
+            if (event.altKey) {
+                var newTimecode = prompt("Bitte geben Sie den neuen Start-Timecode ein (im Format HH:MM:SS:FF):");
+                if (newTimecode !== null) {
+                    adjustStartTC(newTimecode);
+                }
+            }
+            break;
+        default:
+            break;
+    }
+});
+
+
+function adjustStartTC(newStartTC) {
+    var newBaseTimecodeInSeconds = timecodeToSeconds(newStartTC);
+    var offset = newBaseTimecodeInSeconds - baseTimecodeInSeconds; // Offset berechnen
+
+    baseTimecodeInSeconds = newBaseTimecodeInSeconds; // Basis-Timecode aktualisieren
+
+    // Aktualisieren Sie die timecode aller Marker ohne die Alteration der timeInSeconds
+    markers.forEach(function(marker) {
+        marker.timecode = convertTimeToTimecode(marker.timeInSeconds + newBaseTimecodeInSeconds, 25);
+    });
+
+    updateMarkerList();
+}
+
 
 window.addEventListener('keydown', function(event) {
     if (document.activeElement.nodeName === 'INPUT') {
