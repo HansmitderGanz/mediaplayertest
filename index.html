@@ -132,6 +132,7 @@ backgroundImages.forEach((img) => {
 	var audioElement = document.getElementById('mySoundClip');
 
         $('#leftHalf').click(function() {
+    audioElement.currentTime = 0;
     audioElement.play();
     if (viewState === 'main') {
         changeBackground('player', transitionVideoPlayer);
@@ -143,6 +144,7 @@ backgroundImages.forEach((img) => {
 });
 
 $('#rightHalf').click(function() {
+    audioElement.currentTime = 0;
     audioElement.play();
     if (viewState === 'main') {
         changeBackground('sichter', transitionVideoSichter);
