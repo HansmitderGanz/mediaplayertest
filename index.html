@@ -82,6 +82,7 @@ object-fit: cover;
 <body>
 
 <audio id="mySoundClip" src="Spin_Sound.mp3"></audio>
+<audio id="centerButtonSound" src="Sound_to_website.mp3"></audio>
 
     <div id="leftHalf" class="nav-area"></div>
     <div id="rightHalf" class="nav-area"></div>
@@ -167,7 +168,8 @@ $('#rightHalf').click(function() {
         }
 
         $('#navButton').click(function(e) {
-    e.preventDefault();
+            e.preventDefault();
+            document.getElementById('centerButtonSound').play(); // Spielt den Sound ab
 
     if (viewState === 'player') {
         transitionToPlayer.style.display = "block";
