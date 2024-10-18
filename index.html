@@ -106,6 +106,19 @@ object-fit: cover;
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+
+// Liste aller Hintergrundbilder
+const backgroundImages = ["Backrounds Index/Player Backround Main.png", "Backrounds Index/Player Backround Player.png", "Backrounds Index/Player Backround Sichter.png", /* hier weitere Bilder einfügen */];
+
+// Lädt alle Bilder im Voraus
+backgroundImages.forEach((img) => {
+    const image = new Image();
+    image.src = img;
+    image.onload = function() {
+        console.log('Image preloaded: ', img);
+    };
+});
+
         var viewState = 'main';
 
         var navButton = document.getElementById('navButton');
