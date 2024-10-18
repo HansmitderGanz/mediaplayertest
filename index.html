@@ -81,6 +81,8 @@ object-fit: cover;
 
 <body>
 
+<audio id="mySoundClip" src="Spin_Sound.mp3"></audio>
+
     <div id="leftHalf" class="nav-area"></div>
     <div id="rightHalf" class="nav-area"></div>
 
@@ -113,26 +115,29 @@ object-fit: cover;
         var transitionVideoSichter = document.getElementById('transitionVideoSichter');
         var transitionToPlayer = document.getElementById('transitionToPlayer');
         var transitionToSichter = document.getElementById('transitionToSichter');
+	var audioElement = document.getElementById('mySoundClip');
 
         $('#leftHalf').click(function() {
-            if (viewState === 'main') {
-                changeBackground('player', transitionVideoPlayer);
-                viewState = 'player';
-            } else if (viewState === 'sichter') {
-                changeBackground('main', transitionVideoSichter);
-                viewState = 'main';
-            }
-        });
+    audioElement.play();
+    if (viewState === 'main') {
+        changeBackground('player', transitionVideoPlayer);
+        viewState = 'player';
+    } else if (viewState === 'sichter') {
+        changeBackground('main', transitionVideoSichter);
+        viewState = 'main';
+    }
+});
 
-        $('#rightHalf').click(function() {
-            if (viewState === 'main') {
-                changeBackground('sichter', transitionVideoSichter);
-                viewState = 'sichter';
-            } else if (viewState === 'player') {
-                changeBackground('main', transitionVideoPlayer);
-                viewState = 'main';
-            }
-        });
+$('#rightHalf').click(function() {
+    audioElement.play();
+    if (viewState === 'main') {
+        changeBackground('sichter', transitionVideoSichter);
+        viewState = 'sichter';
+    } else if (viewState === 'player') {
+        changeBackground('main', transitionVideoPlayer);
+        viewState = 'main';
+    }
+});
 
         function changeBackground(target, transitionVideo) {
             transitionVideo.style.display = "block";
@@ -202,7 +207,14 @@ window.addEventListener('pageshow', function (event) {
 });
 
         updateButtonVisibility();
+
+
+
+
+
     </script>
+
+
 
 </body>
 
