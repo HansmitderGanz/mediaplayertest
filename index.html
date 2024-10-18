@@ -132,24 +132,28 @@ backgroundImages.forEach((img) => {
 	var audioElement = document.getElementById('mySoundClip');
 
         $('#leftHalf').click(function() {
-    audioElement.currentTime = 0;
-    audioElement.play();
     if (viewState === 'main') {
+        audioElement.currentTime = 0;
+        audioElement.play();
         changeBackground('player', transitionVideoPlayer);
         viewState = 'player';
     } else if (viewState === 'sichter') {
+        audioElement.currentTime = 0;
+        audioElement.play();
         changeBackground('main', transitionVideoSichter);
         viewState = 'main';
     }
 });
 
 $('#rightHalf').click(function() {
-    audioElement.currentTime = 0;
-    audioElement.play();
     if (viewState === 'main') {
+        audioElement.currentTime = 0;
+        audioElement.play();
         changeBackground('sichter', transitionVideoSichter);
         viewState = 'sichter';
     } else if (viewState === 'player') {
+        audioElement.currentTime = 0;
+        audioElement.play();
         changeBackground('main', transitionVideoPlayer);
         viewState = 'main';
     }
