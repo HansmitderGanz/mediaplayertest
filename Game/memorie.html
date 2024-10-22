@@ -96,6 +96,9 @@ function flipCard() {
     secondCard = this;
     count++;
 
+    // Set wait to true to prevent further clicks
+    wait = true;
+
     if (firstCard.dataset.name === secondCard.dataset.name) {
       // Beide Karten leuchten grün bei Übereinstimmung
       firstCard.style.backgroundColor = 'lightgreen';
@@ -104,20 +107,17 @@ function flipCard() {
         firstCard.style.visibility = 'hidden';
         secondCard.style.visibility = 'hidden';
         resetTurn();
-	richtigPaareZähler++; // erhöhe richtigPaareZähler
-      if (richtigPaareZähler % 3 === 0) { // Prüfe, ob richtigPaareZähler ein Vielfaches von 3 ist
-        gewinneHerz();
-      }
-
-// Überprüfen Sie, ob das Spiel nach jedem erfolgreichen Paar gewonnen wurde
-    checkWin();
-
+        richtigPaareZähler++; // erhöhe richtigPaareZähler
+        if (richtigPaareZähler % 3 === 0) { // Prüfe, ob richtigPaareZähler ein Vielfaches von 3 ist
+          gewinneHerz();
+        }
+        checkWin();
+        wait = false; // Setze wait zurück nach dem Überprüfen
       }, 900);
     } else {
       // Beide Karten leuchten rot bei Nichtübereinstimmung
       firstCard.style.backgroundColor = 'lightcoral';
       secondCard.style.backgroundColor = 'lightcoral';
-      wait = true;
       setTimeout(() => {
         firstCard.classList.add('cover');
         firstCard.classList.remove('flipped');
@@ -125,10 +125,10 @@ function flipCard() {
         secondCard.classList.remove('flipped');
         firstCard.style.backgroundColor = 'lightgray';
         secondCard.style.backgroundColor = 'lightgray';
-        wait = false;
         resetTurn();
-	richtigPaareZähler = 0;
+        richtigPaareZähler = 0;
         loseLife(); // Leben verlieren, wenn die Übereinstimmung falsch ist
+        wait = false; // Setze wait zurück nach dem Verstecken
       }, 1000);
     }
   }
@@ -144,13 +144,8 @@ function loseLife() {
         '<div style="font-size: 30px; text-align: center; font-weight: bold;">Und jetzt zurück an die Arbeit!</div>';
     game.innerHTML = gameOverMessage;
     gameStarted = false;
-
-document.getElementById('start-button').style.display = 'none';
+    document.getElementById('startButton').style.display = 'none'; // Verstecke den Start-Button
   }
-}
-
-function showStartButton() {
-  document.getElementById('start-button').style.display = 'block';
 }
 
 function gewinneHerz() {
@@ -201,7 +196,7 @@ function checkWin() {
       '<div style="font-size: 50px; text-align: center; font-weight: bold;">WOW GEWONNEN</div>' +
       '<div style="font-size: 30px; text-align: center; font-weight: bold;">Jetzt aber zurück an die Arbeit!</div>';
     game.innerHTML = winMessage;
-    document.getElementById('start-button').style.display = 'block';
+    document.getElementById('startButton').style.display = 'none'; // Verstecke den Start-Button
   }
 }
 
