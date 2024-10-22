@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <title>Kartenspiel</title>
     <style>
+        body {
+            display: flex; /* Flexbox für das Layout */
+            flex-direction: column; /* Vertikale Anordnung */
+            align-items: center; /* Zentriere den Inhalt */
+        }
+        .rules {
+            width: 600px; /* Breite für die Regeln */
+            margin-top: 20px; /* Abstand zum Kartenfeld */
+            font-size: 1em; /* Schriftgröße für die Regeln */
+            text-align: center; /* Text zentriert */
+        }
         .grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr); /* 5 Spalten */
@@ -11,6 +22,30 @@
             width: 500px;
             margin: auto;
         }
+.message-container {
+    display: flex;
+    flex-direction: column; /* Vertikale Anordnung der Nachrichten */
+    align-items: center; /* Zentriere die Nachrichten horizontal */
+    justify-content: center; /* Zentriere die Nachrichten vertikal */
+    height: 300px; /* Höhe des Containers für Nachrichten */
+    width: 400%; /* Volle Breite */
+    max-width: 600px; /* Maximalbreite für den Container */
+    margin: 0 auto; /* Zentriert den Container */
+    text-align: center; /* Zentriert den Text innerhalb des Containers */
+}
+
+.message {
+    font-size: 50px;
+    font-weight: bold;
+}
+
+.sub-message {
+    font-size: 30px;
+    margin-top: 20px; /* Abstand zur Hauptmeldung */
+    font-weight: bold;
+}
+
+
 
         .card {
             background: lightgray;
@@ -19,7 +54,7 @@
             text-align: center;
             line-height: 80px;
             cursor: pointer;
-            font-size: 2em;
+            font-size: 2.5em; /* Schriftgröße reduziert */
             user-select: none;
             transition: background-color 0.3s ease;
         }
@@ -36,7 +71,7 @@
 
         #lives {
             text-align: center;
-            font-size: 2em;
+            font-size: 2em; /* Schriftgröße reduziert */
             margin: 20px;
         }
 
@@ -50,11 +85,35 @@
 </head>
 <body>
 
+<!-- Hintergrundmusik -->
+<audio id="backgroundMusic" autoplay loop>
+    <source src="99pro Media Memorie.mp3" type="audio/mpeg">
+    Dein Browser unterstützt keine Audio-Wiedergabe.
+</audio>
+
+<div class="header">
+    <img src="Memorie_logo.png" alt="Memorie Logo" style="max-width: 200px; height: auto;">
+</div>
+
 <div id="lives"></div>
 <button id="startButton" onclick="startGame()">Start</button>
-<div id="game"></div>
+
+<div class="grid" id="game"></div>
+
+<div class="rules" id="rules">
+    <h3>Grundregeln</h3>
+    <p>1. Versuche dir die Positionen der Paare zu merken.</p>
+    <p>2. Decke nacheinander zwei Karten auf.</p>
+    <p>3. Deckst du nicht zwei gleiche Karten auf, so verlierst du ein Herz.</p>
+    <p>4. Hast du alle 10 Herzen verloren, verlierst du das Spiel.</p>
+    <p>5. Hast du drei richtige Paare hintereinander aufgedeckt, bekommst du ein Herz zurück.</p>
+    <p>6. Hast du alle Paare aufgedeckt, Herzlichen Glückwunsch, du hast gewonnen.</p>
+</div>
 
 <script>
+
+let music = document.getElementById('backgroundMusic'); // Musik-Element
+music.volume = 0.3; // Setze die Lautstärke auf 20% (kann angepasst werden)
 
 let richtigPaareZähler = 0;
 let cardArray = [
@@ -135,18 +194,21 @@ function flipCard() {
 }
 
 function loseLife() {
-  lives--;
-  updateLives();
+    lives--;
+    updateLives();
 
-  if (lives === 0) {
-    let gameOverMessage =
-        '<div style="font-size: 50px; text-align: center; font-weight: bold;">Game Over</div>' +
-        '<div style="font-size: 30px; text-align: center; font-weight: bold;">Und jetzt zurück an die Arbeit!</div>';
-    game.innerHTML = gameOverMessage;
-    gameStarted = false;
-    document.getElementById('startButton').style.display = 'none'; // Verstecke den Start-Button
-  }
+    if (lives === 0) {
+        let gameOverMessage = 
+          '<div class="message-container">' + 
+          '<div class="message">Game Over</div>' +
+          '<div class="sub-message">Und jetzt zurück an die Arbeit!</div>' +
+          '</div>';
+        game.innerHTML = gameOverMessage;
+        gameStarted = false;
+        document.getElementById('startButton').style.display = 'none'; // Verstecke den Start-Button
+    }
 }
+
 
 function gewinneHerz() {
   lives++;
@@ -178,27 +240,32 @@ function startGame() {
   let cards = document.querySelectorAll('.card');
   cards.forEach(card => card.classList.add('cover')); // Flip all cards
   document.getElementById('startButton').style.display = 'none'; // versteckt den Startknopf
+  document.getElementById('rules').style.display = 'none'; // Verstecke die Regeln
+	music.play(); // Musik startet, wenn das Spiel startet
 }
 
 function checkWin() {
-  let cards = document.querySelectorAll('.card');
-  let win = true;
+    let cards = document.querySelectorAll('.card');
+    let win = true;
 
-  cards.forEach(card => {
-    if (card.style.visibility !== 'hidden') {
-      win = false;
+    cards.forEach(card => {
+        if (card.style.visibility !== 'hidden') {
+            win = false;
+        }
+    });
+
+    if (win) {
+        gameStarted = false;
+        let winMessage = 
+          '<div class="message-container">' + 
+          '<div class="message">WOW GEWONNEN</div>' +
+          '<div class="sub-message">Jetzt aber zurück an die Arbeit!</div>' +
+          '</div>';
+        game.innerHTML = winMessage;
+        document.getElementById('startButton').style.display = 'none'; // Verstecke den Start-Button
     }
-  });
-
-  if (win) {
-    gameStarted = false;
-    let winMessage = 
-      '<div style="font-size: 50px; text-align: center; font-weight: bold;">WOW GEWONNEN</div>' +
-      '<div style="font-size: 30px; text-align: center; font-weight: bold;">Jetzt aber zurück an die Arbeit!</div>';
-    game.innerHTML = winMessage;
-    document.getElementById('startButton').style.display = 'none'; // Verstecke den Start-Button
-  }
 }
+
 
 function restartGame() {
   game.innerHTML = ''; // Clear the board
