@@ -51,7 +51,7 @@
 <body>
 
 <div id="lives"></div>
-<button onclick="startGame()">Start</button>
+<button id="startButton" onclick="startGame()">Start</button>
 <div id="game"></div>
 
 <script>
@@ -128,9 +128,18 @@ function loseLife() {
   updateLives();
 
   if (lives === 0) {
-    alert("Du hast verloren! Das Spiel wird neustarten.");
-    restartGame();
+    let gameOverMessage =
+        '<div style="font-size: 50px; text-align: center; font-weight: bold;">Game Over</div>' +
+        '<div style="font-size: 30px; text-align: center; font-weight: bold;">Und jetzt zurück an die Arbeit!</div>';
+    game.innerHTML = gameOverMessage;
+    gameStarted = false;
+
+document.getElementById('start-button').style.display = 'none';
   }
+}
+
+function showStartButton() {
+  document.getElementById('start-button').style.display = 'block';
 }
 
 function resetTurn() {
@@ -157,6 +166,7 @@ function startGame() {
   gameStarted = true;
   let cards = document.querySelectorAll('.card');
   cards.forEach(card => card.classList.add('cover')); // Flip all cards
+  document.getElementById('startButton').style.display = 'none'; // versteckt den Startknopf
 }
 
 function restartGame() {

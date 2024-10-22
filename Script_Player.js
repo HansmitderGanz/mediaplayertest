@@ -864,7 +864,7 @@ window.addEventListener('keydown', function(event) {
 });
 
 window.addEventListener('keydown', function(event) {
-    if (event.ctrlKey && event.altKey && event.key === 'g') {
+    if (event.altKey && event.key === 'g') {
         startGame(); // Sie müssen diese Funktion implementieren
     }
 });
@@ -925,8 +925,6 @@ function createScreenshot(index) {
                 markers[index].canvas = null;
             }
         }
-    
-        // Der Rest deines Codes ...
     }
 
     // Setzt die aktuelle Zeit des Videos auf die Markerposition und pausiert das Video

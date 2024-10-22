@@ -151,6 +151,17 @@ window.addEventListener('keydown', function(event) {
     
 });
 
+window.addEventListener('keydown', function(event) {
+    if (event.altKey && event.key === 'g') {
+        startGame(); // Sie müssen diese Funktion implementieren
+    }
+});
+
+// Hier ist Ihre StartGame Funktion, die ein neues Fenster öffnet und ein HTML-Spiel lädt.
+function startGame() {
+    let gameWindow = window.open("Game/memorie.html", "Spielefenster", "height=600,width=800");
+}
+
 var currentMarkerSelection = 0; // Variabel um die aktuelle Marker-Auswahl zu speichern
 
 window.addEventListener('keydown', function(event) {
@@ -494,6 +505,9 @@ var faqs = [
     { frage: 'Warum muss ich meinen Namen eingeben?', antwort: 'Die Abfrage des Namens erfolgt, um anzuzeigen welche Person eine entsprechende Anmerkung oder Bearbeitung durchgeführt hat. Bei Fragen oder Unklarheiten ist damit sofort ein Ansprechpartner oder Ansprechpartnerin erkennbar.' },
     { frage: 'Warum gibt es dieses mega Tool erst jetzt?', antwort: 'Gute Frage, das muss ich mal an die KI weitergeben. Weitere Informationen finden Sie <a href="https://www.youtube.com/watch?v=1P5yyeeYF9o" target="_blank">hier</a>.' },
     { frage: 'Kann ich auch für Microsoft Word exportieren?', antwort: 'Der Player bietet zum jetzigen Zeitpunkt nur die Möglichkeit eine .txt-Datei zu exportieren. Die Inhalte müssen dann außerhalb des Players in Microsoft Office übertragen werden.' },
+    { frage: 'Kann ich den Zeitpunkt, oder das Timing eines Sprechertextes im nachhinein ändern?', antwort: 'Ja. Wählen sie beim Transkript den Bearbeitungsmodus. Klicken sie dann in das Sprechertextfeld, welches sie zeitlich neu anpassen möchten. Drücken sie nun die ALt + T Tasten gemeinsam. Es öffnet sich ein Fenster in welches Sie den neuen Start-Timecode des Textabschnittes eingeben können.' },
+    { frage: 'Kann ich einen Transkripttext im Nachinein zu einem Sprechertext machen?', antwort: 'Ja. Wählen sie beim Transkript den Bearbeitungsmodus. Suchen sie den Textabschnitt, welchen sie zu einem Sprechertext umwandeln wollen und machen sie einen Doppelklick darauf. Es erscheint ein Fenster, in welchem sie die Umwandlung bestätigen müssen. Um den Sprechertext wieder zurück in einen normalen Text umzuwandeln, wiederholen sie den Vorgang.' },
+    { frage: 'Warum kann ich keine Absätze im Transkript machen?', antwort: 'Bei der Sprachausgabe des Players wird immer nur der erste Absatz nach dem Timecode beachtet. Der gesammte Sprechertext eines Abschnittes ist daher in eine Zeile zu schreiben. Aus diesen Grund ist das Erstellen von Absätzen in der Transkript bearbeitung deaktiviert.' },
     // Fügen Sie so viele Fragen und Antworten hinzu, wie Sie möchten
 ];
 
