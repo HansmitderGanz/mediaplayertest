@@ -9,6 +9,12 @@
             flex-direction: column; /* Vertikale Anordnung */
             align-items: center; /* Zentriere den Inhalt */
         }
+
+.header {
+    text-align: center; /* Zentriert den Text innerhalb des Headers */
+    margin-bottom: 20px; /* Abstand unter dem Header */
+}
+
         .rules {
             width: 600px; /* Breite für die Regeln */
             margin-top: 20px; /* Abstand zum Kartenfeld */
@@ -92,7 +98,8 @@
 </audio>
 
 <div class="header">
-    <img src="images/Memorie_Logo.png" alt="Memorie Logo" style="max-width: 200px; height: auto;">
+    <div class="header">
+    <img id="logo" src="memorie_logo.png" alt="Memorie Logo" style="max-width: 200px; height: auto;">
 
 </div>
 
@@ -112,15 +119,7 @@
 </div>
 
 <script>
-// Funktion zum Überprüfen des Bildpfads
-    function checkImagePath() {
-        const imgElement = document.querySelector('img'); // Wähle das Bild-Element
-        console.log("Der Pfad zum Bild ist:", imgElement.src); // Gib den Pfad in der Konsole aus
-    }
 
-    // Führe die Funktion nach dem Laden der Seite aus
-    window.onload = checkImagePath;
-	
 let music = document.getElementById('backgroundMusic'); // Musik-Element
 music.volume = 0.3; // Setze die Lautstärke auf 20% (kann angepasst werden)
 
@@ -150,6 +149,10 @@ function shuffle(array) {
 
   return array;
 }
+
+// Zeige den Pfad des Logos in der Konsole an
+    const logoPath = document.getElementById('logo').src;
+    console.log('Pfad zum Bild:', logoPath);
 
 function flipCard() {
   if (!gameStarted || wait || this.classList.contains('flipped')) return;
