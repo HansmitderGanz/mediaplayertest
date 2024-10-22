@@ -112,7 +112,15 @@
 </div>
 
 <script>
+// Funktion zum Überprüfen des Bildpfads
+    function checkImagePath() {
+        const imgElement = document.querySelector('img'); // Wähle das Bild-Element
+        console.log("Der Pfad zum Bild ist:", imgElement.src); // Gib den Pfad in der Konsole aus
+    }
 
+    // Führe die Funktion nach dem Laden der Seite aus
+    window.onload = checkImagePath;
+	
 let music = document.getElementById('backgroundMusic'); // Musik-Element
 music.volume = 0.3; // Setze die Lautstärke auf 20% (kann angepasst werden)
 
