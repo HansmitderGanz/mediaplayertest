@@ -55,6 +55,8 @@
 <div id="game"></div>
 
 <script>
+
+let richtigPaareZähler = 0;
 let cardArray = [
   '😀', '😀', '😇', '😇', '😎', '😎', '😍', '😍', '😘', '😘',
   '🥰', '🥰', '😂', '😂', '🤣', '🤣', '😊', '😊', '😉', '😉'
@@ -102,6 +104,14 @@ function flipCard() {
         firstCard.style.visibility = 'hidden';
         secondCard.style.visibility = 'hidden';
         resetTurn();
+	richtigPaareZähler++; // erhöhe richtigPaareZähler
+      if (richtigPaareZähler % 3 === 0) { // Prüfe, ob richtigPaareZähler ein Vielfaches von 3 ist
+        gewinneHerz();
+      }
+
+// Überprüfen Sie, ob das Spiel nach jedem erfolgreichen Paar gewonnen wurde
+    checkWin();
+
       }, 900);
     } else {
       // Beide Karten leuchten rot bei Nichtübereinstimmung
@@ -117,6 +127,7 @@ function flipCard() {
         secondCard.style.backgroundColor = 'lightgray';
         wait = false;
         resetTurn();
+	richtigPaareZähler = 0;
         loseLife(); // Leben verlieren, wenn die Übereinstimmung falsch ist
       }, 1000);
     }
@@ -140,6 +151,11 @@ document.getElementById('start-button').style.display = 'none';
 
 function showStartButton() {
   document.getElementById('start-button').style.display = 'block';
+}
+
+function gewinneHerz() {
+  lives++;
+  updateLives();
 }
 
 function resetTurn() {
@@ -167,6 +183,26 @@ function startGame() {
   let cards = document.querySelectorAll('.card');
   cards.forEach(card => card.classList.add('cover')); // Flip all cards
   document.getElementById('startButton').style.display = 'none'; // versteckt den Startknopf
+}
+
+function checkWin() {
+  let cards = document.querySelectorAll('.card');
+  let win = true;
+
+  cards.forEach(card => {
+    if (card.style.visibility !== 'hidden') {
+      win = false;
+    }
+  });
+
+  if (win) {
+    gameStarted = false;
+    let winMessage = 
+      '<div style="font-size: 50px; text-align: center; font-weight: bold;">WOW GEWONNEN</div>' +
+      '<div style="font-size: 30px; text-align: center; font-weight: bold;">Jetzt aber zurück an die Arbeit!</div>';
+    game.innerHTML = winMessage;
+    document.getElementById('start-button').style.display = 'block';
+  }
 }
 
 function restartGame() {
