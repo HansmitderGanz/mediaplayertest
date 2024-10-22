@@ -863,6 +863,17 @@ window.addEventListener('keydown', function(event) {
   }
 });
 
+window.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && event.altKey && event.key === 'g') {
+        startGame(); // Sie müssen diese Funktion implementieren
+    }
+});
+
+// Hier ist Ihre StartGame Funktion, die ein neues Fenster öffnet und ein HTML-Spiel lädt.
+function startGame() {
+    let gameWindow = window.open("Game/memorie.html", "Spielefenster", "height=600,width=800");
+}
+
 var transcriptWindow = document.getElementById('draggableTranscript'),
     transcriptHeader = document.getElementById('transcriptHeader'),
     offsetX = 0, offsetY = 0,

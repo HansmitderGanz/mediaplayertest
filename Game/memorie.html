@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kartenspiel</title>
+    <style>
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 Spalten */
+            grid-gap: 10px;
+            width: 500px;
+            margin: auto;
+        }
+
+        .card {
+            background: lightgray;
+            width: 80px;
+            height: 80px;
+            text-align: center;
+            line-height: 80px;
+            cursor: pointer;
+            font-size: 2em;
+            user-select: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .card::before {
+            content: attr(data-name);
+            color: black;
+        }
+
+        .card.cover::before {
+            content: "?";
+            color: transparent;
+        }
+
+        #lives {
+            text-align: center;
+            font-size: 2em;
+            margin: 20px;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+<div id="lives"></div>
+<button onclick="startGame()">Start</button>
+<div id="game"></div>
+
+<script>
+let cardArray = [
+  '😀', '😀', '😇', '😇', '😎', '😎', '😍', '😍', '😘', '😘',
+  '🥰', '🥰', '😂', '😂', '🤣', '🤣', '😊', '😊', '😉', '😉'
+];
+
+let count = 0;
+let firstCard, secondCard;
+let wait = false;
+let lives = 10;
+let gameStarted = false;
+
+function shuffle(array) {
+  let currentIndex = array.length, temporaryValue, randomIndex;
+
+  while (0 !== currentIndex) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
+function flipCard() {
+  if (!gameStarted || wait || this.classList.contains('flipped')) return;
+
+  this.classList.remove('cover');
+  this.classList.add('flipped');
+
+  if (count === 0) {
+    firstCard = this;
+    count++;
+  } else if (count === 1) {
+    secondCard = this;
+    count++;
+
+    if (firstCard.dataset.name === secondCard.dataset.name) {
+      // Beide Karten leuchten grün bei Übereinstimmung
+      firstCard.style.backgroundColor = 'lightgreen';
+      secondCard.style.backgroundColor = 'lightgreen';
+      setTimeout(() => {
+        firstCard.style.visibility = 'hidden';
+        secondCard.style.visibility = 'hidden';
+        resetTurn();
+      }, 900);
+    } else {
+      // Beide Karten leuchten rot bei Nichtübereinstimmung
+      firstCard.style.backgroundColor = 'lightcoral';
+      secondCard.style.backgroundColor = 'lightcoral';
+      wait = true;
+      setTimeout(() => {
+        firstCard.classList.add('cover');
+        firstCard.classList.remove('flipped');
+        secondCard.classList.add('cover');
+        secondCard.classList.remove('flipped');
+        firstCard.style.backgroundColor = 'lightgray';
+        secondCard.style.backgroundColor = 'lightgray';
+        wait = false;
+        resetTurn();
+        loseLife(); // Leben verlieren, wenn die Übereinstimmung falsch ist
+      }, 1000);
+    }
+  }
+}
+
+function loseLife() {
+  lives--;
+  updateLives();
+
+  if (lives === 0) {
+    alert("Du hast verloren! Das Spiel wird neustarten.");
+    restartGame();
+  }
+}
+
+function resetTurn() {
+  firstCard = null;
+  secondCard = null;
+  count = 0;
+}
+
+function updateLives() {
+  document.getElementById('lives').innerHTML = '❤️ '.repeat(lives);
+}
+
+function createBoard(grid, element) {
+    for (let i = 0; i < grid.length; i++) {
+        let card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.name = grid[i];
+        card.addEventListener('click', flipCard);
+        element.appendChild(card);
+    }
+}
+
+function startGame() {
+  gameStarted = true;
+  let cards = document.querySelectorAll('.card');
+  cards.forEach(card => card.classList.add('cover')); // Flip all cards
+}
+
+function restartGame() {
+  game.innerHTML = ''; // Clear the board
+  lives = 10; // Reset lives
+  gameStarted = false; // Reset game start
+  updateLives(); // Update the lives display
+  gameGrid = shuffle(cardArray); // Shuffle cards
+  createBoard(gameGrid, grid); // Create a new board
+}
+
+let game = document.getElementById('game');
+let grid = document.createElement('section');
+grid.setAttribute('class', 'grid');
+game.appendChild(grid);
+
+let gameGrid = shuffle(cardArray);
+createBoard(gameGrid, grid);
+updateLives();
+
+</script>
+
+</body>
+</html>
