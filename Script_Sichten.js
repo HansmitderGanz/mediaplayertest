@@ -74,6 +74,26 @@ function togglePlayPause() {
 // Fügen Sie eine Kontrollvariable hinzu, um zu prüfen, ob das FAQ-Fenster offen oder geschlossen ist
 var isFAQOpen = false;
 
+
+window.addEventListener('keydown', function(evt) {
+    if (evt.key === "t" && evt.altKey) {
+        let focusedElem = document.activeElement;
+        if (focusedElem && focusedElem.tagName.toLowerCase() === 'textarea') {
+            if (editMode) {
+                var newTimecode = prompt("Bitte geben Sie den neuen Timecode im Format HH:MM:SS:FF ein");
+                if (newTimecode !== null) {
+                    var newTimeInSeconds = timecodeToSeconds(newTimecode);
+                    if (!isNaN(newTimeInSeconds)) {
+                        focusedElem.setAttribute("data-time", newTimeInSeconds);
+                    } else {
+                        alert("Ungültiger Timecode eingegeben. Bitte geben Sie einen gültigen Timecode im Format HH:MM:SS:FF ein.");
+                    }
+                }
+            }
+        }
+    }
+}, false);
+
 window.addEventListener('keydown', function(event) {
 // Überprüfen, ob das Transkript-Suchfeld den Fokus hat
     if (document.activeElement.id === 'transcriptSearch' || document.activeElement.tagName === 'TEXTAREA') {
@@ -127,6 +147,8 @@ window.addEventListener('keydown', function(event) {
             videoElement.currentTime = seconds;
         }
     }
+
+    
 });
 
 var currentMarkerSelection = 0; // Variabel um die aktuelle Marker-Auswahl zu speichern
@@ -227,7 +249,6 @@ if (Math.abs(currentTime - pTime) <= underlineDuration) {
             if (p.getAttribute('data-saved') == lastSpokenText) {
                 isSpeaking = false;
                 lastSpokenText = null;
-                stopSpeaking();
             }
         }
     });
@@ -497,6 +518,8 @@ function toggleEditMode() {
             textarea.onkeydown = function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
+
+                    
                 }
             };
         
@@ -522,9 +545,13 @@ function toggleEditMode() {
             
             p.replaceWith(para);
             toggleEditButton.innerHTML = "Bearbeiten"; // Text ändern
+
         }
+
     });
 }
+
+
 
 
 // EventListener für das Doppelklicken 
@@ -564,25 +591,30 @@ document.body.addEventListener("dblclick", function (evt) {
     } 
 }, false);
 
+
+
 function loadNewTranscriptFormat(transcriptDiv, content) {
-  var matches = content.matchAll(
-    /([\t\s]*\d{2}:\d{2}(?: - SPRECHER)?)([\s\S]*?)(?=\n[\t\s]*\d{2}:\d{2}|$)/g
-  );
-
-  for (let match of matches) {
-    var timestamps = match[1].trim();
-    var text = match[2].trim();
-    const p = document.createElement("p");
-    p.classList.add("interactable-transcript");
-
-    var isSpeaker = timestamps.endsWith("- SPRECHER");
-
-    if (isSpeaker) {
-      timestamps = timestamps.slice(0, timestamps.lastIndexOf(" - SPRECHER"));
-      p.style.color = "green";
-      p.style.fontWeight = "bold";
-      
-    }
+    var matches = content.matchAll(
+      /([\t\s]*\d{2}:\d{2}(?: - SPRECHER| - VO)?)([\s\S]*?)(?=\n[\t\s]*\d{2}:\d{2}|$)/g
+    );
+  
+    for (let match of matches) {
+      var timestamps = match[1].trim();
+      var text = match[2].trim();
+      const p = document.createElement("p");
+      p.classList.add("interactable-transcript");
+  
+      var isSpeaker = timestamps.endsWith("- SPRECHER") || timestamps.endsWith("- VO");
+  
+      if (isSpeaker) {
+        if (timestamps.endsWith("- SPRECHER")) {
+          timestamps = timestamps.slice(0, timestamps.lastIndexOf(" - SPRECHER"));
+        } else if (timestamps.endsWith("- VO")) {
+          timestamps = timestamps.slice(0, timestamps.lastIndexOf(" - VO"));
+        }
+        p.style.color = "green";
+        p.style.fontWeight = "bold";
+      }
 
     var timeParts = timestamps.split(":");
     var timeInSeconds = Number(timeParts[0]) * 60 + Number(timeParts[1]);
@@ -627,6 +659,8 @@ function loadTranscript(event) {
     };
     reader.readAsText(file, 'UTF-8');
 }
+
+
 
 function removeTranscript() {
     // Entfernen Sie alle Absätze aus dem Transkript
@@ -876,14 +910,6 @@ function handleSaveOptions(selectElem) {
 
 }
 
-document.getElementById('toggleSpeechSynthesisButton').addEventListener('click', function() {
-    speechSynthesisEnabled = !speechSynthesisEnabled;  // Umschalten der Sprachsynthese
-    if (speechSynthesisEnabled && paragraphsToRead.length > 0) {
-        moveToNextParagraph();
-    } else {
-        stopSpeaking();
-    }
-});
 
 function saveMarkers() {
     var date = new Date();
