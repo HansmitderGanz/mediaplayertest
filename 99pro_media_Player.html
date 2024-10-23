@@ -69,6 +69,17 @@ body {
 }
 
 
+#timecodeContainer {
+    background-color: #fff;
+    color: black;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.dark-mode #timecodeContainer {
+    background-color: #e1e1e1;
+    color: black;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
 
 /* Dark Mode */
 body.dark-mode {
@@ -123,6 +134,8 @@ transition: background-color 0.5s ease, color 0.5s ease;
 body.dark-mode #myVideo {
     box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.6); /* Helle Schatten im dunklen Modus */
 }
+
+
 
 
 .switch {
@@ -425,6 +438,11 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 }
 
 
+
+
+
+
+
 </style>
 </head>
 <body>
@@ -436,6 +454,10 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 
 
 <div class="page-wrapper">
+
+    <div id="timecodeContainer" class="draggable interactable" style="display: none; position: fixed; top: 69%; right: 76.5%; padding: 20px; border-radius: 10px; max-width: 90px; min-width: 90px; z-index: 1500; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);">
+    <span id="timecode" style="font-weight: bold;">00:00:00</span>
+	</div>
 
     <button class="interactable" id="toggleShortcuts" style="position: fixed; top: 56px; left: 10px; padding: 10px; background-color: #e1e1e1; border-radius: 10px; border: none; cursor: pointer; font-size: 20px; z-index: 3;" onclick="toggleShortcuts()">🙈</button>
 
@@ -453,8 +475,9 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 	    <tr><td><b>Pfeil unten</b></td><td>: nächster Marker</td></tr>
 	    <tr><td><b>E + Entf</b></td><td>: EDL Marker löschen</td></tr>
 	    <tr><td><b>/</b></td><td>: Timecodesuche</td></tr>
-	    <tr><td><b>ALT + T</b></td><td>: Start-Timecode</td></tr>
-	    <tr><td><b>ALT + G</b></td><td>: Pause</td></tr>
+	    <tr><td><b>Alt + V</b></td><td>: Timecode ein/aus</td></tr>
+	    <tr><td><b>Alt + T</b></td><td>: Start-Timecode</td></tr>
+            <tr><td><b>Alt + G</b></td><td>: Päuschen</td></tr>
 	    <tr><td><b>Alt + F</b></td><td>: FAQ</td></tr>
         </table>
     </div>
@@ -572,6 +595,8 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 <script src="Script_Player.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.3.1/fabric.min.js"></script>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 <script>
 

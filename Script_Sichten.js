@@ -10,6 +10,8 @@ $(document).ready(function() {
         evt.preventDefault();
     }, false);
     
+   
+
     document.body.addEventListener("drop", function (evt) {
         evt.preventDefault();
         var files = evt.dataTransfer.files;
@@ -38,6 +40,8 @@ $(document).ready(function() {
         $('#removeTranscriptButton').addClass('hidden'); // Versteckt den "Transkript entfernen" Button
     }
 
+    $( ".draggable" ).draggable();
+    
     $("#toggleTranscriptVisibility").prop('checked', true);
     if ($('#toggleTranscriptVisibility').is(':checked')) {
         toggleTranscript();
@@ -187,6 +191,76 @@ window.addEventListener('keydown', function(event) {
   }
 });
 
+document.addEventListener("keydown", function(event) {
+    if (event.altKey && (event.key == 'v')) {
+        toggleTimecode();
+    }
+});
+
+// Machen Sie den Zeitcode Container ("timecodeContainer") doppelklickbar.
+document.getElementById('timecodeContainer').addEventListener('dblclick', function() {
+    // Zugriff auf den Timecode
+    var timecode = document.getElementById('timecode').textContent;
+  
+    // Erstellen Sie ein neues Textarea-Element
+    var textarea = document.createElement('textarea');
+    textarea.value = timecode;
+  
+    // Fügen Sie das Textarea-Element zu Ihrem Dokument hinzu
+    document.body.appendChild(textarea);
+  
+    // Auswählen des Texts im Textarea-Element
+    textarea.select();
+  
+    // Kopieren des ausgewählten Texts in die Zwischenablage
+    document.execCommand('copy');
+  
+    // Entfernen des erstellten Textarea-Elementes
+    document.body.removeChild(textarea);
+  
+    alert('Timecode wurde in die Zwischenablage kopiert!');
+  });
+
+var video = document.getElementById('myVideo');
+video.addEventListener('timeupdate', updateTimecode);
+
+function toggleTimecode() {
+    var container = document.getElementById('timecodeContainer');
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        updateTimecode();    
+        console.log("Timecode is visible now");   // Added console log
+    } else {
+        container.style.display = "none";
+        console.log("Timecode is hidden now");  // Added console log
+    }
+}
+
+
+
+
+function updateTimecode() {
+    var video = document.getElementById('myVideo');
+    var timecode = document.getElementById('timecode');
+    var currentTime = video.currentTime;
+    
+    var hours = Math.floor(currentTime / 3600);
+    var minutes = Math.floor((currentTime - (hours * 3600)) / 60);
+    var seconds = Math.floor(currentTime - (hours * 3600) - (minutes * 60));
+    
+    var frames = Math.floor((currentTime % 1) * 25);  // calculate the frames
+
+    // Format time as HH:MM:SS:FF
+    var formattedTime = ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2) + ":"
+                      + ("0" + seconds).slice(-2) + ":" + ("0" + frames).slice(-2);
+    
+    timecode.textContent = formattedTime;
+
+    // Update the timecode as the video is playing
+    if (!video.paused && !video.ended) {
+        setTimeout(updateTimecode, 40);   // Lowering the interval to update frame number accordingly
+    }
+}   
 
 
 // Deklaration der booleschen Variable zu Beginn des Skripts
@@ -202,6 +276,7 @@ function loadVideo(event) {
     videoElement = document.getElementById("myVideo");
     videoElement.src = url;
     videoElement.load();
+    $("#timecodeContainer").show();
 
     // Überprüfen Sie, ob es das erste Mal ist, dass ein Video geladen wurde
     if (!isFirstVideoLoad) {

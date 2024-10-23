@@ -144,6 +144,18 @@ body.dark-mode #shortcuts {
 	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
 }
 
+#timecodeContainer {
+    background-color: #fff;
+    color: black;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.dark-mode #timecodeContainer {
+    background-color: #e1e1e1;
+    color: black;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
 #markerListContainer.hidden {
     display: none !important;
 }
@@ -416,6 +428,10 @@ z-index: 50;
 
 <div id="overlay"></div>
 
+<div id="timecodeContainer" class="draggable interactable" style="display: none; position: fixed; top: 92.3%; right: 62%; padding: 20px; border-radius: 10px; max-width: 90px; min-width: 90px; z-index: 1500; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);">
+    <span id="timecode" style="font-weight: bold;">00:00:00</span>
+	</div>
+
 
 
 <!--_______________________OPTION_Darkmode Knopf/ Video Size / Trasnkript / Shortcuts__________________________-->
@@ -432,10 +448,12 @@ z-index: 50;
             <tr><td><b>Pfeil rechts</b></td><td>: 5sek vor</td></tr>
             <tr><td><b>Alt + Pfeil links</b></td><td>: 1 Frame zurück</td></tr>
             <tr><td><b>Alt + Pfeil rechts</b></td><td>: 1 Frame vor</td></tr>
-	    <tr><td><b>Pfeil oben</b></td><td>: vorheriger Marker </td></tr>
-	    <tr><td><b>Pfeil unten</b></td><td>: nächster Marker </td></tr>
-	    <tr><td><b>/</b></td><td>: Timecodesuche </td></tr>
-	    <tr><td><b>ALT + G</b></td><td>: Pause</td></tr>
+	    <tr><td><b>Pfeil oben</b></td><td>: vorheriger Marker</td></tr>
+	    <tr><td><b>Pfeil unten</b></td><td>: nächster Marker</td></tr>
+	    <tr><td><b>/</b></td><td>: Timecodesuche</td></tr>
+	    <tr><td><b>Alt + V</b></td><td>: Timecode ein/aus</td></tr>
+	    <tr><td><b>Alt + T</b></td><td>: Transkript timing</td></tr>
+	    <tr><td><b>Alt + G</b></td><td>: Päuschen</td></tr>
 	    <tr><td><b>Alt + F</b></td><td>: FAQ</td></tr>
         </table>
     </div>
@@ -585,6 +603,8 @@ z-index: 50;
 <script src="Script_Sichten.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.3.1/fabric.min.js"></script>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 
 
