@@ -236,7 +236,25 @@ function toggleTimecode() {
     }
 }
 
+document.getElementById('myVideo').onloadedmetadata = function() {
+    var fps = 25; // Frames per second
+    var duration = this.duration;
+    var hours = Math.floor(duration / 3600);
+    var minutes = Math.floor((duration - (hours * 3600)) / 60);
+    var seconds = Math.floor(duration - (hours * 3600) - (minutes * 60));
+   
+    // Calculate total number of frames for the current second
+    var frames = Math.round((duration - Math.floor(duration)) * fps);
 
+    // Format duration as HH:MM:SS:FF
+    var formattedDuration = ("0" + hours).slice(-2) + ":" + 
+                            ("0" + minutes).slice(-2) + ":" + 
+                            ("0" + seconds).slice(-2) + ":" +
+                            ("0" + frames).slice(-2);
+
+    // Update the "duration" span
+    document.getElementById('duration').textContent =formattedDuration;
+};
 
 
 function updateTimecode() {
@@ -262,6 +280,23 @@ function updateTimecode() {
     }
 }   
 
+document.getElementById('timecodeContainer').addEventListener('wheel', function(event) {
+    event.preventDefault();
+    
+    var timecodeContainer = document.getElementById('timecodeContainer');
+    var style = window.getComputedStyle(timecodeContainer, null);
+    var fontSize = parseFloat(style.getPropertyValue('font-size'));
+    
+    if(event.deltaY < 0 && fontSize < 40) {
+        // Vergrößern
+        timecodeContainer.style.fontSize = (fontSize + 1) + 'px';
+    }
+    else if(event.deltaY > 0 && fontSize > 20) {
+        // Verkleinern
+        timecodeContainer.style.fontSize = (fontSize - 1) + 'px';
+    }
+});
+
 
 // Deklaration der booleschen Variable zu Beginn des Skripts
 var isFirstVideoLoad = true;
@@ -272,6 +307,8 @@ function loadVideo(event) {
     var url = URL.createObjectURL(file);
     var videoLabel = document.getElementById("videoFileLabel"); 
     videoLabel.title = "Hochgeladene Datei: " + videoFile;
+    var timecodeContainer = document.getElementById('timecodeContainer');
+  timecodeContainer.style.fontSize = '20px';
     
     videoElement = document.getElementById("myVideo");
     videoElement.src = url;

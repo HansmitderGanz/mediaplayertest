@@ -455,9 +455,11 @@ button.interactable:active, select.interactable:active, #videoFileLabel:active {
 
 <div class="page-wrapper">
 
-    <div id="timecodeContainer" class="draggable interactable" style="display: none; position: fixed; top: 71%; right: 76.2%; padding: 20px; border-radius: 10px; max-width: 90px; min-width: 90px; z-index: 1500; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);">
-    <span id="timecode" style="font-weight: bold; font-family: 'Consolas', 'Lucida Console', monospace;">00:00:00</span>
-	</div>
+    <div id="timecodeContainer" class="draggable interactable" style="display: none; position: fixed; top: 67%; right: 73%; padding-top: 10px; padding-bottom: 2px; width: 8em; height: 3em; border-radius: 10px; z-index: 1500; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); text-align: center;">
+    <span id="timecode" style="font-size: 1.2em; font-weight: bold; font-family: 'Consolas', 'Lucida Console', monospace; ">00:00:00</span>
+	<br>
+    <span id="duration" style="font-size: 0.9em; font-family: 'Consolas', 'Lucida Console', monospace;">Dur.: 00:00:00</span>
+</div>
 
     <button class="interactable" id="toggleShortcuts" style="position: fixed; top: 56px; left: 10px; padding: 10px; background-color: #e1e1e1; border-radius: 10px; border: none; cursor: pointer; font-size: 20px; z-index: 3;" onclick="toggleShortcuts()">🙈</button>
 

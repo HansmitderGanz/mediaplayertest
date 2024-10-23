@@ -64,6 +64,8 @@ var baseTimecodeInSeconds = 0;
 var isBaseTimecodeSet = false;
 var drawingPaths = [];
 let currentUserName = '';
+var timecodeContainer = document.getElementById('timecodeContainer');
+  timecodeContainer.style.fontSize = '20px';
 
 function loadVideo(event) {
     console.table(markers);  // Debug log hier
@@ -96,7 +98,7 @@ setTimeout(function() {
     baseTimecodeInSeconds = timecodeToSeconds(startTC); // Verwendung der aktualisierten 'timecodeToSeconds'-Funktion
     isBaseTimecodeSet = true;
 }, 1000);
-
+ 
     videoElement.addEventListener('timeupdate', (event) => {
         let currentTime = event.target.currentTime;
         var body = document.body;
@@ -854,6 +856,25 @@ document.getElementById('timecodeContainer').addEventListener('dblclick', functi
     alert('Timecode wurde in die Zwischenablage kopiert!');
   });
 
+  document.getElementById('myVideo').onloadedmetadata = function() {
+    var fps = 25; // Frames per second
+    var duration = this.duration;
+    var hours = Math.floor(duration / 3600);
+    var minutes = Math.floor((duration - (hours * 3600)) / 60);
+    var seconds = Math.floor(duration - (hours * 3600) - (minutes * 60));
+   
+    // Calculate total number of frames for the current second
+    var frames = Math.round((duration - Math.floor(duration)) * fps);
+
+    // Format duration as HH:MM:SS:FF
+    var formattedDuration = ("0" + hours).slice(-2) + ":" + 
+                            ("0" + minutes).slice(-2) + ":" + 
+                            ("0" + seconds).slice(-2) + ":" +
+                            ("0" + frames).slice(-2);
+
+    // Update the "duration" span
+    document.getElementById('duration').textContent = formattedDuration;
+};
   
 
 function updateTimecode() {
@@ -880,6 +901,23 @@ function updateTimecode() {
         setTimeout(updateTimecode, 40);   // Lowering the interval to update frame number accordingly
     }
 }   
+
+document.getElementById('timecodeContainer').addEventListener('wheel', function(event) {
+    event.preventDefault();
+    
+    var timecodeContainer = document.getElementById('timecodeContainer');
+    var style = window.getComputedStyle(timecodeContainer, null);
+    var fontSize = parseFloat(style.getPropertyValue('font-size'));
+    
+    if(event.deltaY < 0 && fontSize < 40) {
+        // Vergrößern
+        timecodeContainer.style.fontSize = (fontSize + 1) + 'px';
+    }
+    else if(event.deltaY > 0 && fontSize > 20) {
+        // Verkleinern
+        timecodeContainer.style.fontSize = (fontSize - 1) + 'px';
+    }
+});
 
 
 
