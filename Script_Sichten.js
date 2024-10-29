@@ -53,6 +53,7 @@ var videoFile = '';
 var videoElement;
 var pendingParagraphIndex = 0;
 var drawingPaths = [];
+var isLooping = false;
 
 
 
@@ -676,6 +677,245 @@ function toggleEditMode() {
 
     });
 }
+
+// _________________________________________________________________________________________________________________________________________________________________
+
+var inTime = null;
+var outTime = null;
+var inPointElement = document.getElementById('inPoint');
+var outPointElement = document.getElementById('outPoint');
+//var durationBetweenInOut = null; // Neu hinzugefügt
+    var durationElement = document.getElementById('durationBetweenInOut'); // Neu hinzugefügt
+
+    // Create enum-like object to track the current display point
+    var DisplayPointEnum = {
+        InPoint: 1,
+        OutPoint: 2,
+        Duration: 3
+    };
+    var currentDisplayPoint = DisplayPointEnum.InPoint; // Anfangspunkt ist In-Point
+
+window.addEventListener('keydown', function(event) {
+
+    // Referenzen auf HTML-Elemente erstellen
+    var inPointElement = document.getElementById('inPoint');
+    var outPointElement = document.getElementById('outPoint');
+    var durationElement = document.getElementById('duration');
+    
+    
+    // Überprüfen ob "i" oder "I" gedrückt wurde und setzen oder löschen Sie die In-Zeit
+if (event.key === 'i' || event.key === 'I') {
+    if (inTime !== null) {
+        console.log("In Punkt gelöscht");
+        inTime = null;
+        inPointElement.style.display = "none";
+        
+    } else {
+        inTime = videoElement.currentTime;
+        console.log("In Punkt gesetzt bei: ", inTime);
+
+        // Aktualisieren der In-Punkt-Anzeige und Einblenden der Anzeige
+        inPointElement.textContent = "In: " + convertTimeToTimecode(inTime, 25);
+        inPointElement.style.display = "inline";
+        currentDisplayPoint = DisplayPointEnum.InPoint;
+    }
+    toggleTimecodeButtons();
+    updateDuration();
+
+    // Verstecke die Dauer-Anzeige, wenn entweder In- oder Aus-Zeit gesetzt sind 
+    if (inTime !== null) {
+        // In-Punkt ist gesetzt, also zeigen wir das an
+        inPointElement.style.display = "inline";
+        // Da wir jetzt einen neuen In-Punkt haben, verstecken wir den Out-Punkt
+        outPointElement.style.display = "none";
+    } else {
+        inPointElement.style.display = "none";
+    }
+}
+
+    // Überprüfen ob "o" oder "O" gedrückt wurde und setzen oder löschen Sie die Aus-Zeit
+    if (event.key === 'o' || event.key === 'O') {
+        if (outTime !== null) {
+            console.log("Out Punkt gelöscht");
+            outTime = null;
+            outPointElement.style.display = "none";
+            if (inTime !== null) {
+                currentDisplayPoint = DisplayPointEnum.InPoint;
+                inPointElement.style.display = "inline"; // Zeigen Sie den In-Punkt an  
+            }
+            updateDuration();
+
+        } else {
+            outTime = videoElement.currentTime;
+            console.log("Out Punkt gesetzt bei: ", outTime);
+            
+        
+            // Aktualisieren der Out-Punkt-Anzeige und Einblenden der Anzeige
+            outPointElement.textContent = "Out: " + convertTimeToTimecode(outTime, 25);
+            outPointElement.style.display = "none"; // Dies sollte anfänglich auf "none" gesetzt sein, um den In-Punkt anzuzeigen
+
+            currentDisplayPoint = DisplayPointEnum.OutPoint;
+        }
+// Aktualisiert die Sichtbarkeit der Buttons
+    toggleTimecodeButtons();
+            updateDuration();
+            
+       // Verstecke die Dauer-Anzeige, wenn entweder In- oder Aus-Zeit gesetzt sind 
+       if (outTime !== null) {
+        // Out-Punkt ist gesetzt, also zeigen wir das an
+        outPointElement.style.display = "inline";
+        // Da wir jetzt einen neuen Out-Punkt haben, verstecken wir den In-Punkt
+        inPointElement.style.display = "none";
+    } else {
+        outPointElement.style.display = "none";
+    }
+}
+
+
+videoElement.ontimeupdate = function () {
+    if (isLooping && inTime !== null && outTime !== null && currentDisplayPoint !== DisplayPointEnum.Duration) {
+        if (videoElement.currentTime < inTime || videoElement.currentTime > outTime) {
+            videoElement.currentTime = inTime;
+        }
+    }
+};
+    
+
+    // Überprüfen ob sowohl In-Zeit als auch Aus-Zeit gesetzt sind
+    if (inTime != null && outTime != null) {
+       // videoElement.ontimeupdate = function(event) {
+            // Schleife das Video zwischen In- und Aus-Zeit
+           // if (videoElement.currentTime >= outTime) {
+                //videoElement.currentTime = inTime;
+                //videoElement.play();
+           // }
+       // }
+        // switchPointElement.style.display = "inline"; // Jetzt wird die Umschalttaste angezeigt, um zwischen In und Out Punkten zu wechseln
+    //} else {
+        // Kein Looping, wenn einer der Punkte gelöscht ist
+       // videoElement.ontimeupdate = null;
+         // switchPointElement.style.display = "none"; // Verstecke die Umschalttaste, wenn In- oder Out-Punkt gelöscht wird
+    }
+
+    // Zeigen sie wieder die Dauer (und Dauer zwischen In- und Outpunkt) Anzeige an, wenn sowohl In- als auch Aus-Zeit gelöscht sind 
+if (inTime == null && outTime == null) {
+    durationElement.style.display = 'inline';
+    //durationBetweenInOutElement.style.display = 'none'; 
+} else {
+    durationElement.style.display = 'none'; 
+}
+});
+
+
+
+
+
+
+function updateDuration(){
+    // Überprüfen, ob sowohl In-Zeit als auch Aus-Zeit gesetzt sind
+    if (inTime !== null && outTime !== null) {
+        durationBetweenInOut = outTime - inTime;
+        durationElement.textContent = "I-O: " + convertTimeToTimecode(durationBetweenInOut, 25);
+        // Überprüfen, ob der aktuelle Anzeigepunkt der 'Duration' Punkt ist
+        if (currentDisplayPoint === DisplayPointEnum.Duration) {
+            durationElement.style.display = "inline";
+        }   
+    } else {
+        durationBetweenInOut = null;
+        durationElement.style.display = "none";
+    }
+} 
+
+// Definieren Sie eine Variable, um den aktuellen Anzeigepunkt zu speichern (0 = In-Punkt, 1 = Dauer, 2 = Aus-Punkt)
+var gleichzeitigeAnzeige = 0;
+
+// Button-Listener für den "Left" Button
+document.getElementById('btnLeft').addEventListener('click', function () {
+    gleichzeitigeAnzeige = (gleichzeitigeAnzeige + 2) % 3; // Nach links zyklisch verschieben
+    updateInOutDisplay();
+});
+
+// Button-Listener für den "Right" Button
+document.getElementById('btnRight').addEventListener('click', function () {
+    gleichzeitigeAnzeige = (gleichzeitigeAnzeige + 1) % 3; // Nach rechts zyklisch verschieben
+    updateInOutDisplay();
+    
+});
+
+
+// Button Listener für den "Loop" Button
+document.getElementById('btnLoop').addEventListener('click', function () {
+    isLooping = !isLooping;  // Wechselt den Loop-Status jedes Mal, wenn der Button geklickt wird
+
+    // Wenn das Looping aktiv ist und das Video gerade spielt, setzt der currentTime des Videos auf die inTime zurück
+    if (isLooping && !videoElement.paused) {
+        videoElement.currentTime = inTime;
+    }
+
+    if(isLooping) {
+        this.textContent = '⏸️';  // Ein Emoji für den aktiven Loop-Status
+    } else {
+        this.textContent = '🔄';  // Das ursprüngliche Emoji für den inaktiven Loop-Status
+    }
+});
+
+
+
+function loop() {
+    if(isLooping && inTime !== null && outTime !== null) {  // Überprüfen Sie, ob der Loop aktiviert ist und ob In- und Out-Zeiten gesetzt sind
+        videoElement.ontimeupdate = function(event) {
+            // Schleifen Sie das Video zwischen In- und Aus-Zeit
+            if (videoElement.currentTime >= outTime) {
+                videoElement.currentTime = inTime;
+            }
+        }
+    } else {
+        // Deaktivieren Sie das Looping, wenn der Loop nicht aktiviert ist oder wenn eine der Zeiten gelöscht wird
+        videoElement.ontimeupdate = null;
+    }
+}
+
+function updateInOutDisplay() {
+    // Verstecken Sie alle Elemente
+    inPointElement.style.display = "none";
+    outPointElement.style.display = "none";
+    durationElement.style.display = "none";
+
+    // Zeigen Sie das ausgewählte Element an
+    switch (gleichzeitigeAnzeige) {
+        case 0:
+            inPointElement.style.display = "block";
+            break;
+        case 1:
+            durationElement.style.display = "block";
+            break;
+        case 2:
+            outPointElement.style.display = "block";
+            break;
+    }
+}
+
+
+function toggleTimecodeButtons() {
+    var btnLoop = document.getElementById('btnLoop');
+    var btnRight = document.getElementById('btnRight');
+    var btnLeft = document.getElementById('btnLeft');
+  
+    if (inTime !== null && outTime !== null) {
+        // Beide Punkte sind gesetzt, also die Buttons anzeigen
+        btnLeft.style.display = 'block';
+        btnRight.style.display = 'block';
+        btnLoop.style.display = 'block';
+    } else {
+        // Mindestens ein Punkt ist nicht gesetzt, also die Buttons verstecken
+        btnLeft.style.display = 'none';
+        btnRight.style.display = 'none';
+        btnLoop.style.display = 'none';
+    }
+}
+
+
+// _________________________________________________________________________________________________________________________________________________________________
 
 
 

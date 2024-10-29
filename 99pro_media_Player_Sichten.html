@@ -426,13 +426,11 @@ z-index: 50;
 
 <div class="page-wrapper">
 
+
+
 <div id="overlay"></div>
 
-<div id="timecodeContainer" class="draggable interactable" style="display: none; position: fixed; top: 77%; right: 70%; padding-top: 10px; padding-bottom: 2px; width: 8em; height: 3em; border-radius: 10px; z-index: 1500; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); text-align: center;">
-    <span id="timecode" style="font-size: 1.2em; font-weight: bold; font-family: 'Consolas', 'Lucida Console', monospace; ">00:00:00</span>
-	<br>
-    <span id="duration" style="font-size: 0.9em; font-family: 'Consolas', 'Lucida Console', monospace;">Dur.: 00:00:00</span>
-</div>
+
 
 
 
@@ -586,6 +584,32 @@ z-index: 50;
     </div>
 </div>
 
+<div id="timecodeContainer" class="draggable interactable" style="display: none; position: fixed; top: 67%; right: 73%; padding-top: 10px; padding-bottom: 2px; width: 8em; height: 3em; border-radius: 10px; z-index: 1500; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); text-align: center;" title="Doppelklick = Timecode kopieren">
+    <span id="timecode" style="font-size: 1.2em; font-weight: bold; font-family: 'Consolas', 'Lucida Console', monospace; ">00:00:00</span>
+    
+    <!-- Block um In- und Out-Punkt -->
+    <div style="display: flex; justify-content: center; font-size: 0.9em; font-family: 'Consolas', 'Lucida Console', monospace;" >
+        <span id="inPoint" style="display:none; font-size: 0.9em; color: green;"></span>
+        <span id="outPoint" style="display:none; font-size: 0.9em; color: red;"></span>
+    </div>
+
+<!-- Dauer zwischen In und Out Punkt -->
+    <div style="display: flex; justify-content: center; font-size: 0.82em; font-family: 'Consolas', 'Lucida Console', monospace;" >
+        <span id="durationBetweenInOut" style="display:none"></span>
+    </div>
+
+<!-- Dauer -->
+    <div style="display: flex; justify-content: center; font-size: 0.9em; font-family: 'Consolas', 'Lucida Console', monospace;" >
+        <span id="duration" style=" margin: 0; color: grey;">00:00:00:00</span>
+    </div>
+
+    <!-- Switch-Point block -->
+<div style="display: flex; justify-content: center; font-size: 0.9em; font-family: 'Consolas', 'Lucida Console', monospace;">
+    <button id="btnLeft" style="display: none; border: none; background: none; outline: none; font-size: 1.2em; margin-top: -5px;">◀️</button>
+    <button id="btnLoop" style=" display: none; border: none; background: none; outline: none; font-size: 1.2em;  margin-top: -5px;">🔄️</button>
+    <button id="btnRight" style=" display: none; border: none; background: none; outline: none; font-size: 1.2em;  margin-top: -5px;">▶️</button>
+</div>
+</div>
 
 <footer style="position: fixed; bottom: 5px; right: 5px; font-size: 10px; color: gray;">
     developed and designed by Hans Höpfner
