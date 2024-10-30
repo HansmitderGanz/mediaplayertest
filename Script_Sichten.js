@@ -704,15 +704,20 @@ window.addEventListener('keydown', function(event) {
     
     
     // Überprüfen ob "i" oder "I" gedrückt wurde und setzen oder löschen Sie die In-Zeit
-if (event.key === 'i' || event.key === 'I') {
-    if (inTime !== null) {
-        console.log("In Punkt gelöscht");
-        inTime = null;
-        inPointElement.style.display = "none";
-        
-    } else {
-        inTime = videoElement.currentTime;
-        console.log("In Punkt gesetzt bei: ", inTime);
+    if (event.key === 'i' || event.key === 'I') {
+        if (inTime !== null) {
+            console.log("In Punkt gelöscht");
+            inTime = null;
+            inPointElement.style.display = "none";
+            
+            if (outTime !== null) {
+                gleichzeitigeAnzeige = 2; // Setze die Anzeige auf OUT-Punkt
+                outPointElement.style.display = "inline"; // Zeige den OUT-Punkt an
+            } 
+            updateInOutDisplay(); // Aktualisiere die Anzeige
+        } else {
+            inTime = videoElement.currentTime;
+            console.log("In Punkt gesetzt bei: ", inTime);
 
         // Aktualisieren der In-Punkt-Anzeige und Einblenden der Anzeige
         inPointElement.textContent = "In: " + convertTimeToTimecode(inTime, 25);
@@ -739,11 +744,16 @@ if (event.key === 'i' || event.key === 'I') {
             console.log("Out Punkt gelöscht");
             outTime = null;
             outPointElement.style.display = "none";
-            if (inTime !== null) {
-                currentDisplayPoint = DisplayPointEnum.InPoint;
-                inPointElement.style.display = "inline"; // Zeigen Sie den In-Punkt an  
-            }
-            updateDuration();
+
+            // Überprüfen, ob der IN-Punkt gesetzt ist
+        if (inTime !== null) {
+            gleichzeitigeAnzeige = 0; // Setze die Anzeige auf IN-Punkt
+            inPointElement.style.display = "inline"; // Zeige den IN-Punkt an
+        }
+        
+        updateDuration(); // Dauer aktualisieren
+        updateInOutDisplay(); // Aktualisiere die Anzeige
+    
 
         } else {
             outTime = videoElement.currentTime;
@@ -771,6 +781,11 @@ if (event.key === 'i' || event.key === 'I') {
     }
 }
 
+// Überprüfen, ob sowohl In-Zeit als auch Aus-Zeit gesetzt sind
+if (inTime !== null && outTime !== null) {
+    gleichzeitigeAnzeige = 1; // Setze die Anzeige zuerst auf die Dauer
+    updateInOutDisplay(); // Aktualisiere die Anzeige
+}
 
 videoElement.ontimeupdate = function () {
     if (isLooping && inTime !== null && outTime !== null && currentDisplayPoint !== DisplayPointEnum.Duration) {
@@ -781,21 +796,6 @@ videoElement.ontimeupdate = function () {
 };
     
 
-    // Überprüfen ob sowohl In-Zeit als auch Aus-Zeit gesetzt sind
-    if (inTime != null && outTime != null) {
-       // videoElement.ontimeupdate = function(event) {
-            // Schleife das Video zwischen In- und Aus-Zeit
-           // if (videoElement.currentTime >= outTime) {
-                //videoElement.currentTime = inTime;
-                //videoElement.play();
-           // }
-       // }
-        // switchPointElement.style.display = "inline"; // Jetzt wird die Umschalttaste angezeigt, um zwischen In und Out Punkten zu wechseln
-    //} else {
-        // Kein Looping, wenn einer der Punkte gelöscht ist
-       // videoElement.ontimeupdate = null;
-         // switchPointElement.style.display = "none"; // Verstecke die Umschalttaste, wenn In- oder Out-Punkt gelöscht wird
-    }
 
     // Zeigen sie wieder die Dauer (und Dauer zwischen In- und Outpunkt) Anzeige an, wenn sowohl In- als auch Aus-Zeit gelöscht sind 
 if (inTime == null && outTime == null) {
