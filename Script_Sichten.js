@@ -222,6 +222,24 @@ document.getElementById('timecodeContainer').addEventListener('dblclick', functi
     alert('Timecode wurde in die Zwischenablage kopiert!');
   });
 
+  // Die Buttons 
+var btnRight = document.getElementById('btnRight');
+var btnLeft = document.getElementById('btnLeft');
+var btnLoop = document.getElementById('btnLoop');
+
+// EventListener die das Kopieren des Timecodes bei Doppelklick unterdrücken
+btnRight.addEventListener('dblclick', function(event) {
+    event.stopPropagation();
+});
+
+btnLeft.addEventListener('dblclick', function(event) {
+    event.stopPropagation();
+});
+ 
+btnLoop.addEventListener('dblclick', function(event) {
+    event.stopPropagation();
+});
+
 var video = document.getElementById('myVideo');
 video.addEventListener('timeupdate', updateTimecode);
 
