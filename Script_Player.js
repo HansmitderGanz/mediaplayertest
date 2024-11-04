@@ -811,6 +811,17 @@ window.addEventListener('keydown', function(event) {
     }
 });
 
+window.addEventListener('keydown', function(event) {
+    if (event.altKey && event.key === 'g') {
+        startGame(); // Sie müssen diese Funktion implementieren
+    }
+});
+
+// Hier ist Ihre StartGame Funktion, die ein neues Fenster öffnet und ein HTML-Spiel lädt.
+function startGame() {
+    let gameWindow = window.open("Game/memorie.html", "Spielefenster", "height=600,width=800");
+}
+
 // _________________________________________________________________________________________________________________________________________________________________
 
 var inTime = null;
