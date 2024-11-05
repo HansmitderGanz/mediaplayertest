@@ -1221,19 +1221,22 @@ function updateMarkerList() {
 function handleMarkerActions(selectElem, index) {
     var selectedOption = selectElem.value;
     if (selectedOption === 'edit') {
-        var newDescription = prompt("Bitte geben Sie eine neue Anmerkung ein");
-        markers[index].description = newDescription;
+        var oldDescription = markers[index].description; // Sichern Sie die alte Beschreibung
+        var newDescription = prompt("Bitte geben Sie eine neue Anmerkung ein", oldDescription); // Geben Sie die alte Beschreibung als zweiten Parameter an
+        if (newDescription !== null) {  // Überprüfen, ob der Benutzer das Prompt-Fenster nicht abgebrochen hat
+            markers[index].description = newDescription;
+        }
         updateMarkerList();
     } else if (selectedOption === 'delete') {
-        var reallyDelete = confirm("Möchten Sie wirklich die Anmerkung von '" + markers[index].userName + "' löschen?");
+        var reallyDelete = confirm("Möchten Sie wirklich die Anmerkung von " + markers[index].userName + " löschen?");
         if (reallyDelete) {
             markers.splice(index, 1);
             updateMarkerList();
         }
     } else if (selectedOption === 'screenshot') {
         createScreenshot(index);
-    }
-    selectElem.selectedIndex = 0;
+    }    
+    selectElem.selectedIndex = 0; // Reset the dropdown
 }
 
 
