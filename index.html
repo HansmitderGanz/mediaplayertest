@@ -179,10 +179,10 @@ $('#rightHalf').click(function() {
                 navButton.style.display = 'none';
             } else if (viewState === 'player') {
                 navButton.style.display = 'block';
-                navButton.setAttribute('href', '99pro_media_Player.html');
+                navButton.setAttribute('href', '99pro_media_Player_VorSchnitt.html');
             } else if (viewState === 'sichter') {
                 navButton.style.display = 'block';
-                navButton.setAttribute('href', '99pro_media_Player_Sichten.html');
+                navButton.setAttribute('href', '99pro_media_Player_NachSchnitt.html');
             }
         }
 
@@ -201,7 +201,7 @@ $('#rightHalf').click(function() {
 
         transitionToPlayer.onended = function() {
             setTimeout(function() {
-                window.location.href = '99pro_media_Player.html';
+                window.location.href = '99pro_media_Player_VorSchnitt.html';
             }, 100);
         };
     } else if (viewState === 'sichter') {
@@ -215,7 +215,7 @@ $('#rightHalf').click(function() {
 
         transitionToSichter.onended = function() {
             setTimeout(function() {
-                window.location.href = '99pro_media_Player_Sichten.html';
+                window.location.href = '99pro_media_Player_NachSchnitt.html';
             }, 100);
         };
     }

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    font-family: Arial, sans-serif;
+	background-image: radial-gradient(circle at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.6) 180%, rgba(0,0,0,1) 20%);
+    display: center;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#whiteOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #dbdcdc;
+    z-index: 1000;
+}
+
+@keyframes fadeZoomIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.0); /* Leichtes Overshoot für natürlichen Effekt */
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+.page-wrapper {
+    animation: fadeZoomIn 3s cubic-bezier(0.25, 0.1, 0.25, 1.0) forwards;
+
+}
+
+.hidden {
+    display: none !important;
+}
+
+.interactable {
+  transition: transform 0.3s ease;
+}
+
+.interactable:hover {
+  transform: scale(1.05);
+}
+
+.interactable-transcript {
+    transition: transform 0.3s ease;
+}
+
+.interactable-transcript:hover {
+    transform: scale(1.005); // Ändern Sie den Zoomfaktor hier
+}
+
+textarea {
+    box-sizing: border-box;
+}
+
+
+#myVideo {
+    margin-right: 10px;
+	box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.75);
+
+}
+
+body.dark-mode #myVideo {
+    box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.6); /* Helle Schatten im dunklen Modus */
+}
+
+body.dark-mode .faq-modal div {
+        color: #000000;
+}
+
+#markerList {
+    flex-grow: 1;
+	
+}
+
+
+
+#playerContainer {
+    margin-top: 10px;
+}
+
+
+
+.show {
+    display: block !important;
+}
+
+#toggleEditMode {
+    display: inline-block; 
+    padding: 10px; 
+    border-radius: 10px; 
+    cursor: pointer; 
+    margin-bottom: 10px;
+}
+
+/* Normaler Modus */
+body {
+    background-color: #FAFAFA;
+    color: black;
+transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: white;
+	transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.dark-mode #shortcuts {
+    color: black;
+}
+
+
+.videoControlBar {
+    background-color: lightgray;
+}
+
+.videoControlBar.dark-mode {
+    background-color: darkgray;
+}
+
+#markerListContainer {
+	max-width: 500px;  /* Maximale Breite */
+    max-height: 400px;
+    overflow-y: auto;
+    border-style: solid;  /* Rahmenstil */
+    border-width: 2px;  /* Rahmendicke */
+    border-color: #676767;  /* Rahmenfarbe */
+	border-radius: 10px;
+	display: block;
+	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+#timecodeContainer {
+    background-color: #fff;
+    color: black;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.dark-mode #timecodeContainer {
+    background-color: #e1e1e1;
+    color: black;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+#markerListContainer.hidden {
+    display: none !important;
+}
+
+body.dark-mode #markerListContainer {
+    border-color: #c4c4c4;  /* Rahmenfarbe im Darkmode */
+}
+
+#markerList li {
+    border-bottom: 2px solid #676767;
+    padding: 8px 0; /* fügt ein bisschen vertikalen Abstand hinzu, damit die Anmerkungen nicht zu nahe an der Linie sind */
+	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode #markerList li {
+border-color: #c4c4c4;
+}
+
+#myVideo {
+    position: relative; 
+    /* Andere Stile... */
+    z-index: 2; /* Vordergrund */
+}
+
+#transcriptContainer {
+    width: 120%; 
+    margin: 20px auto;
+	margin-top: 60px;
+
+}
+
+#transcriptContainer.hidden {
+    display: none;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e1e1e1;
+  -webkit-transition: .4s;
+  transition: .4s;
+	border: 2px solid #6b6b6b;
+}
+
+.slider:before {
+  position: absolute;
+  content: "🌜"; /* Halbmond-Symbol */
+  height: 26px;
+  width: 26px;
+  left: 3px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  text-align: center;
+  line-height: 26px;
+  font-size: 16px;
+box-shadow: none
+}
+
+input:checked + .slider {
+  background-color: #673ab7;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #1a1a1a; 
+}
+
+input:checked + .slider:before {
+  content: "☀️"; /* Sonnen-Symbol */
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+  text-align: center;
+  line-height: 26px;
+  font-size: 16px;
+}
+
+
+.slider.round {
+  border-radius: 34px;
+box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.3), /* inner shadow */
+                0px 2px 2px rgba(0, 0, 0, 0.3); /* outer shadow */
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.switch-transcript {
+  position: relative;
+  display: inline-block;
+  width: 110px;
+  height: 34px;
+}
+
+.switch-transcript input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider.transcript {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e1e1e1;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border: 2px solid #6b6b6b;
+}
+
+.slider.transcript:after {
+  content: "Transkript";
+  color: #000000;
+  display: block;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 63.5%;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+	opacity: 1; /* Default opacity to 1 */
+  transition: opacity 0.2s ease-in-out; /* Transition effect for smooth fade */
+}
+
+.slider.transcript:before {
+  position: absolute;
+  content: "📝";
+  height: 26px;
+  width: 26px;
+  left: 3px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  text-align: center;
+  line-height: 26px;
+  font-size: 16px;
+}
+
+input:checked + .slider.transcript:before {
+  content: "❌";
+  -webkit-transform: translateX(70px);
+  -ms-transform: translateX(70px);
+  transform: translateX(75px);
+}
+
+input:checked + .slider.transcript:after {
+	opacity: 0;
+}
+
+button.interactable, select.interactable, label.interactable {
+    /* Ihre bisherigen Stile ... */
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); 
+    transition: all 0.3s; 
+}
+
+button.interactable:hover, select.interactable:hover, label.interactable:hover{
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5); 
+}
+
+button.interactable:active, select.interactable:active, label.interactable:active{
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+#screenshotContainer {
+ overflow: hidden;
+    position: absolute;
+    top: 5.15%;  
+    left: 50%; 
+    transform: translateX(-50%);
+    display: none;
+    z-index: 10;
+	max-width: 1280px;
+    max-height: 720px;
+}
+
+#saveScreenshotButton {
+	position: absolute;
+    top: 10px;
+    background-color:  #2E8B57;
+	color: white;
+}
+
+#closeScreenshotButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px;
+    z-index: 10;
+    color: white;
+    background-color: red;
+}
+
+#toolsContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+#overlay {
+    /* Overlay nimmt den gesamten Bildschirm in Anspruch */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+	backdrop-filter: blur(1px);
+    /* Setzen Sie den Hintergrund auf schwarz mit 50% Transparenz */
+    background-color: rgba(0,0,0,0.7);
+    /* Setzen Sie den Standarddisplay-Wert auf 'none' */
+    display: none;
+    /* Hängen hinter dem Screenshot-Container den Zeichenfolgewert an */
+    z-index: 10;
+    /* Fügen Sie den Übergangseffekt hinzu, um es ausblenden zu lassen */
+    transition: all 0.5s ease;
+}
+
+div.top-container {
+  position: fixed; 
+  top: 10px; /* Ändern Sie diese Position, um die Schieberegler weiter nach unten zu positionieren */
+  left: 10px; 
+  display: flex; 
+  align-items: center; 
+  gap: 10px;
+z-index: 50;
+}
+
+#toolsContainer button {
+    width: 30px;  /* Stellen Sie die Werte entsprechend Ihren Bedürfnissen ein */
+    height: 30px;
+}
+
+
+
+</style>
+</head>
+<body>
+
+<div id="whiteOverlay"></div>
+
+<div class="page-wrapper">
+
+
+
+<div id="overlay"></div>
+
+
+
+
+
+<!--_______________________OPTION_Darkmode Knopf/ Video Size / Trasnkript / Shortcuts__________________________-->
+
+<button class="interactable" id="toggleShortcuts" style="position: fixed; top: 56px; left: 10px; padding: 10px; background-color: #e1e1e1; border-radius: 10px; border: none; cursor: pointer; font-size: 20px; z-index: 3;" onclick="toggleShortcuts()">🙈</button>
+
+<div id="shortcuts" style="position: fixed; top: 92px; left: 10px; padding: 10px; background-color: #e1e1e1; border-radius: 10px; display: none;">
+        <h3>Nützliche Shortcuts</h3>
+        <table>
+            <tr><td><b>Leertaste</b></td><td>: Play/Pause</td></tr>
+            <tr><td><b>M</b></td><td>: Marker setzen</td></tr>
+            <tr><td><b>Alt + S</b></td><td>: Stand speichern</td></tr>
+            <tr><td><b>Pfeil links</b></td><td>: 5sek zurück</td></tr>
+            <tr><td><b>Pfeil rechts</b></td><td>: 5sek vor</td></tr>
+            <tr><td><b>Alt + Pfeil links</b></td><td>: 1 Frame zurück</td></tr>
+            <tr><td><b>Alt + Pfeil rechts</b></td><td>: 1 Frame vor</td></tr>
+	    <tr><td><b>Pfeil oben</b></td><td>: vorheriger Marker</td></tr>
+	    <tr><td><b>Pfeil unten</b></td><td>: nächster Marker</td></tr>
+	    <tr><td><b>/</b></td><td>: Timecodesuche</td></tr>
+	    <tr><td><b>Alt + V</b></td><td>: Timecode ein/aus</td></tr>
+	    <tr><td><b>I</b></td><td>: In setzen/entfernen</td></tr>
+	    <tr><td><b>O</b></td><td>: Out setzen/entfernen</td></tr>
+	    <tr><td><b>Alt + T</b></td><td>: Transkript timing</td></tr>
+	    <tr><td><b>Alt + G</b></td><td>: Päuschen</td></tr>
+	    <tr><td><b>Alt + F</b></td><td>: FAQ</td></tr>
+        </table>
+    </div>
+
+<div class="top-container">
+  <!-- Darkmode-Slider --> 
+  <label class="switch">
+    <input type="checkbox" id="toggleDarkMode" onclick="toggleDarkMode()">
+    <div class="slider round"></div>
+  </label>
+
+<label class="switch-transcript">
+    <input type="checkbox" id="toggleTranscript" onclick="toggleTranscript()">
+    <div class="slider round transcript"></div>
+  </label> 
+ 
+
+</div>
+
+
+
+
+
+
+<!--__________________________________Video Importieren / Speichern______________________________________________-->
+
+   
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+	<div id="playerTopButtons" style="margin-bottom: 10px;">
+
+   <label for="videoFile" id="videoFileLabel" class= "interactable" style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; font-size: 14px;">
+    Video einladen
+    <input class="hidden" type="file" id="videoFile" accept=".mp4,.mov" onchange="loadVideo(event)" style="display: none;">
+</label>
+    
+        <select onchange="handleSaveOptions(this)" class= "interactable" style="padding: 10px; padding-left: 30px; border-radius: 10px; cursor: pointer;">
+    	<option selected disabled>Speichern/Laden</option>
+    	<option value="save">Stand speichern</option>
+   	<option value="load">Speicherstand laden</option>
+   	
+</select>
+
+<!-- <option value="loadMarkerList">MarkerListe importieren</option>-->
+
+
+<input type="file" id="loadMarkerListFile" style="display: none;">
+
+  <input type="file" id="loadMarkersFile" style="display: none;" onchange="loadMarkers(event)">
+
+<!--__________________________________Exportieren______________________________________________________________________-->
+
+<select onchange="handleExportOptions(this)" 
+               class= "interactable" style="display: inline-block; background-color: #2E8B57; color: white; padding: 10px; border-radius: 10px; cursor: pointer;">
+            <option selected disabled>Anmerkungen Exportieren</option>
+            <option value="markers">Für AVID exportieren</option>
+            <option value="table"> Als Liste exportieren</option>
+        </select>
+ </div>
+<!--______________________________Player Container / Navigations Buttons / Marker Liste________________________-->
+
+<div style="display: flex; justify-content: center; align-items: center;">
+    <div id="playerContainer" style="text-align: center;">
+
+<video id="myVideo" width="720" height="405" controls style="display:block; margin: 0 auto; border-radius: 10px; "></video>
+
+    <button onclick="rewind(5)" class= "interactable" style="padding: 10px; border-radius: 10px; cursor: pointer;  margin-top: 8px;">&#8647 5sek</button>
+<button onclick="rewind(1/25)" class= "interactable" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 8px">&#8592 Frame</button>
+<button onclick="setMarker()" class= "interactable" style="background-color: #673ab7; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 8px">Anmerkung setzen</button>
+<button onclick="forward(1/25)" class= "interactable" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 8px">Frame &#8594</button>
+<button onclick="forward(5)" class= "interactable" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 8px">5sek &#8649</button>
+</div>
+
+<div id="markerListContainer" class="hidden" style="width: 80%; margin-left: 10px; margin-top: -33px;">
+    <ul id="markerList">
+</ul>
+    </div>
+
+</div>
+
+<!--__________________________________Transkript Container_____________________________________________-->
+
+<div id="screenshotContainer" style="display: none;">
+    <canvas id="screenshotCanvas"></canvas>
+    <button id="saveScreenshotButton" style="display: none;" onclick="saveScreenshot()">Screenshot speichern</button>
+    <button id="closeScreenshotButton" onclick="closeScreenshot()">X</button>
+    <div id="toolsContainer">
+<button title="Undo" onclick="undoDrawing()" style="display: flex; justify-content: center; align-items: center;">↩️</button>
+    <button title="Pencil" onclick="selectBrush('Pencil')" style="display: flex; justify-content: center; align-items: center;">✏️</button>
+	<button title="Black" onclick="setBrushColor('black')" style="display: flex; justify-content: center; align-items: center;">⬛</button>
+	<button title="White" onclick="setBrushColor('white')" style="display: flex; justify-content: center; align-items: center;">⬜</button>
+    <button title="Red" onclick="setBrushColor('red')" style="display: flex; justify-content: center; align-items: center;">🟥</button>
+    <button title="Green" onclick="setBrushColor('green')" style="display: flex; justify-content: center; align-items: center;">🟩</button>
+    <button title="Blue" onclick="setBrushColor('blue')" style="display: flex; justify-content: center; align-items: center;">🟦</button>
+    <button title="Thin" onclick="setBrushWidth(2)">
+  <span style="font-size: 5px;" style="display: flex; justify-content: center; align-items: center;">🟣</span>
+</button>
+    <button title="Medium" onclick="setBrushWidth(5)" style="display: flex; justify-content: center; align-items: center;"><span style="font-size: 10px;">🟣</span>
+    <button title="Thick" onclick="setBrushWidth(20)" style="display: flex; justify-content: center; align-items: center;"><span style="font-size: 20px;">🟣</span>
+</div>
+</div>
+
+
+
+<div style="display: flex; justify-content: center;">
+<div id="transcriptContainer" class="hidden">
+    <label for="transcriptFile" class="interactable" style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; font-size: 14px;">
+        Transkript einladen
+        <input class="hidden" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)" style="display: none;">
+    </label>
+
+    <button id="removeTranscriptButton" class="transcriptActions transcript-related hidden interactable" style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"
+    onclick="removeTranscript()">Transkript entfernen</button>
+
+    <span class="transcript-related hidden interactable"><span role="img" aria-label="Lautsprecher">🔊</span>
+        <input type="range" id="volume" name="volume" min="0" max="1" step="0.01" value="1">
+    </span>
+
+    <input class="transcript-related hidden interactable" type="search" id="transcriptSearch" placeholder="Suchen im Transkript..." 
+            style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; width: 30%;">
+    
+    <button id="toggleEditMode" class="transcriptActions transcript-related hidden interactable" style="padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"
+        onclick="toggleEditMode()">Bearbeiten</button>
+
+    <div class="transcript-related hidden" id="transcript" style="border: solid 2px #676767; padding: 10px; height: 250px; overflow-y: scroll; white-space: pre-line; border-radius: 10px; overflow-wrap: break-word; word-wrap: break-word; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);"></div>
+</div>
+
+
+    </div>
+</div>
+
+<div id="timecodeContainer" class="draggable interactable" style="display: none; position: fixed; top: 67%; right: 73%; padding-top: 10px; padding-bottom: 2px; width: 8em; height: 3em; border-radius: 10px; z-index: 1500; box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); text-align: center;" title="Doppelklick = Timecode kopieren">
+    <span id="timecode" style="font-size: 1.2em; font-weight: bold; font-family: 'Consolas', 'Lucida Console', monospace; ">00:00:00</span>
+    
+    <!-- Block um In- und Out-Punkt -->
+    <div style="display: flex; justify-content: center; font-size: 0.9em; font-family: 'Consolas', 'Lucida Console', monospace;" >
+        <span id="inPoint" style="display:none; font-size: 0.9em; color: green;"></span>
+        <span id="outPoint" style="display:none; font-size: 0.9em; color: red;"></span>
+    </div>
+
+<!-- Dauer zwischen In und Out Punkt -->
+    <div style="display: flex; justify-content: center; font-size: 0.82em; font-family: 'Consolas', 'Lucida Console', monospace;" >
+        <span id="durationBetweenInOut" style="display:none"></span>
+    </div>
+
+<!-- Dauer -->
+    <div style="display: flex; justify-content: center; font-size: 0.9em; font-family: 'Consolas', 'Lucida Console', monospace;" >
+        <span id="duration" style=" margin: 0; color: grey;">00:00:00:00</span>
+    </div>
+
+    <!-- Switch-Point block -->
+<div style="display: flex; justify-content: center; font-size: 0.9em; font-family: 'Consolas', 'Lucida Console', monospace;">
+    <button id="btnLeft" style="display: none; border: none; background: none; outline: none; font-size: 1.2em; margin-top: -5px;">◀️</button>
+    <button id="btnLoop" style=" display: none; border: none; background: none; outline: none; font-size: 1.2em;  margin-top: -5px;">🔄️</button>
+    <button id="btnRight" style=" display: none; border: none; background: none; outline: none; font-size: 1.2em;  margin-top: -5px;">▶️</button>
+</div>
+</div>
+
+<footer style="position: fixed; bottom: 5px; right: 5px; font-size: 10px; color: gray;">
+    developed and designed by Hans Höpfner
+</footer>
+
+</body>
+</html>
+
+
+
+
+<!--__________________________________JAVA SCRIPT______________________________________________________________________-->
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="Script_Player_NachSchnitt.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.3.1/fabric.min.js"></script>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+
+</body>
+</html>
