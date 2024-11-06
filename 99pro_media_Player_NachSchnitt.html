@@ -416,6 +416,41 @@ z-index: 50;
     height: 30px;
 }
 
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1500;
+  padding-top: 100px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 50%;
+}
+
+.modal-content p {
+  font-size: 18px; /* Ändern Sie die Größe, wie benötigt */
+}
+
+.highlight {
+  color: red; 
+  font-weight: bold;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
 
 
 </style>
@@ -612,6 +647,31 @@ z-index: 50;
     <button id="btnRight" style=" display: none; border: none; background: none; outline: none; font-size: 1.2em;  margin-top: -5px;">▶️</button>
 </div>
 </div>
+
+<!-- Erstes Modal -->
+<div id="modal1" class="modal">
+  <div class="modal-content">
+    <p> <span class="highlight">Die Datei mit dem Namen  wurde erstellt.</span> Um fortzufahren, klicken Sie bitte auf <span class="highlight">Per E-Mail versenden</span>, um eine E-Mail zu erstellen und fügen Sie manuell die .txt Datei als Anhang hinzu.</p>
+    <div class="buttons">
+        <button id="okButton">Per E-Mail versenden</button>
+        <button id="cancelButton1">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Zweites Modal -->
+<div id="modal2" class="modal">
+  <div class="modal-content">
+    <p> <span class="highlight">Fügen Sie die generierte Datei als Anhang an Ihre E-Mail hinzu!</span><br><br>Drücken Sie "Verstanden und E-Mail erstellen", um fortzufahren.</p>
+    <div class="buttons">
+        <button id="emailButton">Verstanden und E-Mail erstellen</button>
+        <button id="cancelButton2">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
 
 <footer style="position: fixed; bottom: 5px; right: 5px; font-size: 10px; color: gray;">
     developed and designed by Hans Höpfner

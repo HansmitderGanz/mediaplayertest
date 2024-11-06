@@ -472,7 +472,7 @@ function exportMarkers() {
 
     // Setzen Sie den Dateinamen in den Modaltext
     document.getElementById('modal1').getElementsByClassName('modal-content')[0]
-            .getElementsByTagName('p')[0].innerHTML = `Die Datei mit dem Namen <span class="highlight">${fileName}</span> wurde erstellt. Um eine <span class="highlight">E-Mail an die Postproduktion zu senden</span> klicken Sie bitte auf <span class="highlight">OK</span> und fügen Sie manuell die Datei als Anhang hinzu.`
+            .getElementsByTagName('p')[0].innerHTML = `Die Datei mit dem Namen <span class="highlight">${fileName}</span> wurde erstellt.<br><br>Um die Anmerkungen per <span class="highlight">E-Mail an die Postproduktion</span> zu senden, klicken Sie bitte auf <span class="highlight">"Per E-Mail versenden"</span> und fügen Sie manuell die Datei als Anhang hinzu.`
 
     // Modal anzeigen
     document.getElementById('modal1').style.display = "block";
@@ -510,7 +510,7 @@ function sendMail() {
       
     let currentUser = currentUserName; 
     
-    let body = `Liebe Postproduktion,\n\nHiermit erhaltet ihr die Avid Markerliste der Sendung: ${clipName}.\n\nMit freundlichen Grüßen,\n${currentUser}`; // Den Textinhalt der E-Mail anpassen
+    let body = `Liebe Postproduktion,\n\nhiermit erhaltet ihr die AVID Markerliste mit den Anmerkungen zur Sendung: ${clipName}.\n\nMit freundlichen Grüßen,\n${currentUser}`; // Den Textinhalt der E-Mail anpassen
 
     let mailto_link = 'mailto:' + email + '?subject=' + subject + '&body=' + encodeURIComponent(body);
 

@@ -1279,9 +1279,59 @@ function exportMarkers() {
     a.style = "display: none";
     var url = window.URL.createObjectURL(blob);
     a.href = url;
-    a.download = nameWithoutExtension + '_Anmerkungen_AvidMarker_Sichtung_' + currentUserName + '.txt';
+    a.download = nameWithoutExtension + '_AVID_Anmerkungen_' + currentUserName + '.txt';
     a.click();
     window.URL.revokeObjectURL(url);
+    
+// Holen Sie sich den Namen der generierten Datei
+var fileName = nameWithoutExtension + '_AVID_Anmerkungen_' + currentUserName + '.txt';
+
+
+// Setzen Sie den Dateinamen in den Modaltext
+document.getElementById('modal1').getElementsByClassName('modal-content')[0]
+        .getElementsByTagName('p')[0].innerHTML = `Die Datei mit dem Namen <span class="highlight">${fileName}</span> wurde erstellt.<br><br>Um die Anmerkungen per <span class="highlight">E-Mail an die Postproduktion</span> zu senden, klicken Sie bitte auf <span class="highlight">"Per E-Mail versenden"</span> und fügen Sie manuell die Datei als Anhang hinzu.`
+
+// Modal anzeigen
+document.getElementById('modal1').style.display = "block";
+}
+
+document.getElementById('okButton').addEventListener('click', function() {
+// Modal1 ausblenden und Modal2 anzeigen
+document.getElementById('modal1').style.display = "none";
+document.getElementById('modal2').style.display = "block";
+});
+
+document.getElementById('emailButton').addEventListener('click', function() {
+// Modal2 ausblenden und E-Mail-Fenster öffnen
+document.getElementById('modal2').style.display = "none";
+sendMail();
+});
+
+document.getElementById('cancelButton1').addEventListener('click', function() {
+// Modal1 ausblenden
+document.getElementById('modal1').style.display = "none";
+});
+
+document.getElementById('cancelButton2').addEventListener('click', function() {
+// Modal2 ausblenden
+document.getElementById('modal2').style.display = "none";
+});
+
+function sendMail() {
+let email = 'VL99PMPFPostproduktion@99pro.de';  // Passen Sie die E-Mail-Adresse an
+let clipName = videoFile;
+let subject = 'Avid Markerliste: ' + clipName;  // Den Betreff anpassen
+
+
+// Abrufen des Namens des aktuellen Clips und des aktuellen Benutzers
+  
+let currentUser = currentUserName; 
+
+let body = `Liebe Postproduktion,\n\nhiermit erhaltet ihr die AVID Markerliste mit den Anmerkungen zur Sendung: ${clipName}.\n\nMit freundlichen Grüßen,\n${currentUser}`; // Den Textinhalt der E-Mail anpassen
+
+let mailto_link = 'mailto:' + email + '?subject=' + subject + '&body=' + encodeURIComponent(body);
+
+window.open(mailto_link, 'emailWindow');
 }
 
 function handleSaveOptions(selectElem) {
