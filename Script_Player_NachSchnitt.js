@@ -1551,7 +1551,7 @@ function exportTable() {
     + '\nSichtung durch: ' + currentUserName 
     + '\nSichtungsdatum: ' + todayDate;
 
-    text += '\n\n-------------- AUFLISTUNG ANMERKUNGEN/SPRECHERTEXT -------------\n\n';
+    
     var transcriptLines = Array.from(document.querySelectorAll('#transcript p'));
     var maxNoteLength = 0;
     
@@ -1689,7 +1689,12 @@ doc.autoTable({
             data.cell.styles.fontStyle = data.row.raw[2] ? 'bold' : 'normal'; // Setzt den Schriftstil auf 'fett', wenn es sich um Sprechertext handelt, sonst auf 'normal'
         }
     },
-    styles: { cellWidth: 'auto' }, 
+    styles: { 
+        cellWidth: 'auto',
+        lineColor: [211, 211, 211], 
+        lineWidth: 0.5, // Linienbreite
+        cellPadding: {top: 2, right: 2, bottom: 2, left: 2} // Zellenabstand
+    },
     columnStyles: {
         0: {cellWidth: 'auto', overflow: 'visible'},  // Timecode
         1: {cellWidth: 'auto'}  // Transkript
@@ -1699,33 +1704,8 @@ doc.autoTable({
 });
 
 doc.save(nameWithoutExtension + '_Liste_Anmerkungen_' + currentUser + '_' + todayDate + '.pdf');
-
-
-
-
-
-    var noteHeader = 'Anmerkung';
-    var userHeader = 'gesetzt von'; 
-    var speechHeaderText = 'Sprechertext';
-    let repeatCount = Math.max(0, maxNoteLength - noteHeader.length + 2);
-    text += 'Nummer\tTimecode\t' + noteHeader + ' '.repeat(repeatCount) + '\t' + userHeader + '\t' + speechHeaderText + '\n';
-
-    markers.forEach(function(marker, index) {
-        var correspondingTranscriptLine = transcriptLines.find(p => {
-            return Math.abs(parseFloat(p.getAttribute('data-time')) - marker.timeInSeconds) <= 1;
-        });
-
-        var speechText = '';
-        if (correspondingTranscriptLine && correspondingTranscriptLine.style.color === 'green') {
-            speechText = correspondingTranscriptLine.getAttribute('data-saved').trim();
-        }
-
-        var fullDescription = marker.description + (marker.hasScreenshot ? ' - siehe Screenshot NR' + marker.screenshotTime : '');
-        text += (index + 1) + '\t' + marker.timecode + '\t' + fullDescription + ' '.repeat(maxNoteLength - fullDescription.length + 2) + '\t' + marker.userName + '\t' + speechText + '\n';
-    });
-
-
 }
+
 
 function extractSpeakerLines() {
     var speakerText = [];
