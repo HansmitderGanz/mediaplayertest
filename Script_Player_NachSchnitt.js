@@ -1523,7 +1523,22 @@ function exportTranscript(transcriptState) {
     return text;
 }
 
+function extractTranscriptLines() {
+    var transcript = Array.from(document.querySelectorAll('#transcriptContainer p')).map(p => {
+        var isSpeaker = p.getAttribute('data-speaker') === 'true';
+        var timecode = convertTimeToHrsMinsSecs(parseFloat(p.getAttribute('data-time')));
+        var lines = p.textContent.split('\n'); 
+        lines.shift(); 
+        if (isSpeaker) {
+            lines.unshift('- SPRECHER');
+        }
+        return [timecode, lines.join('\n'), isSpeaker];
+    });
+    return transcript;
+}
+
 function exportTable() {
+    let currentUser = currentUserName;
     var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
     
     var today = new Date();
@@ -1547,6 +1562,148 @@ function exportTable() {
         }
     });
 
+
+    var doc = new jsPDF();
+    
+    // Setzen Sie die Schriftgröße und den Schriftstil
+    doc.setFontSize(10);
+    doc.setFontStyle('bold');
+    
+    // Fügt den fettgedruckten Text zur PDF hinzu
+    doc.text('Dateiname: ' + nameWithoutExtension, 10, 20);
+    doc.text('Sichtung durch: ' + currentUserName, 10, 30);
+    doc.text('Sichtungsdatum: ' + todayDate, 10, 40);
+
+
+    doc.setFontSize(14);     // Setzen der Schriftgröße für die Überschriften
+    doc.setFontStyle('bold'); // Setzen der Schriftart auf Fett
+    if (doc.autoTable.previous.finalY > 260) { // Überprüfen Sie, ob genug Platz für die Überschrift vorhanden ist
+        doc.addPage();
+    }
+    doc.text('AUFLISTUNG ANMERKUNGEN/SPRECHERTEXT', 10, 50); // setzt Überschrifttext
+    doc.setDrawColor(0,0,0); // Setzen Sie die Farbe auf Schwarz
+    doc.line(10, 52, 200, 52) // Fügen Sie eine Linie unter dem Text hinzu 
+    
+    doc.setFontSize(12); // Zurücksetzen der Schriftgröße und des -stils für die Tabelle
+    doc.setFontStyle('normal');
+
+    // Erzeugen Sie eine Datenmatrix für die Anmerkungen/Sprechertext-Tabelle
+var tableData = [];
+
+markers.forEach(function(marker, index) {
+    var correspondingTranscriptLine = transcriptLines.find(p => {
+        return Math.abs(parseFloat(p.getAttribute('data-time')) - marker.timeInSeconds) <= 1;
+    });
+
+    var speechText = '';
+    if (correspondingTranscriptLine && correspondingTranscriptLine.style.color === 'green') {
+        speechText = correspondingTranscriptLine.getAttribute('data-saved').trim();
+    }
+
+    var fullDescription = marker.description + (marker.hasScreenshot ? ' - siehe Screenshot NR' + marker.screenshotTime : '');
+    
+    // Erstellen Sie eine Zeile für die Tabelle
+    var row = [];
+    row.push(index + 1); // Nummer
+    row.push(marker.timecode); // Timecode
+    row.push(fullDescription); // Anmerkung
+    row.push(marker.userName); // gesetzt von
+    row.push(speechText); // Sprechertext
+    
+    tableData.push(row);
+});
+
+if (doc.autoTable.previous.finalY > 260) { // Überprüfen Sie, ob genug Platz für die Überschrift vorhanden ist
+    doc.addPage();
+}
+doc.autoTable({
+    startY: 60,
+    styles: { 
+        overflow: 'linebreak',
+        cellWidth: 'wrap',
+        lineColor: [211, 211, 211], 
+        lineWidth: 0.5, // Linienbreite
+        cellPadding: {top: 2, right: 2, bottom: 2, left: 2} // Zellenabstand
+    },
+    columnStyles: {
+        0: {cellWidth: 'auto'},    // Nummer
+        1: {cellWidth: 30,},    // Timecode
+        2: {cellWidth: 'auto'},    // Anmerkung
+        3: {cellWidth: 'auto'},    // gesetzt von
+        4: {cellWidth: 'auto'},    // Sprechertext
+    },
+    head: [['Nummer', 'Timecode', 'Anmerkung', 'gesetzt von', 'Sprechertext']],
+    body: tableData
+});
+
+// Setzen Sie die Überschrift für die zweite Tabelle
+doc.setFontSize(14);
+doc.setFontStyle('bold');
+if (doc.autoTable.previous.finalY > 260) { // Überprüfen Sie, ob genug Platz für die Überschrift vorhanden ist
+    doc.addPage();
+}
+doc.text('AUFLISTUNG SPRECHERTEXT', 10, doc.autoTable.previous.finalY + 20); // setzt Überschrifttext
+doc.setDrawColor(0,0,0); // Setzen Sie die Farbe auf Schwarz
+doc.line(10, doc.autoTable.previous.finalY + 22, 200, doc.autoTable.previous.finalY + 22) // Fügen Sie eine Linie unter dem Text hinzu 
+
+
+
+// Zweite Tabelle
+doc.setFontSize(12);
+doc.setFontStyle('normal');
+
+// Sprechertext Tabelle hinzufügen
+var speakerLines = extractSpeakerLines()
+
+if (doc.autoTable.previous.finalY > 260) { // Überprüfen Sie, ob genug Platz für die Überschrift vorhanden ist
+    doc.addPage();
+}
+doc.autoTable({
+    startY: doc.autoTable.previous.finalY + 30,  // Beginn unter der vorherigen Tabelle
+    styles: { 
+        overflow: 'linebreak',
+        cellWidth: 'auto',
+        lineColor: [211, 211, 211], 
+        lineWidth: 0.5, // Linienbreite
+        cellPadding: {top: 2, right: 2, bottom: 2, left: 2} // Zellenabstand
+    },
+    head: [['Timecode', 'Sprechertext']],
+    body: speakerLines
+});
+
+doc.setFontSize(14);
+doc.setFontStyle('bold');
+doc.text('GESAMTTRANSKRIPT', 10, doc.autoTable.previous.finalY + 30);
+
+// Gesamtes Transkript hinzufügen
+doc.setFontSize(12);
+doc.setFontStyle('normal');
+var transcriptLines = extractTranscriptLines();
+doc.autoTable({
+    startY: doc.autoTable.previous.finalY + 40,
+    head: [['Timecode', 'Transkript']],
+    body: transcriptLines,
+    didParseCell: function (data) {
+        if (data.section === 'body') {
+            data.cell.styles.textColor = data.row.raw[2] ? [0, 128, 0] : [0, 0, 0]; // Setzt die Textfarbe auf Grün, wenn es sich um Sprechertext handelt, sonst auf Schwarz
+            data.cell.styles.fontStyle = data.row.raw[2] ? 'bold' : 'normal'; // Setzt den Schriftstil auf 'fett', wenn es sich um Sprechertext handelt, sonst auf 'normal'
+        }
+    },
+    styles: { cellWidth: 'auto' }, 
+    columnStyles: {
+        0: {cellWidth: 'auto', overflow: 'visible'},  // Timecode
+        1: {cellWidth: 'auto'}  // Transkript
+    },
+    head: [['Timecode', 'Transkript']],
+    body: transcriptLines
+});
+
+doc.save(nameWithoutExtension + '_Liste_Anmerkungen_' + currentUser + '_' + todayDate + '.pdf');
+
+
+
+
+
     var noteHeader = 'Anmerkung';
     var userHeader = 'gesetzt von'; 
     var speechHeaderText = 'Sprechertext';
@@ -1567,34 +1724,16 @@ function exportTable() {
         text += (index + 1) + '\t' + marker.timecode + '\t' + fullDescription + ' '.repeat(maxNoteLength - fullDescription.length + 2) + '\t' + marker.userName + '\t' + speechText + '\n';
     });
 
-    text += '\n\n-------------- AUFLISTUNG SPRECHERTEXT -------------\n\n' + extractSpeakerLines() + '\n\n--------------------- GESAMT TRANSKRIPT ---------------------\n\n';
 
-    var transcriptState = Array.from(document.querySelectorAll('#transcriptContainer p, #transcriptContainer textarea'))
-    .map(p => ({ 
-        text: p.textContent || p.value,  
-        dataTime: p.getAttribute('data-time'), 
-        dataSpeaker: (p.getAttribute('data-speaker') === 'true') 
-    }));
-    text += exportTranscript(transcriptState);
-
-    var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
-    var a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    var url = window.URL.createObjectURL(blob);
-    a.href = url;
-    a.download = nameWithoutExtension + '_Anmerkungen_Liste.txt';
-    a.click();
-    window.URL.revokeObjectURL(url);
 }
 
 function extractSpeakerLines() {
-    var speakerText = '';
+    var speakerText = [];
     document.querySelectorAll('#transcript p').forEach(p => {
         if (p.style.color === 'green') { // Prüfen, ob die Zeile ein Sprechertext ist 
             p.setAttribute('data-speaker', 'true'); // Markieren Sie die Zeile als Sprechertext
             var timecode = convertTimeToHrsMinsSecs(parseFloat(p.getAttribute('data-time')));
-            speakerText += timecode + '\n' + p.getAttribute('data-saved') + '\n\n';
+            speakerText.push([timecode, p.getAttribute('data-saved')]);
         }
     });
     return speakerText;
@@ -1625,8 +1764,6 @@ function createScreenshot(index) {
                  markers[index].canvas = null;
              }
          }
-     
-         // Der Rest deines Codes ...
      }
  
      // Setzt die aktuelle Zeit des Videos auf die Markerposition und pausiert das Video

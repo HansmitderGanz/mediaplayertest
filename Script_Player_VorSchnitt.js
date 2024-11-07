@@ -635,17 +635,16 @@ function handleExportOptions(selectElem) {
 function exportTable() {
     var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
 
-    // Aktuelles Datum erstellen
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //Januar ist 0
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
     var yyyy = today.getFullYear();
     var todayDate =  dd + '.' + mm + '.' + yyyy;
+    
+    // Define the file name
+    var fileName = `${nameWithoutExtension}_Anmerkungen_Liste_${currentUserName}_${todayDate}`;
 
-    // Exportiert Markerliste
-    var text = 'Dateiname: ' + nameWithoutExtension 
-    + '\nSichtung durch: ' + currentUserName 
-    + '\nSichtungsdatum: ' + todayDate; 
+    var text = 'Dateiname: ' + nameWithoutExtension + '\nSichtung durch: ' + currentUserName + '\nSichtungsdatum: ' + todayDate; 
 
     var transcriptLines = Array.from(document.querySelectorAll('#transcript p'));
 
@@ -672,15 +671,51 @@ function exportTable() {
         text += (index + 1) + '\t' + marker.timecode + '\t' + fullDescription + ' '.repeat(maxNoteLength - fullDescription.length + 2) + '\t' + marker.userName + '\n';
     });
 
-    var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
-    var a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    var url = window.URL.createObjectURL(blob);
-    a.href = url;
-    a.download = nameWithoutExtension + '_Anmerkungen_Liste.txt';
-    a.click();
-    window.URL.revokeObjectURL(url);
+    var doc = new jsPDF();
+
+
+doc.setFontSize(10); // Ändern Sie die Zahl für eine größere / kleinere Schrift
+doc.setFontStyle('bold');
+
+    //Fügen Sie den Text zur PDF hinzu
+doc.text('Dateiname: ' + nameWithoutExtension, 10, 20);
+doc.text('Sichtung durch: ' + currentUserName, 10, 30);
+doc.text('Sichtungsdatum: ' + todayDate, 10, 40);
+
+    // Erzeugen Sie eine zweidimensionale Datenmatrix für die Tabelle
+    var data = [];
+    markers.forEach(function(marker, index) {
+        var row = [];
+        row.push(index + 1);  // Nummer
+        row.push(marker.timecode);  // Timecode
+        row.push(marker.description + (marker.hasScreenshot ? ' - siehe Screenshot NR' + marker.screenshotTime : ''));  // Anmerkung
+        row.push( marker.userName);  // angemerkt von
+        data.push(row);
+    });
+
+    doc.setFontSize(12);
+    doc.setFontStyle('normal');
+
+    doc.autoTable({
+        startY: 50,
+        styles: { 
+        overflow: 'linebreak',
+        cellWidth: 'wrap',
+        lineColor: [211, 211, 211], 
+        lineWidth: 0.5, // Linienbreite
+        cellPadding: {top: 2, right: 2, bottom: 2, left: 2} // Zellenabstand
+    },  
+        columnStyles: {
+            0: {cellWidth: 'auto'}, 
+            1: {cellWidth: 30,},  
+            2: {cellWidth: 'auto'},
+            3: {cellWidth: 'auto'},
+        },
+        head: [['Nummer', 'Timecode', 'Anmerkung', 'angemerkt von']],
+        body: data
+    });
+
+    doc.save(fileName + '.pdf');
 }
 
 function togglePlayPause() {
