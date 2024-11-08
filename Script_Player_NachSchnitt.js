@@ -17,6 +17,9 @@ $(document).ready(function() {
         var files = evt.dataTransfer.files;
         if (files && files.length > 0) {
             var file = files[0];
+            if (file.type === "application/pdf") {
+                readPdf(file);
+            }
             if (file.type.startsWith("video/")) {
                 // Call loadVideo() function
                 var pseudoEvent = { target: { files: [file] } };
@@ -25,6 +28,7 @@ $(document).ready(function() {
             } else if (file.type.startsWith("text/")) {
                 let pseudoEvent = { target: { files: [file] } };
                 loadTranscript(pseudoEvent);
+                
             } else {
                 alert("Bitte ziehen Sie nur .mp4/.mov- oder .txt-Dateien auf diese Seite.");
             }
@@ -54,6 +58,7 @@ var videoElement;
 var pendingParagraphIndex = 0;
 var drawingPaths = [];
 var isLooping = false;
+var transcriptLoaded = false;
 
 
 
@@ -1020,36 +1025,119 @@ function loadNewTranscriptFormat(transcriptDiv, content) {
   }
 }
 
+document.addEventListener("DOMContentLoaded", function(event) { 
+    console.log("pdfjsLib object after page load: ", window['pdfjs-dist/build/pdf']); 
+});
+
 function loadTranscript(event) {
     var file = event.target.files[0];
-    var reader = new FileReader();
-    reader.onload = function (e) {
-        var content = e.target.result;
-        const transcriptDiv = document.getElementById("transcript");
-        transcriptDiv.innerHTML = "";
-       
-
-        if (content.startsWith("<begin subtitles>")) {
-            loadOldTranscriptFormat(transcriptDiv, content);
-        } else {
-            loadNewTranscriptFormat(transcriptDiv, content);
-        }
-        transcriptDiv.style.height = '300px';
-
-        // Code, um die Sichtbarkeit von Elementen zu ändern, nachdem ein Transkript geladen wurde
-        $('.transcript-related').removeClass('hidden'); // Zeigt andere Transkript-bezogene Steuerelemente an
-        $('#removeTranscriptButton').removeClass('hidden'); // Zeigt den "Transkript entfernen" Button
-        $('#toggleEditMode').removeClass('hidden'); // Zeigt den "Bearbeiten" Button
-    };
-    reader.readAsText(file, 'UTF-8');
+  
+    if (file.type === "application/pdf") {
+        loadPdfTranscript(event);
+    } else if (file.type.startsWith("text/")) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var content = e.target.result;
+            console.log("Inhalt des .txt-Transkripts: ", content);  // Loggen des Inhalts
+            const transcriptDiv = document.getElementById("transcript");
+            transcriptDiv.innerHTML = "";
+            
+            if (content.startsWith("<begin subtitles>")) {
+                loadOldTranscriptFormat(transcriptDiv, content);
+            } else {
+                loadNewTranscriptFormat(transcriptDiv, content);
+            }
+            
+            transcriptDiv.style.height = '300px';
+            $('.transcript-related').removeClass('hidden');
+            $('#removeTranscriptButton').removeClass('hidden');
+            $('#toggleEditMode').removeClass('hidden');
+        };
+        
+        reader.readAsText(file, 'UTF-8');
+    }
 }
 
 
+function loadPdfTranscript(event) {
+    var file = event.target.files[0];
+    if (file.type === "application/pdf") {
+        readPdf(file).then(function(textContent) {
+            console.log("Inhalt des gelesenen PDF-Transkripts: ", textContent);  
+            var formattedContent = formatPdfText(textContent); 
+            console.log("Formatierter Text: ", formattedContent);
+            transcriptLoaded = true;  
+            
+            var transcriptDiv = document.getElementById("transcript");
+            transcriptDiv.innerHTML = "";
+            loadNewTranscriptFormat(transcriptDiv, formattedContent);  
+            transcriptDiv.style.height = '300px';
+            $('.transcript-related').removeClass('hidden');
+            $('#removeTranscriptButton').removeClass('hidden'); 
+            $('#toggleEditMode').removeClass('hidden'); 
+        });
+    }
+}
+
+function readPdf(file) {
+    return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            var typedArray = new Uint8Array(ev.target.result);
+            pdfjsLib.getDocument(typedArray).promise.then(pdf => {
+                var totalPages = pdf.numPages;
+                var pages = [];
+                for (let i = 1; i <= totalPages; i++) {
+                    let pagePromise = pdf.getPage(i).then(page => {
+                        return page.getTextContent().then(textContent => {
+                        var pageText = textContent.items.map(item => item.str).join(' ');
+                        return {
+                            page: i,
+                            text: pageText
+                        };
+                    });
+                });
+                pages.push(pagePromise);
+            }
+            Promise.all(pages).then(pageObjects => {
+                var sortedPages = pageObjects.sort((a, b) => a.page - b.page);
+                var fullText = sortedPages.map(pageObject => pageObject.text).join("\n\n");
+                console.log("Vollständiger Text aus der PDF: ", fullText);
+                resolve(fullText);
+            });
+        }).catch(function(error) {
+            console.log("Fehler beim Lesen der PDF-Datei:", error);
+            reject(error);
+        });
+    };
+    reader.readAsArrayBuffer(file);
+});
+}
+
+
+
+function formatPdfText(text) {
+    var chunks = text.split(/(?=\d{2}:\d{2})/);
+    var formattedLines = chunks.map(chunk => {
+        chunk = chunk.replace(/(\d{2}:\d{2}\s+-\s*SPRECHER)/, "$1\n\n");
+        chunk = chunk.replace(/(\d{2}:\d{2}(?!\s+-\s*SPRECHER|\s+-\s*VO))/, "$1\n\n");
+
+        // Ersetzt alle mehrfachen Leerzeichen durch einzelne Leerzeichen
+        // und entfernt alle führenden und abschließenden Leerzeichen
+        var formattedChunk = chunk.toString().replace(/\s{2,}/g, ' ').trim();
+
+        return formattedChunk + '\n\n';
+    });
+    var content = formattedLines.join('\n');
+    console.log("formatPdfText ausgeführt: ", content);
+    return content;
+}
 
 function removeTranscript() {
     // Entfernen Sie alle Absätze aus dem Transkript
     document.querySelectorAll("#transcript p, #transcript textarea").forEach(function(p) {
         p.remove();
+        transcriptLoaded = false; // Transkript wurde entfernt
     });
 
     // Verstecke die anderen transkriptbezogenen Elemente und zeige den "Transkript laden" Button
@@ -1404,6 +1492,7 @@ function loadMarkers(event) {
     reader.onload = function (e) {
         console.log('File has been read'); 
         var content = e.target.result;
+        
         var loadData = JSON.parse(content);
         markers = loadData.markers; 
         var transcriptState = loadData.transcriptState;
@@ -1502,7 +1591,10 @@ function handleExportOptions(selectElem) {
         exportMarkers();
     } else if (selectedOption === 'table') {
         exportTable();
+        if(transcriptLoaded) {
+            exportTranscript(); // Für den Export nur des Transkripts
     }
+}
     selectElem.selectedIndex = 0;
 }
 
@@ -1671,39 +1763,64 @@ doc.autoTable({
     body: speakerLines
 });
 
-doc.setFontSize(14);
-doc.setFontStyle('bold');
-doc.text('GESAMTTRANSKRIPT', 10, doc.autoTable.previous.finalY + 30);
-
-// Gesamtes Transkript hinzufügen
-doc.setFontSize(12);
-doc.setFontStyle('normal');
-var transcriptLines = extractTranscriptLines();
-doc.autoTable({
-    startY: doc.autoTable.previous.finalY + 40,
-    head: [['Timecode', 'Transkript']],
-    body: transcriptLines,
-    didParseCell: function (data) {
-        if (data.section === 'body') {
-            data.cell.styles.textColor = data.row.raw[2] ? [0, 128, 0] : [0, 0, 0]; // Setzt die Textfarbe auf Grün, wenn es sich um Sprechertext handelt, sonst auf Schwarz
-            data.cell.styles.fontStyle = data.row.raw[2] ? 'bold' : 'normal'; // Setzt den Schriftstil auf 'fett', wenn es sich um Sprechertext handelt, sonst auf 'normal'
-        }
-    },
-    styles: { 
-        cellWidth: 'auto',
-        lineColor: [211, 211, 211], 
-        lineWidth: 0.5, // Linienbreite
-        cellPadding: {top: 2, right: 2, bottom: 2, left: 2} // Zellenabstand
-    },
-    columnStyles: {
-        0: {cellWidth: 'auto', overflow: 'visible'},  // Timecode
-        1: {cellWidth: 'auto'}  // Transkript
-    },
-    head: [['Timecode', 'Transkript']],
-    body: transcriptLines
-});
-
 doc.save(nameWithoutExtension + '_Liste_Anmerkungen_' + currentUser + '_' + todayDate + '.pdf');
+}
+
+
+function exportTranscript() {
+    let currentUser = currentUserName;
+    var nameWithoutExtension = videoFile.replace(/\.[^/.]+$/, "");
+    
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var yyyy = today.getFullYear();
+    var todayDate =  dd + '.' + mm + '.' + yyyy;
+    
+
+    var doc = new jsPDF();
+
+    doc.setFontSize(14);
+doc.setFontStyle('bold');
+doc.text('GESAMTTRANSKRIPT', 10, 50);
+doc.line(10, 52, 60, 52)
+    
+    // Setzen Sie die Schriftgröße und den Schriftstil
+    doc.setFontSize(10);
+    doc.setFontStyle('bold');
+    
+    // Fügt den fettgedruckten Text zur PDF hinzu
+    doc.text('Dateiname: ' + nameWithoutExtension, 10, 20);
+    doc.text('Sichtung durch: ' + currentUserName, 10, 30);
+    doc.text('Sichtungsdatum: ' + todayDate, 10, 40);
+
+    // Gesamtes Transkript hinzufügen
+    doc.setFontSize(12);
+    doc.setFontStyle('normal');
+    var transcriptLines = extractTranscriptLines();
+    doc.autoTable({
+        startY: 70,
+        head: [['Timecode', 'Transkript']],
+        body: transcriptLines,
+        didParseCell: function (data) {
+            if (data.section === 'body' && data.column.index === 1 && data.cell.raw.includes("- SPRECHER")) {
+                data.cell.styles.textColor = [0, 128, 0];  // Setze die Textfarbe auf Grün
+                data.cell.styles.fontStyle = 'bold';
+            }
+        },
+        styles: {
+            cellWidth: 'auto',
+            lineColor: [211, 211, 211],
+            lineWidth: 0.5,
+            cellPadding: {top: 2, right: 2, bottom: 2, left: 2}
+        },
+        columnStyles: {
+            0: {cellWidth: 'auto', overflow: 'visible'},
+            1: {cellWidth: 'auto'}
+        }
+    });
+
+    doc.save(nameWithoutExtension + '_Transkript_' + currentUser + '_' + todayDate + '.pdf');
 }
 
 

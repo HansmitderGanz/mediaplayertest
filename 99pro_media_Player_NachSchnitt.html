@@ -610,7 +610,7 @@ body.dark-mode .modal-content .highlight {
 <div id="transcriptContainer" class="hidden">
     <label for="transcriptFile" class="interactable" style="display: inline-block; background-color: #DC143C; color: white; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px; font-size: 14px;">
         Transkript einladen
-        <input class="hidden" type="file" id="transcriptFile" accept=".txt" onchange="loadTranscript(event)" style="display: none;">
+        <input class="hidden" type="file" id="transcriptFile" accept=".txt, application/pdf, .pdf" onchange="loadTranscript(event)" style="display: none;">
     </label>
 
     <button id="removeTranscriptButton" class="transcriptActions transcript-related hidden interactable" style="display: inline-block; padding: 10px; border-radius: 10px; cursor: pointer; margin-bottom: 10px;"
@@ -697,7 +697,9 @@ body.dark-mode .modal-content .highlight {
 
 <!--__________________________________JAVA SCRIPT______________________________________________________________________-->
 
-
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@latest/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@latest/build/pdf.worker.min.js"></script>
+ 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script src="Script_Player_NachSchnitt.js"></script>
@@ -709,6 +711,9 @@ body.dark-mode .modal-content .highlight {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
+
+
+
 
 
 
