@@ -1237,7 +1237,7 @@ function changeVideoSize(size) {
 
 function setMarker() {
     var currentTime = videoElement.currentTime;
-    var description = prompt("Bitte fügen Sie eine Anmerkung für den Marker ein");
+    var description = prompt("Bitte geben Sie eine Anmerkung ein.");
 
     
     // Beenden Sie die Funktion falls keine Beschreibung eingegeben wurde
@@ -1549,8 +1549,7 @@ function loadMarkerList(event) {
         // Split the content into lines
         var lines = content.split('\n');
 
-        // Initialize 'markers' as an empty array
-        markers = [];
+        var tempMarkers = [];
         
         lines.forEach(function(line) {
             var parts = line.split('\t');
@@ -1572,6 +1571,7 @@ function loadMarkerList(event) {
             markers.push(marker);
         });
 
+        markers = markers.concat(tempMarkers)
         // Update the marker list after loading the markers
         updateMarkerList();
     };

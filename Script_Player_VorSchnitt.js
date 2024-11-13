@@ -308,7 +308,7 @@ function setMarker() {
     var description = '';
 
     do {
-        description = prompt("Please enter a description for the marker");
+        description = prompt("Bitte geben sie eine Anmerkung ein.");
         if (description === null) {
             return;
         }
@@ -583,7 +583,7 @@ function loadMarkerList(event) {
         
         var lines = content.split('\n');
         // Initialisiere markers als leeren Array
-        markers = [];
+        var tempMarkers = [];
         lines.forEach(function(line) {
             var parts = line.split('\t');
 
@@ -607,7 +607,7 @@ function loadMarkerList(event) {
               userName: userName
             });
         });
-
+        markers = markers.concat(tempMarkers)
         updateMarkerList();
     }
 
