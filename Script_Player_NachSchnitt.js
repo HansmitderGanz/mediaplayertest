@@ -1429,10 +1429,10 @@ function handleSaveOptions(selectElem) {
     } else if (selectedOption === 'load') {
         document.getElementById('loadMarkersFile').click();
     } else if (selectedOption === 'loadMarkerList') {
+        console.log("Selected: loadMarkerList");  // Eine Protokollnachricht hinzufügen
         document.getElementById('loadMarkerListFile').click();
     }
     selectElem.selectedIndex = 0; // Reset the dropdown
-
 }
 
 
@@ -1545,34 +1545,35 @@ function loadMarkerList(event) {
     var reader = new FileReader();
     reader.onload = function(e) {
         var content = e.target.result;
-
-        // Split the content into lines
         var lines = content.split('\n');
 
-        var tempMarkers = [];
-        
         lines.forEach(function(line) {
             var parts = line.split('\t');
-            
-            // Check if all parts exist
-            if (parts.length < 5) {
-                console.log('Unexpected line structure, less than 5 elements: ', line);
+            if (parts.length < 6) {
+                console.log('Unexpected line structure, less than 6 elements: ', line);
                 return;
             }
 
+            // Extract and remove the "(gesetzt von {userName})" part from the description
+            var description = parts[4];
+            var setByText = " (gesetzt von ";
+            var setDescriptionStart = description.indexOf(setByText);
+            var userName = "";
+            if (setDescriptionStart !== -1) {
+                userName = description.slice(setDescriptionStart + setByText.length, -1); // "-1" removes the closing ")"
+                description = description.slice(0, setDescriptionStart); // Update the description without the "(gesetzt von {userName})" part
+            }
+
             var marker = {
-                timeInSeconds: parseFloat(parts[0]),
+                timeInSeconds: timecodeToSeconds(parts[1]),
                 timecode: parts[1],
-                description: parts[2],
-                userName: parts[3],
-                // Interpret the string 'true' as true, and anything else as false
-                hasScreenshot: parts[4].toLowerCase() === 'true' ? true : false,
+                description: description,
+                userName: userName, // Use the extracted userName
+                hasScreenshot: false,
             };
             markers.push(marker);
         });
 
-        markers = markers.concat(tempMarkers)
-        // Update the marker list after loading the markers
         updateMarkerList();
     };
     reader.readAsText(file);
@@ -1581,7 +1582,7 @@ function loadMarkerList(event) {
           
 
 // Verknüpft die Funktion mit dem 'MarkerListe importieren' Button
-document.getElementById('loadMarkersFile').addEventListener('change', loadMarkerList);
+document.getElementById('loadMarkerListFile').addEventListener('change', loadMarkerList);
 
 
 function handleExportOptions(selectElem) {
