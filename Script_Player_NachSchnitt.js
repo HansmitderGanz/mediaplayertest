@@ -719,6 +719,9 @@ var outPointElement = document.getElementById('outPoint');
     var currentDisplayPoint = DisplayPointEnum.InPoint; // Anfangspunkt ist In-Point
 
 window.addEventListener('keydown', function(event) {
+    if (document.activeElement.id === 'transcriptSearch') {
+        return; // If yes, exit the function early
+    }
 
     // Referenzen auf HTML-Elemente erstellen
     var inPointElement = document.getElementById('inPoint');
@@ -1376,11 +1379,11 @@ var fileName = nameWithoutExtension + '_AVID_Anmerkungen_' + currentUserName + '
 
 
 // Setzen Sie den Dateinamen in den Modaltext
-document.getElementById('modal1').getElementsByClassName('modal-content')[0]
-        .getElementsByTagName('p')[0].innerHTML = `Die Datei mit dem Namen <span class="highlight">${fileName}</span> wurde erstellt.<br><br>Um die Anmerkungen per <span class="highlight">E-Mail an die Postproduktion</span> zu senden, klicken Sie bitte auf <span class="highlight">"Per E-Mail versenden"</span> und fügen Sie manuell die Datei als Anhang hinzu.`
+//document.getElementById('modal1').getElementsByClassName('modal-content')[0]
+        //.getElementsByTagName('p')[0].innerHTML = `Die Datei mit dem Namen <span class="highlight">${fileName}</span> wurde erstellt.<br><br>Um die Anmerkungen per <span class="highlight">E-Mail an die Postproduktion</span> zu senden, klicken Sie bitte auf <span class="highlight">"Per E-Mail versenden"</span> und fügen Sie manuell die Datei als Anhang hinzu.`
 
 // Modal anzeigen
-document.getElementById('modal1').style.display = "block";
+//document.getElementById('modal1').style.display = "block";
 }
 
 document.getElementById('okButton').addEventListener('click', function() {
